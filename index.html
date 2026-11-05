@@ -1144,27 +1144,33 @@ function toggleEvent(id, d){
   else e.done = !e.done;
   save(); render(); if (isDone(e,d)) toast('Μπράβο! ✓ '+e.title);
 }
-const timeRange = (e) => e.start ? `${e.start}${e.end?'–'+e.end:''}` : 'Όλη μέρα';
+const overnight = (e) => !!(e.start && e.end && toMin(e.end) <= toMin(e.start));
+const endMin = (e) => e.end ? (overnight(e) ? toMin(e.end)+1440 : toMin(e.end)) : toMin(e.start)+60;
+const carryOn = (d) => eventsOn(addDays(d,-1)).filter(overnight).map(e=>({e, cont:true}));
+const timeRange = (e, cont) => cont ? `μέχρι ${e.end} · από χθες` : e.start ? `${e.start}${e.end?'–'+e.end:''}${overnight(e)?' (+1)':''}` : 'Όλη μέρα';
 function nowStatus(e, d){
   if (d!==today() || !e.start) return '';
-  const now = new Date().getHours()*60+new Date().getMinutes(), s = toMin(e.start), en = toMin(e.end) ?? s+60;
+  const now = new Date().getHours()*60+new Date().getMinutes(), s = toMin(e.start), en = endMin(e);
   if (now>=s && now<en) return 'Τώρα';
   if (s>now && s-now<=90) return `σε ${s-now<60? (s-now)+'′' : Math.floor((s-now)/60)+'ω '+((s-now)%60?((s-now)%60)+'′':'')}`;
   return '';
 }
-function taskCard(e, d){
-  const st = nowStatus(e, d);
+function taskCard(e, d, cont){
+  const st = cont ? ((new Date().getHours()*60+new Date().getMinutes()) < toMin(e.end) && d===today() ? 'Τώρα' : '') : nowStatus(e, d);
+  if (cont) d = addDays(d,-1);
   return `<div class="tcard${isDone(e,d)?' done':''}" style="--c:${e.color}" data-act="editEvent" data-id="${e.id}" data-date="${d}">
     <button class="chk${isDone(e,d)?' on':''}" data-act="toggleEvent" data-id="${e.id}" data-date="${d}" title="Έγινε">${svg('check')}</button>
-    <div class="t"><span class="tm">${timeRange(e)}</span>${st?`<span class="tag">${st}</span>`:''}<b>${esc(e.title)}</b>${e.note?`<small class="muted" style="font-size:12px;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(e.note)}</small>`:''}</div></div>`;
+    <div class="t"><span class="tm">${timeRange(e, cont)}</span>${st?`<span class="tag">${st}</span>`:''}<b>${esc(e.title)}</b>${e.note?`<small class="muted" style="font-size:12px;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(e.note)}</small>`:''}</div></div>`;
 }
 function todayCard(){
   const d = today(), list = eventsOn(d), tom = eventsOn(addDays(d,1));
+  const nowM = new Date().getHours()*60+new Date().getMinutes();
+  const carry = carryOn(d).filter(c=>toMin(c.e.end) > nowM);
   const left = list.filter(e=>!isDone(e,d)).length;
   return `<section class="glass card c-today rise">
     <h3><span>Σήμερα · ${new Date().toLocaleDateString('el-GR',{weekday:'long',day:'numeric',month:'long'})}${list.length?` · <span style="color:var(--text)">${left ? left+' ακόμα' : 'όλα έγιναν 🎉'}</span>`:''}</span>
       <span class="row" style="gap:6px"><button class="btn sm ghost" data-act="openDay" data-date="${d}">${svg('cal')}Ατζέντα</button><button class="btn sm" data-act="newEvent" data-date="${d}">${svg('plus')}Νέο</button></span></h3>
-    ${list.length ? `<div class="today-list">${list.map(e=>taskCard(e,d)).join('')}</div>`
+    ${list.length||carry.length ? `<div class="today-list">${carry.map(c=>taskCard(c.e,d,true)).join('')}${list.map(e=>taskCard(e,d)).join('')}</div>`
       : `<p class="muted" style="font-size:13.5px;margin:8px 0 0">Τίποτα προγραμματισμένο για σήμερα. ${tom.length?`Αύριο έχεις ${tom.length}.`:''}</p>`}
     ${list.length && tom.length ? `<p class="faint" style="font-size:12px;margin:12px 0 0">Αύριο: ${tom.slice(0,3).map(e=>esc((e.start?e.start+' ':'')+e.title)).join(' · ')}${tom.length>3?' …':''}</p>`:''}
   </section>`;
@@ -1180,19 +1186,20 @@ function vAgenda(){
     cells += `<button class="cal-day${d.slice(0,7)!==agMonth?' out':''}${d===today()?' today':''}${d===agSel?' sel':''}" data-act="calDay" data-date="${d}">${Number(d.slice(8))}<span class="cal-dots">${evs.slice(0,4).map(e=>`<i style="--c:${e.color}"></i>`).join('')}</span></button>`;
   }
   const list = eventsOn(agSel);
-  const timed = list.filter(e=>e.start), allday = list.filter(e=>!e.start);
+  const timed = list.filter(e=>e.start), allday = list.filter(e=>!e.start), carry = carryOn(agSel);
   const HOUR = 56;
   let h0 = 7, h1 = 23;
-  for (const e of timed){ h0 = Math.min(h0, Math.floor(toMin(e.start)/60)); h1 = Math.max(h1, Math.ceil((toMin(e.end)??toMin(e.start)+60)/60)); }
+  for (const e of timed){ h0 = Math.min(h0, Math.floor(toMin(e.start)/60)); h1 = Math.max(h1, Math.ceil(endMin(e)/60)); }
+  if (carry.length) h0 = 0;
   h1 = Math.min(24, h1);
   // overlap layout
-  const items = timed.map(e=>({e, s:toMin(e.start), en:Math.max(toMin(e.end)??toMin(e.start)+60, toMin(e.start)+20)}));
+  const items = carry.map(c=>({e:c.e, cont:true, s:0, en:Math.max(toMin(c.e.end),20)})).concat(timed.map(e=>({e, s:toMin(e.start), en:Math.min(Math.max(endMin(e), toMin(e.start)+20), 1440)})));
   let cluster = [], cEnd = -1; const clusters = [];
   for (const it of items){ if (cluster.length && it.s>=cEnd){ clusters.push(cluster); cluster=[]; cEnd=-1; } cluster.push(it); cEnd = Math.max(cEnd, it.en); }
   if (cluster.length) clusters.push(cluster);
   for (const c of clusters){ const cols = []; for (const it of c){ let k = cols.findIndex(end=>end<=it.s); if (k<0){ k = cols.length; cols.push(0); } cols[k] = it.en; it.col = k; } c.forEach(it=>it.n = cols.length); }
   const evHtml = items.map(it=>{ const top = (it.s - h0*60)/60*HOUR, h = Math.max(24, (it.en-it.s)/60*HOUR - 3);
-    return `<div class="ev${isDone(it.e,agSel)?' done':''}" style="--c:${it.e.color};top:${top+1}px;height:${h}px;left:calc(${it.col/it.n*100}% + 2px);width:calc(${100/it.n}% - 4px)" data-act="editEvent" data-id="${it.e.id}" data-date="${agSel}"><b>${esc(it.e.title)}</b>${h>34?`<small>${timeRange(it.e)}</small>`:''}</div>`; }).join('');
+    return `<div class="ev${isDone(it.e,agSel)?' done':''}" style="--c:${it.e.color};top:${top+1}px;height:${h}px;left:calc(${it.col/it.n*100}% + 2px);width:calc(${100/it.n}% - 4px)" data-act="editEvent" data-id="${it.e.id}" data-date="${it.cont?addDays(agSel,-1):agSel}"><b>${esc(it.e.title)}</b>${h>34?`<small>${timeRange(it.e, it.cont)}</small>`:''}</div>`; }).join('');
   let hours = ''; for (let h=h0; h<h1; h++) hours += `<div class="tl-hour" data-act="newEvent" data-date="${agSel}" data-time="${String(h).padStart(2,'0')}:00"><span>${String(h).padStart(2,'0')}:00</span></div>`;
   const now = new Date(), nowMin = now.getHours()*60+now.getMinutes();
   const nowLine = agSel===today() && nowMin>=h0*60 && nowMin<h1*60 ? `<div class="now-line" id="nowLine" style="top:${(nowMin-h0*60)/60*HOUR}px"></div>` : '';
@@ -1232,7 +1239,7 @@ function formEvent(e, opts={}){
     <div class="field"><label>Ημερομηνία</label><input class="inp" type="date" name="date" value="${e.date}" required></div>
     <label class="switch"><input type="checkbox" name="allday" ${e.start?'':'checked'}>Χωρίς συγκεκριμένη ώρα</label>
     <div class="two" id="times" style="${e.start?'':'display:none'}"><div class="field"><label>Από</label><input class="inp" type="time" name="start" value="${e.start||st}"></div>
-    <div class="field"><label>Μέχρι</label><input class="inp" type="time" name="end" value="${e.end||plus1(e.start||st)}"></div></div>
+    <div class="field"><label>Μέχρι <span id="nextDay" style="color:var(--accent-2);display:none">· επόμενη μέρα</span></label><input class="inp" type="time" name="end" value="${e.end||plus1(e.start||st)}"></div></div>
     <div class="field"><label>Χρώμα</label><div class="ecolors">${EV_COLORS.map(c=>`<button type="button" style="background:${c}" class="${c===e.color?'on':''}" data-ecolor="${c}"></button>`).join('')}</div><input type="hidden" name="color" value="${e.color}"></div>
     <div class="field"><label>Επανάληψη</label><select class="inp" name="repeat">${Object.entries(REPEATS).map(([k,l])=>`<option value="${k}" ${e.repeat===k?'selected':''}>${l}</option>`).join('')}</select></div>
     <div class="field"><label>Σημείωση</label><input class="inp" name="note" value="${esc(e.note||'')}" placeholder="προαιρετικό"></div>
@@ -1240,7 +1247,7 @@ function formEvent(e, opts={}){
     ${actions(!isNew)}`, (fd)=>{
       const allday = !!fd.get('allday');
       let start = allday ? '' : fd.get('start'), end = allday ? '' : fd.get('end');
-      if (start && end && toMin(end) <= toMin(start)) end = plus1(start);
+      if (start && end && toMin(end) === toMin(start)) end = plus1(start);
       const rec = {title:fd.get('title').trim(), date:fd.get('date'), start, end, color:fd.get('color'), repeat:fd.get('repeat'), note:fd.get('note').trim()};
       if (isNew){ S.events.push(Object.assign({id:uid(), created:Date.now(), done:false, doneDates:[]}, rec)); agSel = rec.date; agMonth = rec.date.slice(0,7); }
       else {
@@ -1252,7 +1259,8 @@ function formEvent(e, opts={}){
     });
   const ad = sheet.querySelector('[name=allday]'); ad.onchange = ()=>{ document.getElementById('times').style.display = ad.checked ? 'none' : ''; };
   const sIn = sheet.querySelector('[name=start]'), eIn = sheet.querySelector('[name=end]');
-  sIn.onchange = ()=>{ if (toMin(eIn.value) <= toMin(sIn.value)) eIn.value = plus1(sIn.value); };
+  const hint = ()=>{ const h = document.getElementById('nextDay'); if (h) h.style.display = (sIn.value && eIn.value && toMin(eIn.value) < toMin(sIn.value)) ? '' : 'none'; };
+  sIn.onchange = ()=>{ if (toMin(eIn.value) === toMin(sIn.value)) eIn.value = plus1(sIn.value); hint(); }; eIn.onchange = hint; eIn.oninput = hint; hint();
   sheet.querySelectorAll('[data-ecolor]').forEach(b=>b.onclick=()=>{ sheet.querySelectorAll('[data-ecolor]').forEach(x=>x.classList.remove('on')); b.classList.add('on'); sheet.querySelector('[name=color]').value=b.dataset.ecolor; });
   const d = sheet.querySelector('[data-del]'); if (d) d.onclick = ()=>{
     if (e.repeat && e.repeat!=='none'){
