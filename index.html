@@ -9,7 +9,7 @@
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="icon.svg">
-<title>Spyrlidis Wallet</title>
+<title>Wallet</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
 <script src="jszip.min.js"></script>
@@ -371,7 +371,7 @@ main.enter .track i,main.enter .meter i,main.enter .split i{animation:fillx 1.1s
 
 <div class="app">
   <aside class="side glass">
-    <div class="brand"><div class="logo">S</div><div><b>Spyrlidis</b><small>Personal wallet</small></div></div>
+    <div class="brand" data-act="rename" style="cursor:pointer" title="Αλλαγή ονόματος"><div class="logo" id="brandLogo">W</div><div><b id="brandName">Wallet</b><small>Personal wallet</small></div></div>
     <nav class="nav" id="nav"></nav>
     <div class="foot" id="sideFoot"></div>
   </aside>
@@ -483,6 +483,7 @@ const catIcon = (c) => (CATS.find(x=>x[0]===c)||INCOME_CATS.find(x=>x[0]===c)||[
 const ACC_TYPES = {cash:'Μετρητά',bank:'Τράπεζα',card:'Κάρτα',savings:'Αποταμίευση',other:'Άλλο'};
 
 let S = load();
+if (S.settings.name===undefined && S.accounts.length) S.settings.name = 'Spyrlidis';
 function blank(){ return {accounts:[], tx:[], subs:[], notes:[], deleted:{}, settings:{currency:'EUR', budget:0}}; }
 const THEMES = [['sage','Sage','linear-gradient(135deg,#d9be93,#4fd1a5 55%,#1c2d32)'],['amethyst','Amethyst','linear-gradient(135deg,#c9c2e3,#8b7cc7 40%,#2a1e4d)']];
 function applyTheme(){ const t = S.settings.theme || 'amethyst'; document.documentElement.dataset.theme = t; document.querySelector('meta[name=theme-color]').content = t==='amethyst' ? '#0e0b1d' : '#1d2f33'; }
@@ -689,6 +690,7 @@ let view = 'dash', noteOpen = null;
 let enterNext = true, flashId = null;
 function go(v, sub){ view = v; noteOpen = sub||null; history.replaceState(null,'','#'+v+(sub?'/'+sub:'')); enterNext = true; render(); window.scrollTo({top:0, behavior: RM?'auto':'smooth'}); }
 function renderNav(){
+  const nm = S.settings.name || ''; document.getElementById('brandName').textContent = nm || 'Wallet'; document.getElementById('brandLogo').textContent = (nm[0]||'W').toUpperCase(); document.title = nm ? nm+' · Wallet' : 'Wallet';
   const btn = ([k,l,ic], short) => `<button class="${view===k?'on':''}" data-go="${k}">${svg(ic)}<span>${short?SHORT[k]:l}</span>${!short&&k==='notes'&&S.notes.length?`<em class="count">${S.notes.length}</em>`:''}${!short&&k==='subs'&&S.subs.filter(s=>s.active).length?`<em class="count">${S.subs.filter(s=>s.active).length}</em>`:''}</button>`;
   document.getElementById('nav').innerHTML = '<div class="navlabel">Χρήματα</div>' + VIEWS.slice(0,5).map(v=>btn(v)).join('') + '<div class="navlabel">Δουλειά</div>' + btn(VIEWS[5]);
   document.getElementById('tabbar').innerHTML = VIEWS.map(v=>btn(v,true)).join('');
@@ -756,6 +758,7 @@ function vDash(){
     <div class="row"><button class="iconbtn" data-act="sync" title="Συγχρονισμός" style="width:42px;height:42px;border-radius:50%;position:relative">${svg('cloud')}<i class="syncdot abs" data-sync-dot data-state="${Sync.state}"></i></button><button class="iconbtn" data-act="theme" title="Αλλαγή θέματος" style="width:42px;height:42px;border-radius:50%">${svg('palette')}</button></div></div>
     <div class="glass card hero rise" style="max-width:600px;min-height:260px"><i class="orb"></i>
       <h3>Γρήγορη αρχή</h3>
+      <div class="field" style="max-width:320px;margin:6px 0 4px"><label>Πώς σε λένε;</label><input class="inp" id="firstName" placeholder="Το όνομά σου" value="${esc(S.settings.name||'')}" autocomplete="given-name"></div>
       <p class="muted" style="font-size:14px;line-height:1.6;max-width:380px">Πρόσθεσε κάθε λογαριασμό με το τωρινό του υπόλοιπο. Μετά, κάθε έξοδο που γράφεις αφαιρείται αυτόματα από τον σωστό λογαριασμό.</p>
       <div class="row" style="flex-wrap:wrap;margin-top:auto">
         <button class="btn primary" data-act="quickstart">${svg('plus')}Μετρητά, Revolut, Eurobank, Wise</button>
@@ -765,7 +768,7 @@ function vDash(){
     </div>`;
   return `
   <div class="top rise">
-    <div><h1>${greet()}, Spyrlidis</h1><p>${new Date().toLocaleDateString('el-GR',{weekday:'long',day:'numeric',month:'long'})} · δες πού βρίσκονται τα χρήματά σου</p></div>
+    <div><h1>${greet()}${S.settings.name?', <span data-act="rename" style="cursor:pointer">'+esc(S.settings.name)+'</span>':''}</h1><p>${new Date().toLocaleDateString('el-GR',{weekday:'long',day:'numeric',month:'long'})} · δες πού βρίσκονται τα χρήματά σου</p></div>
     <div class="row"><button class="iconbtn" data-act="sync" title="Συγχρονισμός" style="width:42px;height:42px;border-radius:50%;position:relative">${svg('cloud')}<i class="syncdot abs" data-sync-dot data-state="${Sync.state}"></i></button><button class="iconbtn" data-act="theme" title="Αλλαγή θέματος" style="width:42px;height:42px;border-radius:50%">${svg('palette')}</button><button class="btn hide-m" data-act="newTx" data-type="income">${svg('down')}Έσοδο</button><button class="btn primary hide-m" data-act="newTx">${svg('plus')}Νέο έξοδο</button></div>
   </div>
   <div class="bento">
@@ -1149,6 +1152,10 @@ function delSub(id){
   if (!confirm(`Διαγραφή συνδρομής "${s.name}"; (Οι χρεώσεις που έγιναν ήδη μένουν στις κινήσεις)`)) return;
   S.subs = S.subs.filter(x=>x!==s); save(); closeModal(); render();
 }
+function formName(){
+  openModal(`<h2>Το όνομά σου</h2><div class="field"><label>Εμφανίζεται στον χαιρετισμό</label><input class="inp" name="n" value="${esc(S.settings.name||'')}" autofocus></div>${actions()}`,
+    (fd)=>{ S.settings.name = fd.get('n').trim(); save(); render(); });
+}
 function formBudget(){
   openModal(`<h2>Μηνιαίο όριο εξόδων</h2><div class="field"><label>Ποσό (€), 0 για κανένα</label><input class="inp amount-inp" name="b" inputmode="decimal" value="${S.settings.budget||''}" autofocus></div>${actions()}`,
     (fd)=>{ S.settings.budget = num(fd.get('b')); save(); render(); });
@@ -1363,7 +1370,7 @@ document.addEventListener('click', e=>{
     newNote:()=>formNote(), openNote:()=>go('notes', id), editNote:()=>formNote(S.notes.find(x=>x.id===id)),
     editLine:()=>{ const n = note(); n && formLine(n, n.items.find(l=>l.id===id)); },
     delLine:()=>{ const n = note(); n && delLine(n, id); },
-    sync:formSync, theme:toggleTheme, budget:formBudget, export:exportData, import:importData,
+    rename:formName, sync:formSync, theme:toggleTheme, budget:formBudget, export:exportData, import:importData,
     pickZip:()=>pickZip(), replaceZip:()=>pickZip(id), openProj:()=>openProj(id), editProj:()=>editProj(id), delProj:()=>delProj(id)
   })[b.dataset.act]?.();
 });
@@ -1389,7 +1396,7 @@ document.addEventListener('input', e=>{
     document.getElementById('noteSaved').textContent = 'Αποθήκευση…';
     noteTimer = setTimeout(()=>{ save(); const s = document.getElementById('noteSaved'); if (s) s.textContent = 'Αποθηκεύτηκε ✓'; }, 500); }
 });
-document.addEventListener('change', e=>{ const f = e.target.dataset.filter; if (f && f!=='q'){ txFilter[f] = e.target.value; render(); } });
+document.addEventListener('change', e=>{ if (e.target.id==='firstName'){ S.settings.name = e.target.value.trim(); save(); renderNav(); return; } const f = e.target.dataset.filter; if (f && f!=='q'){ txFilter[f] = e.target.value; render(); } });
 document.getElementById('fab').innerHTML = svg('plus');
 document.getElementById('fab').onclick = ()=>formTx();
 let tt; function toast(m){ const t = document.getElementById('toast'); t.textContent = m; t.classList.add('show'); clearTimeout(tt); tt = setTimeout(()=>t.classList.remove('show'), 2600); }
