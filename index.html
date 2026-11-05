@@ -752,13 +752,15 @@ function vDash(){
   const upcoming = S.subs.filter(s=>s.active).sort((a,b)=>a.next.localeCompare(b.next)).slice(0,4);
   const net = inc - spent;
   if (!S.accounts.length) return `
-    <div class="top rise"><div><h1>${greet()} 👋</h1><p>Ξεκίνα προσθέτοντας τους λογαριασμούς σου: μετρητά, Revolut, Eurobank, Wise…</p></div></div>
+    <div class="top rise"><div><h1>${greet()} 👋</h1><p>Ξεκίνα προσθέτοντας τους λογαριασμούς σου: μετρητά, Revolut, Eurobank, Wise…</p></div>
+    <div class="row"><button class="iconbtn" data-act="sync" title="Συγχρονισμός" style="width:42px;height:42px;border-radius:50%;position:relative">${svg('cloud')}<i class="syncdot abs" data-sync-dot data-state="${Sync.state}"></i></button><button class="iconbtn" data-act="theme" title="Αλλαγή θέματος" style="width:42px;height:42px;border-radius:50%">${svg('palette')}</button></div></div>
     <div class="glass card hero rise" style="max-width:600px;min-height:260px"><i class="orb"></i>
       <h3>Γρήγορη αρχή</h3>
       <p class="muted" style="font-size:14px;line-height:1.6;max-width:380px">Πρόσθεσε κάθε λογαριασμό με το τωρινό του υπόλοιπο. Μετά, κάθε έξοδο που γράφεις αφαιρείται αυτόματα από τον σωστό λογαριασμό.</p>
       <div class="row" style="flex-wrap:wrap;margin-top:auto">
         <button class="btn primary" data-act="quickstart">${svg('plus')}Μετρητά, Revolut, Eurobank, Wise</button>
         <button class="btn" data-act="newAcc">Άλλος λογαριασμός</button>
+        <button class="btn accent" data-act="sync">${svg('cloud')}Έχω ήδη δεδομένα σε άλλη συσκευή</button>
       </div>
     </div>`;
   return `
