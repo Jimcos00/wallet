@@ -339,7 +339,10 @@ textarea.inp{resize:vertical;line-height:1.5}
 .cal-dots{display:flex;gap:3px;height:6px}
 .cal-dots i{width:6px;height:6px;border-radius:50%;background:var(--c)}
 .allday{display:flex;flex-direction:column;gap:8px;margin:10px 0 6px}
-.tl{position:relative;margin-top:10px}
+.tl-scroll{margin-top:10px;max-height:min(640px,calc(100vh - 260px));min-height:320px;overflow-y:auto;overscroll-behavior:contain;padding:10px 6px 10px 0;border-radius:16px;background:rgba(0,0,0,.12);box-shadow:inset 0 1px 0 rgba(255,255,255,.05);scrollbar-width:thin;scrollbar-color:rgba(255,255,255,.25) transparent}
+.tl-scroll::-webkit-scrollbar{width:6px}.tl-scroll::-webkit-scrollbar-thumb{background:rgba(255,255,255,.25);border-radius:9px}
+.tl{position:relative;margin-left:8px}
+.tl-end{position:relative;height:0;border-top:1px dashed rgba(255,255,255,.1)}.tl-end span{position:absolute;left:0;top:-9px;font-size:11px;color:var(--faint);font-weight:700}
 .tl-hour{height:56px;border-top:1px dashed rgba(255,255,255,.1);position:relative;cursor:pointer;transition:background .2s}
 .tl-hour:hover{background:rgba(255,255,255,.04)}
 .tl-hour span{position:absolute;left:0;top:-9px;font-size:11px;color:var(--faint);font-weight:700;font-variant-numeric:tabular-nums;background:transparent}
@@ -1188,10 +1191,7 @@ function vAgenda(){
   const list = eventsOn(agSel);
   const timed = list.filter(e=>e.start), allday = list.filter(e=>!e.start), carry = carryOn(agSel);
   const HOUR = 56;
-  let h0 = 7, h1 = 23;
-  for (const e of timed){ h0 = Math.min(h0, Math.floor(toMin(e.start)/60)); h1 = Math.max(h1, Math.ceil(endMin(e)/60)); }
-  if (carry.length) h0 = 0;
-  h1 = Math.min(24, h1);
+  const h0 = 0, h1 = 24;
   // overlap layout
   const items = carry.map(c=>({e:c.e, cont:true, s:0, en:Math.max(toMin(c.e.end),20)})).concat(timed.map(e=>({e, s:toMin(e.start), en:Math.min(Math.max(endMin(e), toMin(e.start)+20), 1440)})));
   let cluster = [], cEnd = -1; const clusters = [];
@@ -1217,15 +1217,19 @@ function vAgenda(){
     <section class="glass card rise">
       <h3><span style="text-transform:capitalize">${selLabel}</span><button class="btn sm" data-act="newEvent" data-date="${agSel}">${svg('plus')}Νέο</button></h3>
       ${allday.length?`<div class="allday">${allday.map(e=>taskCard(e,agSel)).join('')}</div>`:''}
-      ${timed.length||!allday.length ? `<div class="tl" id="tl">${hours}<div class="tl-ev">${evHtml}</div>${nowLine}</div>` : ''}
+      <div class="tl-scroll" id="tlScroll" data-day="${agSel}" data-focus="${agSel===today()?nowMin:(items.length?items[0].s:7*60)}"><div class="tl" id="tl">${hours}<div class="tl-end"><span>24:00</span></div><div class="tl-ev">${evHtml}</div>${nowLine}</div></div>
       ${!list.length?'<p class="hint" style="text-align:center">Πάτα σε μια ώρα για να προσθέσεις κάτι εκεί.</p>':''}
     </section>
   </div>`;
 }
+let tlMem = {day:null, top:0};
 function scrollTimeline(){
-  if (!enterNext && document.getElementById('nowLine')) return;
-  const el = document.getElementById('nowLine'); if (!el || !matchMedia('(max-width:1200px)').matches) return;
-  setTimeout(()=>{ const r = el.getBoundingClientRect(); if (r.top > innerHeight*.7) window.scrollTo({top: scrollY + r.top - innerHeight*.35, behavior: RM?'auto':'smooth'}); }, 400);
+  const sc = document.getElementById('tlScroll'); if (!sc) return;
+  const day = sc.dataset.day;
+  if (tlMem.day===day && !enterNext){ sc.scrollTop = tlMem.top; }
+  else { const f = +sc.dataset.focus; sc.scrollTop = Math.max(0, (f/60 - 1.5) * 56); }
+  tlMem.day = day; tlMem.top = sc.scrollTop;
+  sc.onscroll = ()=>{ tlMem.top = sc.scrollTop; };
 }
 function formEvent(e, opts={}){
   const isNew = !e;
