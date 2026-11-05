@@ -92,6 +92,14 @@ button{-webkit-user-select:none;user-select:none}
 .side .foot{margin-top:auto;padding:14px;border-radius:18px;background:rgba(0,0,0,.16);box-shadow:inset 0 1px 0 rgba(255,255,255,.08)}
 .side .foot .v{font-weight:800;font-size:16px;font-variant-numeric:tabular-nums}
 .side .foot small{display:block;color:var(--muted);font-size:12px;margin-top:2px}
+.syncline{display:flex;align-items:center;gap:7px;border:none;background:none;padding:0 0 8px;color:var(--muted);font-size:11.5px;font-weight:700;cursor:pointer}
+.syncline:hover{color:var(--text)}
+.syncdot{width:8px;height:8px;border-radius:50%;flex:none;display:inline-block;background:rgba(255,255,255,.35)}
+.syncdot[data-state=ok]{background:#5be3a4;box-shadow:0 0 8px #5be3a4}
+.syncdot[data-state=busy],.syncdot[data-state=idle]{background:#ffd27a;animation:pulse 1s ease-in-out infinite}
+.syncdot[data-state=err]{background:#ff7a7a;box-shadow:0 0 8px #ff7a7a}
+.syncdot.abs{position:absolute;right:6px;top:6px}
+@keyframes pulse{50%{opacity:.35}}
 .side .foot .themes{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:12px}
 .side .foot .themes button{display:flex;align-items:center;gap:7px;padding:7px 8px;border-radius:12px;border:1px solid var(--line-soft);background:rgba(255,255,255,.06);cursor:pointer;font-size:12px;font-weight:700;color:var(--muted);transition:.25s}
 .side .foot .themes button.on{background:rgba(255,255,255,.18);color:var(--text);border-color:var(--line)}
@@ -421,6 +429,7 @@ const I = {
   bank:'<path d="M3 10l9-6 9 6"/><path d="M5 10v8M9.5 10v8M14.5 10v8M19 10v8M3 20h18"/>',
   card:'<rect x="2.5" y="5" width="19" height="14" rx="2.5"/><path d="M2.5 10h19M6 15h4"/>',
   piggy:'<path d="M5 11a7 6 0 0 1 12-3h2v3l2 1v3h-2a7 6 0 0 1-3 3v2h-3v-1.5H9V20H6v-3a6 6 0 0 1-1-6z"/><circle cx="15" cy="11" r=".8"/>',
+  cloud:'<path d="M7 18a4.5 4.5 0 0 1-.6-8.96A6 6 0 0 1 18 9.5a4.25 4.25 0 0 1-.5 8.5z"/>',
   palette:'<path d="M12 3a9 9 0 1 0 0 18c1.2 0 1.8-.9 1.4-1.9-.4-1.1.3-2.1 1.5-2.1H17a4 4 0 0 0 4-4c0-5.5-4-10-9-10z"/><circle cx="7.5" cy="11" r="1"/><circle cx="10.5" cy="7" r="1"/><circle cx="15" cy="7.5" r="1"/>',
   globe:'<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/>'
 };
@@ -474,7 +483,7 @@ const catIcon = (c) => (CATS.find(x=>x[0]===c)||INCOME_CATS.find(x=>x[0]===c)||[
 const ACC_TYPES = {cash:'Μετρητά',bank:'Τράπεζα',card:'Κάρτα',savings:'Αποταμίευση',other:'Άλλο'};
 
 let S = load();
-function blank(){ return {accounts:[], tx:[], subs:[], notes:[], settings:{currency:'EUR', budget:0}}; }
+function blank(){ return {accounts:[], tx:[], subs:[], notes:[], deleted:{}, settings:{currency:'EUR', budget:0}}; }
 const THEMES = [['sage','Sage','linear-gradient(135deg,#d9be93,#4fd1a5 55%,#1c2d32)'],['amethyst','Amethyst','linear-gradient(135deg,#c9c2e3,#8b7cc7 40%,#2a1e4d)']];
 function applyTheme(){ const t = S.settings.theme || 'amethyst'; document.documentElement.dataset.theme = t; document.querySelector('meta[name=theme-color]').content = t==='amethyst' ? '#0e0b1d' : '#1d2f33'; }
 function toggleTheme(){ S.settings.theme = (S.settings.theme||'amethyst')==='amethyst' ? 'sage' : 'amethyst'; save(); applyTheme(); render(); toast('Θέμα: '+THEMES.find(x=>x[0]===S.settings.theme)[1]); }
@@ -482,7 +491,144 @@ function load(){
   try { const d = JSON.parse(localStorage.getItem(KEY)); if (d && d.accounts) return Object.assign(blank(), d); } catch(e){}
   return blank();
 }
-function save(){ try { localStorage.setItem(KEY, JSON.stringify(S)); } catch(e){ toast('Δεν αποθηκεύτηκε (storage)'); } }
+const COLLS = ['accounts','tx','subs','notes'];
+let snap = new Map();
+const recJson = (r) => JSON.stringify(Object.assign({}, r, {_u:0}));
+function buildSnap(){ snap = new Map(); for (const c of COLLS) for (const r of S[c]) snap.set(c+':'+r.id, recJson(r)); snap.set('settings', recJson(S.settings)); }
+function stamp(){
+  const now = Date.now(), seen = new Set(); S.deleted = S.deleted || {};
+  for (const c of COLLS) for (const r of S[c]){ const k = c+':'+r.id; seen.add(k); const j = recJson(r); if (snap.get(k)!==j){ r._u = now; snap.set(k,j); } }
+  for (const k of [...snap.keys()]) if (k!=='settings' && !seen.has(k)){ S.deleted[k] = now; snap.delete(k); }
+  const sj = recJson(S.settings); if (snap.get('settings')!==sj){ S.settings._u = now; snap.set('settings', sj); }
+}
+function persist(){ try { localStorage.setItem(KEY, JSON.stringify(S)); } catch(e){ toast('Δεν αποθηκεύτηκε (storage)'); } }
+function save(){ stamp(); persist(); Sync.schedule(); }
+function mergeStates(a, b){
+  const out = blank(); out.deleted = Object.assign({}, b.deleted||{});
+  for (const [k,t] of Object.entries(a.deleted||{})) out.deleted[k] = Math.max(t, out.deleted[k]||0);
+  for (const c of COLLS){
+    const m = new Map();
+    for (const r of (b[c]||[])) m.set(r.id, r);
+    for (const r of (a[c]||[])){ const o = m.get(r.id); if (!o || (r._u||0) >= (o._u||0)) m.set(r.id, r); }
+    out[c] = [...m.values()].filter(r => !(out.deleted[c+':'+r.id] >= (r._u||0)));
+  }
+  out.settings = ((a.settings||{})._u||0) >= ((b.settings||{})._u||0) ? Object.assign({}, b.settings, a.settings) : Object.assign({}, a.settings, b.settings);
+  return out;
+}
+
+/* ============ sync: encrypted file in a private GitHub Gist ============ */
+const Sync = (() => {
+  const CFG_KEY = 'spyr.sync.v1', FILE = 'spyr-wallet.enc.json', DESC = 'Spyrlidis Wallet sync (encrypted)';
+  let cfg = {}; try { cfg = JSON.parse(localStorage.getItem(CFG_KEY)) || {}; } catch(e){}
+  let state = cfg.gistId ? 'idle' : 'off', msg = '', timer = null, busy = false, again = false, keyCache = null;
+  const saveCfg = () => { try { localStorage.setItem(CFG_KEY, JSON.stringify(cfg)); } catch(e){} };
+  const b64 = (buf) => btoa(String.fromCharCode(...new Uint8Array(buf)));
+  const unb64 = (s) => Uint8Array.from(atob(s), c => c.charCodeAt(0));
+  async function deriveKey(pass, salt){
+    const sk = b64(salt);
+    if (keyCache && keyCache.sk===sk && keyCache.pass===pass) return keyCache.key;
+    const base = await crypto.subtle.importKey('raw', new TextEncoder().encode(pass), 'PBKDF2', false, ['deriveKey']);
+    const key = await crypto.subtle.deriveKey({name:'PBKDF2', salt, iterations:250000, hash:'SHA-256'}, base, {name:'AES-GCM', length:256}, false, ['encrypt','decrypt']);
+    keyCache = {sk, pass, key}; return key;
+  }
+  async function encrypt(obj, pass){
+    const salt = cfg.salt ? unb64(cfg.salt) : crypto.getRandomValues(new Uint8Array(16)); cfg.salt = b64(salt);
+    const iv = crypto.getRandomValues(new Uint8Array(12));
+    const ct = await crypto.subtle.encrypt({name:'AES-GCM', iv}, await deriveKey(pass, salt), new TextEncoder().encode(JSON.stringify(obj)));
+    return JSON.stringify({v:1, salt:cfg.salt, iv:b64(iv), ct:b64(ct)});
+  }
+  async function decrypt(str, pass){
+    const d = JSON.parse(str); cfg.salt = d.salt;
+    try { const pt = await crypto.subtle.decrypt({name:'AES-GCM', iv:unb64(d.iv)}, await deriveKey(pass, unb64(d.salt)), unb64(d.ct)); return JSON.parse(new TextDecoder().decode(pt)); }
+    catch(e){ throw new Error('Λάθος κωδικός κρυπτογράφησης'); }
+  }
+  async function gh(path, opts={}, token=cfg.token){
+    const r = await fetch('https://api.github.com'+path, Object.assign({}, opts, {cache:'no-store', headers:{Authorization:'Bearer '+token, Accept:'application/vnd.github+json', 'Content-Type':'application/json'}}));
+    if (r.status===401) throw new Error('Το token δεν είναι έγκυρο ή έληξε');
+    if (r.status===404) throw new Error('Δεν βρέθηκε το gist (έχει δικαίωμα gist το token;)');
+    if (!r.ok) throw new Error('GitHub σφάλμα '+r.status);
+    return r.json();
+  }
+  async function pull(){
+    const g = await gh('/gists/'+cfg.gistId); const f = g.files[FILE]; if (!f) return null;
+    let c = f.content; if (f.truncated) c = await (await fetch(f.raw_url, {cache:'no-store'})).text();
+    return c ? decrypt(c, cfg.pass) : null;
+  }
+  async function push(){ await gh('/gists/'+cfg.gistId, {method:'PATCH', body:JSON.stringify({files:{[FILE]:{content: await encrypt(S, cfg.pass)}}})}); }
+  function paint(){
+    const label = {off:'Συγχρονισμός: ανενεργός', idle:'Συγχρονισμός', busy:'Συγχρονισμός…', ok:'Συγχρονίστηκε '+(cfg.last?new Date(cfg.last).toLocaleTimeString('el-GR',{hour:'2-digit',minute:'2-digit'}):''), err:'Σφάλμα συγχρονισμού'}[state];
+    document.querySelectorAll('[data-sync-label]').forEach(el => el.textContent = label);
+    document.querySelectorAll('[data-sync-dot]').forEach(el => el.dataset.state = state);
+  }
+  async function run(){
+    if (!cfg.gistId) return;
+    if (busy){ again = true; return; }
+    busy = true; state = 'busy'; paint();
+    try {
+      const remote = await pull();
+      const before = JSON.stringify(S);
+      if (remote){
+        S = mergeStates(S, remote); buildSnap(); persist();
+        const changed = JSON.stringify(S) !== before;
+        if (changed){ applyTheme(); const a = document.activeElement; if (!(a && /INPUT|TEXTAREA|SELECT/.test(a.tagName)) && !document.getElementById('modal').classList.contains('open')) render(); else needRender = true; }
+      }
+      if (!remote || JSON.stringify(S) !== JSON.stringify(remote)) await push();
+      cfg.last = Date.now(); saveCfg(); state = 'ok'; msg = '';
+    } catch(e){ state = 'err'; msg = e.message; console.warn('sync', e); }
+    busy = false; paint();
+    if (again){ again = false; run(); }
+  }
+  let needRender = false;
+  document.addEventListener('focusout', () => setTimeout(() => { if (needRender && !document.getElementById('modal').classList.contains('open')){ needRender = false; render(); } }, 300));
+  return {
+    get on(){ return !!cfg.gistId; }, get state(){ return state; }, get msg(){ return msg; }, get last(){ return cfg.last; },
+    paint, run,
+    schedule(){ if (!cfg.gistId) return; clearTimeout(timer); state = 'busy'; paint(); timer = setTimeout(run, 1500); },
+    async connect(token, pass){
+      token = token.trim(); if (!token || !pass) throw new Error('Συμπλήρωσε token και κωδικό');
+      const list = await gh('/gists?per_page=100', {}, token);
+      const g = list.find(x => x.files && x.files[FILE]);
+      const prev = cfg; cfg = {token, pass};
+      if (g){ cfg.gistId = g.id; try { await pull(); } catch(e){ cfg = prev; throw e; } }
+      else {
+        const created = await gh('/gists', {method:'POST', body:JSON.stringify({description:DESC, public:false, files:{[FILE]:{content: await encrypt(S, pass)}}})}, token);
+        cfg.gistId = created.id;
+      }
+      saveCfg(); await run(); return !!g;
+    },
+    disconnect(){ cfg = {}; try { localStorage.removeItem(CFG_KEY); } catch(e){} state = 'off'; paint(); }
+  };
+})();
+function formSync(){
+  if (Sync.on){
+    openModal(`<h2>Συγχρονισμός</h2>
+      <div class="glass" style="padding:16px;border-radius:18px;margin-bottom:14px"><div class="row"><i class="syncdot" data-sync-dot data-state="${Sync.state}"></i><b data-sync-label></b></div>
+      ${Sync.msg?`<p class="hint" style="color:var(--neg)">${esc(Sync.msg)}</p>`:''}
+      <p class="hint">Τα δεδομένα σου αποθηκεύονται κρυπτογραφημένα σε ένα ιδιωτικό gist στο GitHub σου και ενημερώνονται αυτόματα σε κάθε αλλαγή.</p></div>
+      <div class="actions"><button type="button" class="btn ghost danger" data-sync-off style="margin-right:auto">Αποσύνδεση</button><button type="button" class="btn ghost" onclick="closeModal()">Κλείσιμο</button><button class="btn primary">${svg('reload')}Συγχρονισμός τώρα</button></div>`,
+      ()=>{ Sync.run(); toast('Συγχρονισμός…'); });
+    Sync.paint();
+    sheet.querySelector('[data-sync-off]').onclick = ()=>{ if (confirm('Αποσύνδεση αυτής της συσκευής από τον συγχρονισμό; Τα δεδομένα μένουν εδώ.')){ Sync.disconnect(); closeModal(); render(); } };
+    return;
+  }
+  openModal(`<h2>Συγχρονισμός PC ↔ κινητό</h2>
+    <p class="muted" style="font-size:13px;line-height:1.6;margin-top:-6px">Κάνε το ίδιο σε κάθε συσκευή, με το ίδιο token και τον ίδιο κωδικό.</p>
+    <ol class="muted" style="font-size:13px;line-height:1.7;padding-left:18px;margin:0 0 14px">
+      <li>Άνοιξε <a href="https://github.com/settings/tokens/new?scopes=gist&description=Spyrlidis%20Wallet" target="_blank" rel="noopener" style="color:var(--accent-2)">αυτό το link</a>, βάλε Expiration «No expiration» και πάτα <b>Generate token</b>.</li>
+      <li>Αντέγραψε το token (ξεκινά με <code>ghp_</code>) και κράτα το κάπου, θα το χρειαστείς και στο κινητό.</li>
+      <li>Διάλεξε έναν κωδικό κρυπτογράφησης. Αν τον ξεχάσεις, τα δεδομένα στο cloud δεν ανοίγουν.</li>
+    </ol>
+    <div class="field"><label>GitHub token</label><input class="inp" name="token" required placeholder="ghp_…" autocomplete="off" autocapitalize="off" spellcheck="false"></div>
+    <div class="field"><label>Κωδικός κρυπτογράφησης</label><input class="inp" name="pass" type="password" required minlength="6" placeholder="τουλάχιστον 6 χαρακτήρες"></div>
+    <p class="hint" id="syncErr" style="color:var(--neg)"></p>
+    <div class="actions"><button type="button" class="btn ghost" onclick="closeModal()">Άκυρο</button><button class="btn primary" id="syncGo">Σύνδεση</button></div>`,
+    (fd)=>{
+      const btn = document.getElementById('syncGo'); btn.disabled = true; btn.textContent = 'Σύνδεση…';
+      Sync.connect(fd.get('token'), fd.get('pass')).then(found => { closeModal(); render(); toast(found ? 'Συνδέθηκε και πήρε τα δεδομένα από το cloud' : 'Ο συγχρονισμός ενεργοποιήθηκε'); })
+        .catch(e => { document.getElementById('syncErr').textContent = e.message; btn.disabled = false; btn.textContent = 'Σύνδεση'; });
+      return false;
+    });
+}
 const uid = () => Math.random().toString(36).slice(2,10) + Date.now().toString(36).slice(-4);
 const today = () => ymd(new Date());
 const ymd = (d) => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
@@ -524,7 +670,7 @@ function processSubs(){
     if (!s.active || !s.next) continue;
     let guard = 0;
     while (s.next <= t && guard++ < 120){
-      S.tx.push({id:uid(), type:'expense', amount:s.amount, accountId:s.accountId, place:s.name, category:s.category||'Συνδρομές', date:s.next, note:'Αυτόματη χρέωση συνδρομής', subId:s.id, created:Date.now()});
+      if (!S.tx.some(x=>x.id==='sub_'+s.id+'_'+s.next)) S.tx.push({id:'sub_'+s.id+'_'+s.next, type:'expense', amount:s.amount, accountId:s.accountId, place:s.name, category:s.category||'Συνδρομές', date:s.next, note:'Αυτόματη χρέωση συνδρομής', subId:s.id, created:Date.now()});
       s.next = addMonths(s.next, s.cycle==='yearly'?12:1, s.day || Number(s.next.slice(8,10)));
       n++;
     }
@@ -546,7 +692,7 @@ function renderNav(){
   const btn = ([k,l,ic], short) => `<button class="${view===k?'on':''}" data-go="${k}">${svg(ic)}<span>${short?SHORT[k]:l}</span>${!short&&k==='notes'&&S.notes.length?`<em class="count">${S.notes.length}</em>`:''}${!short&&k==='subs'&&S.subs.filter(s=>s.active).length?`<em class="count">${S.subs.filter(s=>s.active).length}</em>`:''}</button>`;
   document.getElementById('nav').innerHTML = '<div class="navlabel">Χρήματα</div>' + VIEWS.slice(0,5).map(v=>btn(v)).join('') + '<div class="navlabel">Δουλειά</div>' + btn(VIEWS[5]);
   document.getElementById('tabbar').innerHTML = VIEWS.map(v=>btn(v,true)).join('');
-  document.getElementById('sideFoot').innerHTML = `<div class="v">${cnt('side',total())}</div><small>Σύνολο σε ${S.accounts.length} λογαριασμούς</small>
+  document.getElementById('sideFoot').innerHTML = `<button class="syncline" data-act="sync"><i class="syncdot" data-sync-dot data-state="${Sync.state}"></i><span data-sync-label></span></button><div class="v">${cnt('side',total())}</div><small>Σύνολο σε ${S.accounts.length} λογαριασμούς</small>
     <div class="themes">${THEMES.map(([k,l,g])=>`<button class="${(S.settings.theme||'amethyst')===k?'on':''}" data-theme-set="${k}" title="${l}"><i style="background:${g}"></i>${l}</button>`).join('')}</div>
     <div class="two-btn"><button class="btn" data-act="export" title="Κατέβασε αντίγραφο ασφαλείας">${svg('down')}Backup</button><button class="btn" data-act="import" title="Επαναφορά από αρχείο">${svg('up')}Restore</button></div>`;
 }
@@ -563,6 +709,7 @@ function render(){
   document.getElementById('fab').style.display = (view==='projects'||view==='notes') ? 'none' : '';
   if (flashId){ const el = m.querySelector(`[data-row="${flashId}"]`); if (el) el.classList.add('new'); flashId = null; }
   enterNext = false;
+  if (typeof Sync!=='undefined') Sync.paint();
 }
 
 /* count-up numbers */
@@ -617,7 +764,7 @@ function vDash(){
   return `
   <div class="top rise">
     <div><h1>${greet()}, Spyrlidis</h1><p>${new Date().toLocaleDateString('el-GR',{weekday:'long',day:'numeric',month:'long'})} · δες πού βρίσκονται τα χρήματά σου</p></div>
-    <div class="row"><button class="iconbtn" data-act="theme" title="Αλλαγή θέματος" style="width:42px;height:42px;border-radius:50%">${svg('palette')}</button><button class="btn hide-m" data-act="newTx" data-type="income">${svg('down')}Έσοδο</button><button class="btn primary hide-m" data-act="newTx">${svg('plus')}Νέο έξοδο</button></div>
+    <div class="row"><button class="iconbtn" data-act="sync" title="Συγχρονισμός" style="width:42px;height:42px;border-radius:50%;position:relative">${svg('cloud')}<i class="syncdot abs" data-sync-dot data-state="${Sync.state}"></i></button><button class="iconbtn" data-act="theme" title="Αλλαγή θέματος" style="width:42px;height:42px;border-radius:50%">${svg('palette')}</button><button class="btn hide-m" data-act="newTx" data-type="income">${svg('down')}Έσοδο</button><button class="btn primary hide-m" data-act="newTx">${svg('plus')}Νέο έξοδο</button></div>
   </div>
   <div class="bento">
     <section class="glass card hero c-hero tilt rise"><i class="orb"></i>
@@ -1214,7 +1361,7 @@ document.addEventListener('click', e=>{
     newNote:()=>formNote(), openNote:()=>go('notes', id), editNote:()=>formNote(S.notes.find(x=>x.id===id)),
     editLine:()=>{ const n = note(); n && formLine(n, n.items.find(l=>l.id===id)); },
     delLine:()=>{ const n = note(); n && delLine(n, id); },
-    theme:toggleTheme, budget:formBudget, export:exportData, import:importData,
+    sync:formSync, theme:toggleTheme, budget:formBudget, export:exportData, import:importData,
     pickZip:()=>pickZip(), replaceZip:()=>pickZip(id), openProj:()=>openProj(id), editProj:()=>editProj(id), delProj:()=>delProj(id)
   })[b.dataset.act]?.();
 });
@@ -1245,7 +1392,7 @@ document.getElementById('fab').innerHTML = svg('plus');
 document.getElementById('fab').onclick = ()=>formTx();
 let tt; function toast(m){ const t = document.getElementById('toast'); t.textContent = m; t.classList.add('show'); clearTimeout(tt); tt = setTimeout(()=>t.classList.remove('show'), 2600); }
 window.addEventListener('hashchange', ()=>{ const [v,id] = location.hash.slice(1).split('/'); if (VIEWS.some(x=>x[0]===v) && (v!==view || (id||null)!==noteOpen)){ view = v; noteOpen = id||null; enterNext = true; render(); } });
-document.addEventListener('visibilitychange', ()=>{ if (!document.hidden){ const before = S.tx.length; processSubs(); if (S.tx.length!==before) render(); } });
+document.addEventListener('visibilitychange', ()=>{ if (!document.hidden){ Sync.run(); const before = S.tx.length; processSubs(); if (S.tx.length!==before) render(); } });
 window.addEventListener('resize', ()=>initSegs(document));
 
 /* ============ pointer light + soft 3D tilt ============ */
@@ -1325,7 +1472,8 @@ function startAscii(){
 }
 function stopAscii(){ if (asciiRaf) cancelAnimationFrame(asciiRaf); asciiRaf = null; }
 
-applyTheme(); processSubs(); render();
+buildSnap(); applyTheme(); processSubs(); render(); Sync.paint(); Sync.run();
+setInterval(()=>{ if (!document.hidden) Sync.run(); }, 45000);
 if ('serviceWorker' in navigator && location.protocol.startsWith('http')) navigator.serviceWorker.register('sw.js').catch(()=>{});
 </script>
 </body>
