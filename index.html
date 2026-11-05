@@ -312,6 +312,53 @@ textarea.inp{resize:vertical;line-height:1.5}
 .toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(30px) scale(.9);opacity:0;transition:transform .5s var(--spring),opacity .3s;z-index:80;padding:12px 20px;font-weight:700;font-size:14px;pointer-events:none;border-radius:999px;white-space:nowrap;max-width:calc(100vw - 32px);overflow:hidden;text-overflow:ellipsis}
 .toast.show{opacity:1;transform:translateX(-50%)}
 
+/* ---------- agenda ---------- */
+.c-today{grid-column:1/-1}
+.today-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:10px;margin-top:10px}
+.tcard{position:relative;display:grid;grid-template-columns:auto 1fr;gap:12px;align-items:center;padding:12px 14px;border-radius:16px;background:rgba(255,255,255,.08);border:1px solid var(--line-soft);cursor:pointer;transition:background .2s,transform .3s var(--spring);overflow:hidden}
+.tcard::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--c)}
+.tcard:hover{background:rgba(255,255,255,.13);transform:translateY(-2px)}
+.tcard .tm{font-size:12px;color:var(--muted);font-weight:700;font-variant-numeric:tabular-nums}
+.tcard b{display:block;font-size:14.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tcard .t{min-width:0}
+.tcard.done{opacity:.55}.tcard.done b{text-decoration:line-through}
+.tag{display:inline-block;margin-left:6px;padding:1px 7px;border-radius:99px;font-size:10.5px;font-weight:800;background:var(--c);color:#14101f;vertical-align:1px}
+.chk{width:26px;height:26px;border-radius:50%;border:2px solid var(--c,var(--accent));background:none;display:grid;place-items:center;cursor:pointer;flex:none;color:#14101f;transition:background .25s,transform .3s var(--spring)}
+.chk svg{width:14px;height:14px;opacity:0;transform:scale(.4);transition:.3s var(--spring)}
+.chk.on{background:var(--c,var(--accent))}.chk.on svg{opacity:1;transform:none}
+.chk:active{transform:scale(.85)}
+.agenda{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:18px;align-items:start}
+.cal-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:5px;margin-top:12px}
+.cal-dow{font-size:11px;color:var(--faint);text-align:center;font-weight:800;padding:4px 0;text-transform:uppercase;letter-spacing:.06em}
+.cal-day{aspect-ratio:1/1;border-radius:14px;border:1px solid transparent;background:rgba(255,255,255,.05);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;cursor:pointer;font-weight:700;font-size:14px;color:var(--text);transition:background .2s,transform .3s var(--spring);padding:0}
+.cal-day:hover{background:rgba(255,255,255,.14)}
+.cal-day:active{transform:scale(.92)}
+.cal-day.out{opacity:.32}
+.cal-day.today{border-color:var(--accent);color:var(--accent-2)}
+.cal-day.sel{background:var(--text);color:var(--ink);box-shadow:0 8px 20px -8px rgba(0,0,0,.5)}
+.cal-dots{display:flex;gap:3px;height:6px}
+.cal-dots i{width:6px;height:6px;border-radius:50%;background:var(--c)}
+.allday{display:flex;flex-direction:column;gap:8px;margin:10px 0 6px}
+.tl{position:relative;margin-top:10px}
+.tl-hour{height:56px;border-top:1px dashed rgba(255,255,255,.1);position:relative;cursor:pointer;transition:background .2s}
+.tl-hour:hover{background:rgba(255,255,255,.04)}
+.tl-hour span{position:absolute;left:0;top:-9px;font-size:11px;color:var(--faint);font-weight:700;font-variant-numeric:tabular-nums;background:transparent}
+.tl-ev{position:absolute;left:54px;right:0;top:0;bottom:0;pointer-events:none}
+.ev{position:absolute;border-radius:12px;padding:6px 10px;background:color-mix(in srgb,var(--c) 30%,rgba(20,14,40,.35));border:1px solid color-mix(in srgb,var(--c) 55%,transparent);border-left:4px solid var(--c);pointer-events:auto;cursor:pointer;overflow:hidden;font-size:12px;color:var(--text);box-shadow:0 10px 24px -12px rgba(0,0,0,.6);transition:transform .3s var(--spring),filter .2s}
+.ev:hover{transform:scale(1.015);filter:brightness(1.1)}
+.ev b{display:block;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ev small{color:var(--muted);font-variant-numeric:tabular-nums}
+.ev.done{opacity:.5}.ev.done b{text-decoration:line-through}
+.now-line{position:absolute;left:46px;right:0;height:2px;background:#ff6b8b;box-shadow:0 0 10px #ff6b8b;z-index:2;pointer-events:none}
+.now-line::before{content:"";position:absolute;left:-5px;top:-4px;width:10px;height:10px;border-radius:50%;background:#ff6b8b}
+.ecolors{display:flex;gap:8px;flex-wrap:wrap}
+.ecolors button{width:32px;height:32px;border-radius:50%;border:2px solid transparent;cursor:pointer;box-shadow:inset 0 -3px 6px rgba(0,0,0,.2),inset 0 2px 3px rgba(255,255,255,.4);transition:transform .25s var(--spring)}
+.ecolors button.on{border-color:#fff;transform:scale(1.15)}
+.switch{display:flex;align-items:center;gap:10px;font-size:13px;font-weight:700;color:var(--muted);cursor:pointer;margin-bottom:12px}
+.switch input{width:18px;height:18px;accent-color:var(--accent)}
+.li .txtline{font-weight:600}
+.li.done .t b{text-decoration:line-through;opacity:.55}
+
 /* ---------- motion ---------- */
 main.enter .rise{animation:rise .8s var(--ease) both;animation-delay:calc(var(--i,0) * 55ms)}
 @keyframes rise{from{opacity:0;transform:translateY(22px) scale(.98);filter:blur(6px)}to{opacity:1;transform:none;filter:none}}
@@ -329,6 +376,7 @@ main.enter .track i,main.enter .meter i,main.enter .split i{animation:fillx 1.1s
   .bento{grid-template-columns:repeat(6,minmax(0,1fr))}
   .c-hero{grid-column:span 6;grid-row:auto}.c-stat{grid-column:span 3}
   .c-ascii{grid-column:span 6;grid-row:auto;min-height:200px}
+  .agenda{grid-template-columns:1fr}
   .c-chart,.c-budget,.c-recent{grid-column:span 6}.c-up,.c-notes{grid-column:span 3}
   .ledger{grid-template-columns:1fr}
 }
@@ -336,7 +384,9 @@ main.enter .track i,main.enter .meter i,main.enter .split i{animation:fillx 1.1s
   .app{grid-template-columns:1fr;padding:14px 16px calc(100px + env(safe-area-inset-bottom));gap:0}
   .side{display:none}
   .bento{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
-  .c-hero,.c-ascii,.c-chart,.c-budget,.c-recent,.c-up,.c-notes{grid-column:1/-1}
+  .c-hero,.c-ascii,.c-chart,.c-budget,.c-recent,.c-up,.c-notes,.c-today{grid-column:1/-1}
+  .today-list{grid-template-columns:1fr}
+  .cal-day{border-radius:11px;font-size:13px}
   .c-stat{grid-column:span 1}
   .card{padding:18px}
   .top{margin-top:max(8px,env(safe-area-inset-top))}
@@ -430,6 +480,9 @@ const I = {
   card:'<rect x="2.5" y="5" width="19" height="14" rx="2.5"/><path d="M2.5 10h19M6 15h4"/>',
   piggy:'<path d="M5 11a7 6 0 0 1 12-3h2v3l2 1v3h-2a7 6 0 0 1-3 3v2h-3v-1.5H9V20H6v-3a6 6 0 0 1-1-6z"/><circle cx="15" cy="11" r=".8"/>',
   cloud:'<path d="M7 18a4.5 4.5 0 0 1-.6-8.96A6 6 0 0 1 18 9.5a4.25 4.25 0 0 1-.5 8.5z"/>',
+  cal:'<rect x="3" y="4.5" width="18" height="16.5" rx="3"/><path d="M3 9.5h18M8 2.5v4M16 2.5v4"/>',
+  check:'<path d="M5 12.5l4.5 4.5L19 7"/>',
+  next:'<path d="M9 6l6 6-6 6"/>',
   palette:'<path d="M12 3a9 9 0 1 0 0 18c1.2 0 1.8-.9 1.4-1.9-.4-1.1.3-2.1 1.5-2.1H17a4 4 0 0 0 4-4c0-5.5-4-10-9-10z"/><circle cx="7.5" cy="11" r="1"/><circle cx="10.5" cy="7" r="1"/><circle cx="15" cy="7.5" r="1"/>',
   globe:'<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/>'
 };
@@ -484,7 +537,7 @@ const ACC_TYPES = {cash:'Μετρητά',bank:'Τράπεζα',card:'Κάρτα'
 
 let S = load();
 if (S.settings.name===undefined && S.accounts.length) S.settings.name = 'Spyrlidis';
-function blank(){ return {accounts:[], tx:[], subs:[], notes:[], deleted:{}, settings:{currency:'EUR', budget:0}}; }
+function blank(){ return {accounts:[], tx:[], subs:[], notes:[], events:[], deleted:{}, settings:{currency:'EUR', budget:0}}; }
 const THEMES = [['sage','Sage','linear-gradient(135deg,#d9be93,#4fd1a5 55%,#1c2d32)'],['amethyst','Amethyst','linear-gradient(135deg,#c9c2e3,#8b7cc7 40%,#2a1e4d)']];
 function applyTheme(){ const t = S.settings.theme || 'amethyst'; document.documentElement.dataset.theme = t; document.querySelector('meta[name=theme-color]').content = t==='amethyst' ? '#0e0b1d' : '#1d2f33'; }
 function toggleTheme(){ S.settings.theme = (S.settings.theme||'amethyst')==='amethyst' ? 'sage' : 'amethyst'; save(); applyTheme(); render(); toast('Θέμα: '+THEMES.find(x=>x[0]===S.settings.theme)[1]); }
@@ -492,7 +545,7 @@ function load(){
   try { const d = JSON.parse(localStorage.getItem(KEY)); if (d && d.accounts) return Object.assign(blank(), d); } catch(e){}
   return blank();
 }
-const COLLS = ['accounts','tx','subs','notes'];
+const COLLS = ['accounts','tx','subs','notes','events'];
 let snap = new Map();
 const recJson = (r) => JSON.stringify(Object.assign({}, r, {_u:0}));
 function buildSnap(){ snap = new Map(); for (const c of COLLS) for (const r of S[c]) snap.set(c+':'+r.id, recJson(r)); snap.set('settings', recJson(S.settings)); }
@@ -655,7 +708,7 @@ const total = () => Math.round(S.accounts.reduce((s,a)=>s+balance(a.id),0)*100)/
 const monthKey = (s) => s.slice(0,7);
 function monthSum(type, mk){ return S.tx.filter(t=>t.type===type && monthKey(t.date)===mk).reduce((s,t)=>s+t.amount,0); }
 function subMonthly(s){ return s.cycle==='yearly' ? s.amount/12 : s.amount; }
-function noteTotals(n){ let inc=0, exp=0; for (const l of n.items){ if (l.amount>=0) inc+=l.amount; else exp+=-l.amount; } return {inc, exp, net:Math.round((inc-exp)*100)/100}; }
+function noteTotals(n){ let inc=0, exp=0; for (const l of n.items){ if (l.amount==null) continue; if (l.amount>=0) inc+=l.amount; else exp+=-l.amount; } return {inc, exp, net:Math.round((inc-exp)*100)/100}; }
 
 /* subscriptions: auto-charge when due */
 function addMonths(dateStr, n, day){
@@ -681,10 +734,11 @@ function processSubs(){
 
 /* ============ router ============ */
 const VIEWS = [
-  ['dash','Επισκόπηση','home'],['accounts','Λογαριασμοί','wallet'],['tx','Κινήσεις','list'],
+  ['dash','Επισκόπηση','home'],['agenda','Ατζέντα','cal'],['accounts','Λογαριασμοί','wallet'],['tx','Κινήσεις','list'],
   ['subs','Συνδρομές','repeat'],['notes','Σημειώσεις','note'],['projects','Projects','folder']
 ];
-const SHORT = {dash:'Αρχική',accounts:'Λογαριασμοί',tx:'Κινήσεις',subs:'Συνδρομές',notes:'Σημειώσεις',projects:'Projects'};
+const SHORT = {dash:'Αρχική',agenda:'Ατζέντα',accounts:'Λογαριασμοί',tx:'Κινήσεις',subs:'Συνδρομές',notes:'Σημειώσεις',projects:'Projects'};
+const V = (k) => VIEWS.find(v=>v[0]===k);
 let view = 'dash', noteOpen = null;
 (function(){ const [v,id] = location.hash.slice(1).split('/'); if (VIEWS.some(x=>x[0]===v)) view = v; if (v==='notes' && id) noteOpen = id; })();
 let enterNext = true, flashId = null;
@@ -692,8 +746,12 @@ function go(v, sub){ view = v; noteOpen = sub||null; history.replaceState(null,'
 function renderNav(){
   const nm = S.settings.name || ''; document.getElementById('brandName').textContent = nm || 'Wallet'; document.getElementById('brandLogo').textContent = (nm[0]||'W').toUpperCase(); document.title = nm ? nm+' · Wallet' : 'Wallet';
   const btn = ([k,l,ic], short) => `<button class="${view===k?'on':''}" data-go="${k}">${svg(ic)}<span>${short?SHORT[k]:l}</span>${!short&&k==='notes'&&S.notes.length?`<em class="count">${S.notes.length}</em>`:''}${!short&&k==='subs'&&S.subs.filter(s=>s.active).length?`<em class="count">${S.subs.filter(s=>s.active).length}</em>`:''}</button>`;
-  document.getElementById('nav').innerHTML = '<div class="navlabel">Χρήματα</div>' + VIEWS.slice(0,5).map(v=>btn(v)).join('') + '<div class="navlabel">Δουλειά</div>' + btn(VIEWS[5]);
-  document.getElementById('tabbar').innerHTML = VIEWS.map(v=>btn(v,true)).join('');
+  const todayN = eventsOn(today()).filter(e=>!isDone(e,today())).length;
+  const btn2 = (v) => btn(v).replace('</button>', v[0]==='agenda' && todayN ? `<em class="count">${todayN}</em></button>` : '</button>');
+  document.getElementById('nav').innerHTML = '<div class="navlabel">Η μέρα μου</div>' + ['dash','agenda'].map(k=>btn2(V(k))).join('')
+    + '<div class="navlabel">Χρήματα</div>' + ['accounts','tx','subs'].map(k=>btn2(V(k))).join('')
+    + '<div class="navlabel">Σημειώσεις & δουλειά</div>' + ['notes','projects'].map(k=>btn2(V(k))).join('');
+  document.getElementById('tabbar').innerHTML = ['dash','agenda','accounts','tx','notes','projects'].map(k=>btn(V(k),true)).join('');
   document.getElementById('sideFoot').innerHTML = `<button class="syncline" data-act="sync"><i class="syncdot" data-sync-dot data-state="${Sync.state}"></i><span data-sync-label></span></button><div class="v">${cnt('side',total())}</div><small>Σύνολο σε ${S.accounts.length} λογαριασμούς</small>
     <div class="themes">${THEMES.map(([k,l,g])=>`<button class="${(S.settings.theme||'amethyst')===k?'on':''}" data-theme-set="${k}" title="${l}"><i style="background:${g}"></i>${l}</button>`).join('')}</div>
     <div class="two-btn"><button class="btn" data-act="export" title="Κατέβασε αντίγραφο ασφαλείας">${svg('down')}Backup</button><button class="btn" data-act="import" title="Επαναφορά από αρχείο">${svg('up')}Restore</button></div>`;
@@ -702,13 +760,15 @@ function render(){
   renderNav();
   const m = document.getElementById('main');
   m.className = enterNext && !RM ? 'enter' : '';
-  m.innerHTML = ({dash:vDash, accounts:vAccounts, tx:vTx, subs:vSubs, notes:vNotes, projects:vProjects})[view]();
+  m.innerHTML = ({dash:vDash, agenda:vAgenda, accounts:vAccounts, tx:vTx, subs:vSubs, notes:vNotes, projects:vProjects})[view]();
   m.querySelectorAll('.rise').forEach((el,i)=>el.style.setProperty('--i', i));
   initSegs(document);
   countUp(enterNext);
   if (view==='projects') hydrateProjects();
   if (view==='dash') startAscii(); else stopAscii();
   document.getElementById('fab').style.display = (view==='projects'||view==='notes') ? 'none' : '';
+  document.getElementById('fab').dataset.mode = view==='agenda' ? 'event' : 'tx';
+  if (view==='agenda') scrollTimeline();
   if (flashId){ const el = m.querySelector(`[data-row="${flashId}"]`); if (el) el.classList.add('new'); flashId = null; }
   enterNext = false;
   if (typeof Sync!=='undefined') Sync.paint();
@@ -768,10 +828,11 @@ function vDash(){
     </div>`;
   return `
   <div class="top rise">
-    <div><h1>${greet()}${S.settings.name?', <span data-act="rename" style="cursor:pointer">'+esc(S.settings.name)+'</span>':''}</h1><p>${new Date().toLocaleDateString('el-GR',{weekday:'long',day:'numeric',month:'long'})} · δες πού βρίσκονται τα χρήματά σου</p></div>
+    <div><h1>${greet()}${S.settings.name?', <span data-act="rename" style="cursor:pointer">'+esc(S.settings.name)+'</span>':''}</h1><p>${new Date().toLocaleDateString('el-GR',{weekday:'long',day:'numeric',month:'long'})} · ${(()=>{ const n = eventsOn(today()).filter(e=>!isDone(e,today())).length; return n ? `έχεις <b style="color:var(--text)">${n}</b> πράγμα${n===1?'':'τα'} να κάνεις σήμερα` : 'δες πού βρίσκονται τα χρήματά σου'; })()}</p></div>
     <div class="row"><button class="iconbtn" data-act="sync" title="Συγχρονισμός" style="width:42px;height:42px;border-radius:50%;position:relative">${svg('cloud')}<i class="syncdot abs" data-sync-dot data-state="${Sync.state}"></i></button><button class="iconbtn" data-act="theme" title="Αλλαγή θέματος" style="width:42px;height:42px;border-radius:50%">${svg('palette')}</button><button class="btn hide-m" data-act="newTx" data-type="income">${svg('down')}Έσοδο</button><button class="btn primary hide-m" data-act="newTx">${svg('plus')}Νέο έξοδο</button></div>
   </div>
   <div class="bento">
+    ${todayCard()}
     <section class="glass card hero c-hero tilt rise"><i class="orb"></i>
       <h3>Συνολικό υπόλοιπο</h3>
       <div class="big">${cnt('total',total())}</div>
@@ -935,7 +996,7 @@ function vNotes(){
         <div class="head"><div class="emo">${n.emoji||'📝'}</div><div style="min-width:0"><b>${esc(n.name)}</b><small class="muted" style="display:block;font-size:12px">${n.items.length} γραμμές</small></div></div>
         <div class="net" style="color:${t.net>=0?'var(--pos)':'var(--neg)'}">${fmtS(t.net)}</div>
         <div class="split"><i style="width:${t.inc/tot*100}%;background:var(--accent)"></i><i style="width:${t.exp/tot*100}%;background:var(--neg-2)"></i></div>
-        <div class="lines">${n.items.slice(-3).reverse().map(l=>`<div><span>${esc(l.label)}</span><b style="color:${l.amount>=0?'var(--pos)':'var(--neg)'}">${fmtS(l.amount)}</b></div>`).join('') || '<div><span>Άδεια ακόμα</span></div>'}</div>
+        <div class="lines">${n.items.slice(-3).reverse().map(l=> l.amount==null ? `<div><span style="${l.done?'text-decoration:line-through;opacity:.6':''}">${l.done?'✓':'•'} ${esc(l.label)}</span></div>` : `<div><span>${esc(l.label)}</span><b style="color:${l.amount>=0?'var(--pos)':'var(--neg)'}">${fmtS(l.amount)}</b></div>`).join('') || '<div><span>Άδεια ακόμα</span></div>'}</div>
       </div>`; }).join('')}
     <button class="glass note add rise" data-act="newNote"><div>${svg('plus').replace('<svg','<svg style="width:28px;height:28px"')}<div style="margin-top:8px;font-weight:700">Νέα σημείωση</div><small>π.χ. Ιστοσελίδες, Αυτοκίνητο, Σπίτι</small></div></button>
   </div>`;
@@ -947,21 +1008,23 @@ function vLedger(n){
   <div class="ledger">
     <section class="glass card rise">
       <form id="quickForm" class="quick">
-        <div class="seg" id="qSign"><button type="button" data-sign="-1" class="on">− Έξοδο</button><button type="button" data-sign="1">+ Έσοδο</button></div>
-        <input class="inp" id="qText" placeholder="π.χ. domain 12  ή  + ιστοσελίδα Κώστα 350" autocomplete="off">
+        <div class="seg" id="qSign"><button type="button" data-sign="-1" class="${(n.lastSign??-1)===-1?'on':''}">− Έξοδο</button><button type="button" data-sign="1" class="${n.lastSign===1?'on':''}">+ Έσοδο</button><button type="button" data-sign="0" class="${n.lastSign===0?'on':''}">• Κείμενο</button></div>
+        <input class="inp" id="qText" placeholder="π.χ. domain 12, + ιστοσελίδα 350 ή απλό κείμενο" autocomplete="off">
         <button class="btn primary">${svg('plus')}Προσθήκη</button>
       </form>
       <div class="row" style="margin-top:10px;flex-wrap:wrap;gap:8px">
         <label class="faint" style="font-size:12px">Να μπει και στον λογαριασμό;</label>
         <select class="inp" id="qAcc" style="padding:7px 12px;font-size:13px"><option value="">Όχι, μόνο σημείωση</option>${S.accounts.map(a=>`<option value="${a.id}" ${n.lastAcc===a.id?'selected':''}>${esc(a.name)}</option>`).join('')}</select>
       </div>
-      <p class="hint">Γράψε περιγραφή και ποσό. Με <code>+</code> ή <code>-</code> μπροστά ορίζεις έσοδο ή έξοδο. Μπορείς να επικολλήσεις πολλές γραμμές μαζί.</p>
-      <div class="kpis">
+      <p class="hint">Με ποσό γίνεται έξοδο ή έσοδο (<code>+</code>/<code>-</code> μπροστά). Χωρίς ποσό, ή με «• Κείμενο», γίνεται απλή σημείωση που μπορείς να τσεκάρεις. Μπορείς να επικολλήσεις πολλές γραμμές μαζί.</p>
+      <div class="kpis" style="${n.items.some(l=>l.amount!=null)?'':'display:none'}">
         <div class="kpi"><small>Έσοδα</small><b style="color:var(--pos)">${cnt('ni'+n.id,t.inc)}</b></div>
         <div class="kpi"><small>Έξοδα</small><b style="color:var(--neg)">${cnt('ne'+n.id,t.exp)}</b></div>
         <div class="kpi"><small>Καθαρό</small><b>${t.net<0?'−':''}${cnt('nn'+n.id,Math.abs(t.net))}</b></div>
       </div>
-      <div class="list" style="margin-top:8px">${n.items.length ? [...n.items].reverse().map(l=>`<div class="li" data-row="${l.id}"><div class="emo" style="font-weight:800;color:${l.amount>=0?'var(--pos)':'var(--neg)'}">${l.amount>=0?'+':'−'}</div>
+      <div class="list" style="margin-top:8px">${n.items.length ? [...n.items].reverse().map(l=> l.amount==null ? `<div class="li${l.done?' done':''}" data-row="${l.id}"><div style="display:grid;place-items:center;width:40px"><button class="chk${l.done?' on':''}" data-act="toggleLine" data-id="${l.id}" title="Έγινε">${svg('check')}</button></div>
+        <div class="t"><b class="txtline">${esc(l.label)}</b><small>${fmtDate(l.date)}</small></div><div></div>
+        <div class="acts"><button class="iconbtn" data-act="editLine" data-id="${l.id}" title="Επεξεργασία">${svg('edit')}</button><button class="iconbtn" data-act="delLine" data-id="${l.id}" title="Διαγραφή">${svg('trash')}</button></div></div>` : `<div class="li" data-row="${l.id}"><div class="emo" style="font-weight:800;color:${l.amount>=0?'var(--pos)':'var(--neg)'}">${l.amount>=0?'+':'−'}</div>
         <div class="t"><b>${esc(l.label)}</b><small>${fmtDate(l.date)}${l.txId&&S.tx.some(x=>x.id===l.txId)?' · '+esc(accById(S.tx.find(x=>x.id===l.txId).accountId)?.name||''):''}</small></div>
         <div class="amt ${l.amount>=0?'pos':'neg'}">${fmtS(l.amount)}</div>
         <div class="acts"><button class="iconbtn" data-act="editLine" data-id="${l.id}" title="Επεξεργασία">${svg('edit')}</button><button class="iconbtn" data-act="delLine" data-id="${l.id}" title="Διαγραφή">${svg('trash')}</button></div></div>`).join('')
@@ -980,8 +1043,9 @@ function parseLines(str, defSign){
     s = s.trim(); if (!s) continue;
     let sign = defSign;
     if (/^\+/.test(s)){ sign = 1; s = s.slice(1); } else if (/^[-−–]/.test(s)){ sign = -1; s = s.slice(1); }
-    const nums = [...s.matchAll(/(\d+(?:[.,]\d{1,2})?)\s*(?:€|ευρώ|ευρω|eur)?/gi)];
-    if (!nums.length) continue;
+    else if (/^[•*]\s/.test(s)){ sign = 0; s = s.slice(1); }
+    const nums = sign===0 ? [] : [...s.matchAll(/(\d+(?:[.,]\d{1,2})?)\s*(?:€|ευρώ|ευρω|eur)?/gi)];
+    if (!nums.length){ out.push({sign:0, amount:null, label:s.trim()}); continue; }
     const m = nums[nums.length-1];
     const label = (s.slice(0,m.index) + s.slice(m.index+m[0].length)).replace(/^[\s:\-–—,]+|[\s:\-–—,]+$/g,'').trim();
     out.push({sign, amount:num(m[1]), label: label || 'Χωρίς περιγραφή'});
@@ -990,8 +1054,9 @@ function parseLines(str, defSign){
 }
 function addNoteLines(n, text, sign, accId){
   const parsed = parseLines(text, sign);
-  if (!parsed.length){ toast('Γράψε και ένα ποσό, π.χ. domain 12'); return false; }
+  if (!parsed.length){ toast('Γράψε κάτι πρώτα'); return false; }
   for (const p of parsed){
+    if (p.amount==null){ const line = {id:uid(), label:p.label, amount:null, done:false, date:today()}; n.items.push(line); flashId = line.id; continue; }
     const line = {id:uid(), label:p.label, amount:p.sign*p.amount, date:today()};
     if (accId){
       const tx = {id:uid(), created:Date.now(), type:p.sign>0?'income':'expense', amount:p.amount, accountId:accId, place:p.label, category:p.sign>0?'Project / Πελάτης':'Δουλειά', date:today(), note:n.name, noteId:n.id};
@@ -999,9 +1064,9 @@ function addNoteLines(n, text, sign, accId){
     }
     n.items.push(line); flashId = line.id;
   }
-  n.lastAcc = accId; n.updated = Date.now();
+  n.lastAcc = accId; n.lastSign = sign; n.updated = Date.now();
   save(); render();
-  toast(parsed.length>1 ? `Προστέθηκαν ${parsed.length} γραμμές` : `${fmtS(parsed[0].sign*parsed[0].amount)} · ${parsed[0].label}`);
+  toast(parsed.length>1 ? `Προστέθηκαν ${parsed.length} γραμμές` : parsed[0].amount==null ? 'Προστέθηκε σημείωση' : `${fmtS(parsed[0].sign*parsed[0].amount)} · ${parsed[0].label}`);
   setTimeout(()=>document.getElementById('qText')?.focus(), 50);
 }
 function formNote(n){
@@ -1020,6 +1085,13 @@ function formNote(n){
   };
 }
 function formLine(n, l){
+  if (l.amount==null){
+    openModal(`<h2>Επεξεργασία σημείωσης</h2><div class="field"><label>Κείμενο</label><textarea class="inp" name="label" rows="3" required>${esc(l.label)}</textarea></div>
+      <label class="switch"><input type="checkbox" name="done" ${l.done?'checked':''}>Έγινε</label>${actions(true)}`,
+      (fd)=>{ l.label = fd.get('label').trim(); l.done = !!fd.get('done'); save(); render(); });
+    sheet.querySelector('[data-del]').onclick = ()=>{ delLine(n, l.id); closeModal(); };
+    return;
+  }
   let sign = l.amount>=0?1:-1;
   openModal(`<h2>Επεξεργασία γραμμής</h2>
     <div class="seg" style="margin-bottom:14px"><button type="button" data-ls="-1" class="${sign<0?'on':''}">− Έξοδο</button><button type="button" data-ls="1" class="${sign>0?'on':''}">+ Έσοδο</button></div>
@@ -1043,6 +1115,156 @@ function delLine(n, id){
   S.tx = S.tx.filter(x=>x.id!==l.txId);
   n.items = n.items.filter(x=>x!==l); save(); render();
 }
+
+/* ============ agenda ============ */
+const EV_COLORS = ['#8b7cc7','#c9c2e3','#4fd1a5','#7aa7ff','#ffd27a','#ff9f7a','#ff7ab6','#9ae6ff'];
+const REPEATS = {none:'Καμία', daily:'Κάθε μέρα', weekdays:'Καθημερινές (Δευ–Παρ)', weekly:'Κάθε εβδομάδα', monthly:'Κάθε μήνα'};
+let agSel = today(), agMonth = today().slice(0,7);
+const toMin = (t) => { if (!t) return null; const [h,m] = t.split(':').map(Number); return h*60+m; };
+const dow = (d) => new Date(d+'T00:00').getDay();
+const shiftMonth = (mk, n) => addMonths(mk+'-01', n, 1).slice(0,7);
+const addDays = (d, n) => { const x = new Date(d+'T00:00'); x.setDate(x.getDate()+n); return ymd(x); };
+function occurs(e, d){
+  if (d < e.date) return false;
+  if (e.until && d > e.until) return false;
+  if ((e.skip||[]).includes(d)) return false;
+  switch (e.repeat){
+    case 'daily': return true;
+    case 'weekdays': { const w = dow(d); return w>=1 && w<=5; }
+    case 'weekly': return dow(d)===dow(e.date);
+    case 'monthly': return Number(d.slice(8))===Number(e.date.slice(8));
+    default: return d===e.date;
+  }
+}
+const isDone = (e, d) => (e.repeat && e.repeat!=='none') ? (e.doneDates||[]).includes(d) : !!e.done;
+function eventsOn(d){ return (S.events||[]).filter(e=>occurs(e,d)).sort((a,b)=>(toMin(a.start)??-1)-(toMin(b.start)??-1) || a.title.localeCompare(b.title)); }
+function toggleEvent(id, d){
+  const e = S.events.find(x=>x.id===id); if (!e) return; d = d || e.date;
+  if (e.repeat && e.repeat!=='none'){ e.doneDates = e.doneDates||[]; const i = e.doneDates.indexOf(d); if (i>=0) e.doneDates.splice(i,1); else e.doneDates.push(d); }
+  else e.done = !e.done;
+  save(); render(); if (isDone(e,d)) toast('Μπράβο! ✓ '+e.title);
+}
+const timeRange = (e) => e.start ? `${e.start}${e.end?'–'+e.end:''}` : 'Όλη μέρα';
+function nowStatus(e, d){
+  if (d!==today() || !e.start) return '';
+  const now = new Date().getHours()*60+new Date().getMinutes(), s = toMin(e.start), en = toMin(e.end) ?? s+60;
+  if (now>=s && now<en) return 'Τώρα';
+  if (s>now && s-now<=90) return `σε ${s-now<60? (s-now)+'′' : Math.floor((s-now)/60)+'ω '+((s-now)%60?((s-now)%60)+'′':'')}`;
+  return '';
+}
+function taskCard(e, d){
+  const st = nowStatus(e, d);
+  return `<div class="tcard${isDone(e,d)?' done':''}" style="--c:${e.color}" data-act="editEvent" data-id="${e.id}" data-date="${d}">
+    <button class="chk${isDone(e,d)?' on':''}" data-act="toggleEvent" data-id="${e.id}" data-date="${d}" title="Έγινε">${svg('check')}</button>
+    <div class="t"><span class="tm">${timeRange(e)}</span>${st?`<span class="tag">${st}</span>`:''}<b>${esc(e.title)}</b>${e.note?`<small class="muted" style="font-size:12px;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(e.note)}</small>`:''}</div></div>`;
+}
+function todayCard(){
+  const d = today(), list = eventsOn(d), tom = eventsOn(addDays(d,1));
+  const left = list.filter(e=>!isDone(e,d)).length;
+  return `<section class="glass card c-today rise">
+    <h3><span>Σήμερα · ${new Date().toLocaleDateString('el-GR',{weekday:'long',day:'numeric',month:'long'})}${list.length?` · <span style="color:var(--text)">${left ? left+' ακόμα' : 'όλα έγιναν 🎉'}</span>`:''}</span>
+      <span class="row" style="gap:6px"><button class="btn sm ghost" data-act="openDay" data-date="${d}">${svg('cal')}Ατζέντα</button><button class="btn sm" data-act="newEvent" data-date="${d}">${svg('plus')}Νέο</button></span></h3>
+    ${list.length ? `<div class="today-list">${list.map(e=>taskCard(e,d)).join('')}</div>`
+      : `<p class="muted" style="font-size:13.5px;margin:8px 0 0">Τίποτα προγραμματισμένο για σήμερα. ${tom.length?`Αύριο έχεις ${tom.length}.`:''}</p>`}
+    ${list.length && tom.length ? `<p class="faint" style="font-size:12px;margin:12px 0 0">Αύριο: ${tom.slice(0,3).map(e=>esc((e.start?e.start+' ':'')+e.title)).join(' · ')}${tom.length>3?' …':''}</p>`:''}
+  </section>`;
+}
+function vAgenda(){
+  const [y,m] = agMonth.split('-').map(Number);
+  const first = new Date(y, m-1, 1), startOff = (first.getDay()+6)%7; // Monday first
+  const start = addDays(ymd(first), -startOff);
+  let cells = '';
+  for (let i=0;i<42;i++){
+    const d = addDays(start, i); if (i>=35 && d.slice(0,7)!==agMonth) break;
+    const evs = eventsOn(d);
+    cells += `<button class="cal-day${d.slice(0,7)!==agMonth?' out':''}${d===today()?' today':''}${d===agSel?' sel':''}" data-act="calDay" data-date="${d}">${Number(d.slice(8))}<span class="cal-dots">${evs.slice(0,4).map(e=>`<i style="--c:${e.color}"></i>`).join('')}</span></button>`;
+  }
+  const list = eventsOn(agSel);
+  const timed = list.filter(e=>e.start), allday = list.filter(e=>!e.start);
+  const HOUR = 56;
+  let h0 = 7, h1 = 23;
+  for (const e of timed){ h0 = Math.min(h0, Math.floor(toMin(e.start)/60)); h1 = Math.max(h1, Math.ceil((toMin(e.end)??toMin(e.start)+60)/60)); }
+  h1 = Math.min(24, h1);
+  // overlap layout
+  const items = timed.map(e=>({e, s:toMin(e.start), en:Math.max(toMin(e.end)??toMin(e.start)+60, toMin(e.start)+20)}));
+  let cluster = [], cEnd = -1; const clusters = [];
+  for (const it of items){ if (cluster.length && it.s>=cEnd){ clusters.push(cluster); cluster=[]; cEnd=-1; } cluster.push(it); cEnd = Math.max(cEnd, it.en); }
+  if (cluster.length) clusters.push(cluster);
+  for (const c of clusters){ const cols = []; for (const it of c){ let k = cols.findIndex(end=>end<=it.s); if (k<0){ k = cols.length; cols.push(0); } cols[k] = it.en; it.col = k; } c.forEach(it=>it.n = cols.length); }
+  const evHtml = items.map(it=>{ const top = (it.s - h0*60)/60*HOUR, h = Math.max(24, (it.en-it.s)/60*HOUR - 3);
+    return `<div class="ev${isDone(it.e,agSel)?' done':''}" style="--c:${it.e.color};top:${top+1}px;height:${h}px;left:calc(${it.col/it.n*100}% + 2px);width:calc(${100/it.n}% - 4px)" data-act="editEvent" data-id="${it.e.id}" data-date="${agSel}"><b>${esc(it.e.title)}</b>${h>34?`<small>${timeRange(it.e)}</small>`:''}</div>`; }).join('');
+  let hours = ''; for (let h=h0; h<h1; h++) hours += `<div class="tl-hour" data-act="newEvent" data-date="${agSel}" data-time="${String(h).padStart(2,'0')}:00"><span>${String(h).padStart(2,'0')}:00</span></div>`;
+  const now = new Date(), nowMin = now.getHours()*60+now.getMinutes();
+  const nowLine = agSel===today() && nowMin>=h0*60 && nowMin<h1*60 ? `<div class="now-line" id="nowLine" style="top:${(nowMin-h0*60)/60*HOUR}px"></div>` : '';
+  const selLabel = new Date(agSel+'T00:00').toLocaleDateString('el-GR',{weekday:'long',day:'numeric',month:'long'});
+  const left = list.filter(e=>!isDone(e,agSel)).length;
+  return `<div class="top rise"><div><h1>Ατζέντα</h1><p>${agSel===today()?'Σήμερα, ':''}${selLabel} · ${list.length ? `${list.length} πράγματα${left!==list.length?`, ${left} ακόμα`:''}` : 'ελεύθερη μέρα'}</p></div>
+    <div class="row"><button class="btn" data-act="calToday">Σήμερα</button><button class="btn primary hide-m" data-act="newEvent" data-date="${agSel}">${svg('plus')}Νέο task</button></div></div>
+  <div class="agenda">
+    <section class="glass card rise">
+      <div class="between"><button class="iconbtn" data-act="calPrev" title="Προηγούμενος μήνας">${svg('back')}</button>
+        <b style="font-size:17px;text-transform:capitalize">${first.toLocaleDateString('el-GR',{month:'long',year:'numeric'})}</b>
+        <button class="iconbtn" data-act="calNext" title="Επόμενος μήνας">${svg('next')}</button></div>
+      <div class="cal-grid">${['Δε','Τρ','Τε','Πε','Πα','Σα','Κυ'].map(x=>`<div class="cal-dow">${x}</div>`).join('')}${cells}</div>
+    </section>
+    <section class="glass card rise">
+      <h3><span style="text-transform:capitalize">${selLabel}</span><button class="btn sm" data-act="newEvent" data-date="${agSel}">${svg('plus')}Νέο</button></h3>
+      ${allday.length?`<div class="allday">${allday.map(e=>taskCard(e,agSel)).join('')}</div>`:''}
+      ${timed.length||!allday.length ? `<div class="tl" id="tl">${hours}<div class="tl-ev">${evHtml}</div>${nowLine}</div>` : ''}
+      ${!list.length?'<p class="hint" style="text-align:center">Πάτα σε μια ώρα για να προσθέσεις κάτι εκεί.</p>':''}
+    </section>
+  </div>`;
+}
+function scrollTimeline(){
+  if (!enterNext && document.getElementById('nowLine')) return;
+  const el = document.getElementById('nowLine'); if (!el || !matchMedia('(max-width:1200px)').matches) return;
+  setTimeout(()=>{ const r = el.getBoundingClientRect(); if (r.top > innerHeight*.7) window.scrollTo({top: scrollY + r.top - innerHeight*.35, behavior: RM?'auto':'smooth'}); }, 400);
+}
+function formEvent(e, opts={}){
+  const isNew = !e;
+  const nextHour = String(Math.min(23, new Date().getHours()+1)).padStart(2,'0')+':00';
+  const st = opts.time || nextHour;
+  const plus1 = (t) => { const m = Math.min(toMin(t)+60, 23*60+59); return String(Math.floor(m/60)).padStart(2,'0')+':'+String(m%60).padStart(2,'0'); };
+  e = e || {title:'', date:opts.date||today(), start:st, end:plus1(st), color:EV_COLORS[(S.events.length)%EV_COLORS.length], repeat:'none', note:''};
+  const occ = opts.date || e.date;
+  openModal(`<h2>${isNew?'Νέο task':'Επεξεργασία'}</h2>
+    <div class="field"><label>Τι έχεις να κάνεις;</label><input class="inp" name="title" required value="${esc(e.title)}" placeholder="π.χ. Γυμναστήριο, Meeting με πελάτη" autofocus></div>
+    <div class="field"><label>Ημερομηνία</label><input class="inp" type="date" name="date" value="${e.date}" required></div>
+    <label class="switch"><input type="checkbox" name="allday" ${e.start?'':'checked'}>Χωρίς συγκεκριμένη ώρα</label>
+    <div class="two" id="times" style="${e.start?'':'display:none'}"><div class="field"><label>Από</label><input class="inp" type="time" name="start" value="${e.start||st}"></div>
+    <div class="field"><label>Μέχρι</label><input class="inp" type="time" name="end" value="${e.end||plus1(e.start||st)}"></div></div>
+    <div class="field"><label>Χρώμα</label><div class="ecolors">${EV_COLORS.map(c=>`<button type="button" style="background:${c}" class="${c===e.color?'on':''}" data-ecolor="${c}"></button>`).join('')}</div><input type="hidden" name="color" value="${e.color}"></div>
+    <div class="field"><label>Επανάληψη</label><select class="inp" name="repeat">${Object.entries(REPEATS).map(([k,l])=>`<option value="${k}" ${e.repeat===k?'selected':''}>${l}</option>`).join('')}</select></div>
+    <div class="field"><label>Σημείωση</label><input class="inp" name="note" value="${esc(e.note||'')}" placeholder="προαιρετικό"></div>
+    ${!isNew?`<label class="switch"><input type="checkbox" name="done" ${isDone(e,occ)?'checked':''}>Έγινε${e.repeat&&e.repeat!=='none'?' (αυτή τη μέρα)':''}</label>`:''}
+    ${actions(!isNew)}`, (fd)=>{
+      const allday = !!fd.get('allday');
+      let start = allday ? '' : fd.get('start'), end = allday ? '' : fd.get('end');
+      if (start && end && toMin(end) <= toMin(start)) end = plus1(start);
+      const rec = {title:fd.get('title').trim(), date:fd.get('date'), start, end, color:fd.get('color'), repeat:fd.get('repeat'), note:fd.get('note').trim()};
+      if (isNew){ S.events.push(Object.assign({id:uid(), created:Date.now(), done:false, doneDates:[]}, rec)); agSel = rec.date; agMonth = rec.date.slice(0,7); }
+      else {
+        Object.assign(e, rec);
+        const want = !!fd.get('done');
+        if (want !== isDone(e,occ)){ if (e.repeat!=='none'){ e.doneDates = e.doneDates||[]; if (want) e.doneDates.push(occ); else e.doneDates = e.doneDates.filter(x=>x!==occ); } else e.done = want; }
+      }
+      save(); render(); toast(isNew ? `Προστέθηκε: ${rec.title}` : 'Αποθηκεύτηκε');
+    });
+  const ad = sheet.querySelector('[name=allday]'); ad.onchange = ()=>{ document.getElementById('times').style.display = ad.checked ? 'none' : ''; };
+  const sIn = sheet.querySelector('[name=start]'), eIn = sheet.querySelector('[name=end]');
+  sIn.onchange = ()=>{ if (toMin(eIn.value) <= toMin(sIn.value)) eIn.value = plus1(sIn.value); };
+  sheet.querySelectorAll('[data-ecolor]').forEach(b=>b.onclick=()=>{ sheet.querySelectorAll('[data-ecolor]').forEach(x=>x.classList.remove('on')); b.classList.add('on'); sheet.querySelector('[name=color]').value=b.dataset.ecolor; });
+  const d = sheet.querySelector('[data-del]'); if (d) d.onclick = ()=>{
+    if (e.repeat && e.repeat!=='none'){
+      const only = confirm('Επαναλαμβανόμενο task.\n\nOK = διαγραφή ΜΟΝΟ αυτής της μέρας\nΆκυρο = επιλογή για όλες');
+      if (only){ e.skip = (e.skip||[]).concat(occ); save(); closeModal(); render(); return; }
+      if (!confirm('Διαγραφή ΟΛΩΝ των επαναλήψεων;')) return;
+    } else if (!confirm('Διαγραφή task;')) return;
+    S.events = S.events.filter(x=>x!==e); save(); closeModal(); render();
+  };
+}
+// keep "now" markers fresh
+setInterval(()=>{ if (!document.hidden && (view==='agenda' || view==='dash') && !document.getElementById('modal').classList.contains('open')){ const a = document.activeElement; if (!(a && /INPUT|TEXTAREA|SELECT/.test(a.tagName))) render(); } }, 60000);
 
 /* ============ modal forms ============ */
 const modal = document.getElementById('modal'), sheet = document.getElementById('sheet');
@@ -1367,6 +1589,11 @@ document.addEventListener('click', e=>{
     newAcc:()=>formAcc(), editAcc:()=>formAcc(accById(id)), quickstart,
     newSub:()=>formSub(), editSub:()=>formSub(S.subs.find(s=>s.id===id)), delSub:()=>delSub(id),
     toggleSub:()=>{ const s = S.subs.find(x=>x.id===id); s.active = !s.active; if (s.active && s.next < today()){ s.next = today(); } save(); render(); },
+    toggleLine:()=>{ const n = note(); const l = n && n.items.find(x=>x.id===id); if (l){ l.done = !l.done; save(); render(); } },
+    newEvent:()=>formEvent(null,{date:b.dataset.date||agSel, time:b.dataset.time}), editEvent:()=>formEvent(S.events.find(x=>x.id===id),{date:b.dataset.date}),
+    toggleEvent:()=>toggleEvent(id, b.dataset.date), calPrev:()=>{ agMonth = shiftMonth(agMonth,-1); render(); }, calNext:()=>{ agMonth = shiftMonth(agMonth,1); render(); },
+    calDay:()=>{ agSel = b.dataset.date; if (agSel.slice(0,7)!==agMonth) agMonth = agSel.slice(0,7); render(); }, calToday:()=>{ agSel = today(); agMonth = agSel.slice(0,7); render(); },
+    openDay:()=>{ agSel = b.dataset.date||today(); agMonth = agSel.slice(0,7); go('agenda'); },
     newNote:()=>formNote(), openNote:()=>go('notes', id), editNote:()=>formNote(S.notes.find(x=>x.id===id)),
     editLine:()=>{ const n = note(); n && formLine(n, n.items.find(l=>l.id===id)); },
     delLine:()=>{ const n = note(); n && delLine(n, id); },
@@ -1398,7 +1625,7 @@ document.addEventListener('input', e=>{
 });
 document.addEventListener('change', e=>{ if (e.target.id==='firstName'){ S.settings.name = e.target.value.trim(); save(); renderNav(); return; } const f = e.target.dataset.filter; if (f && f!=='q'){ txFilter[f] = e.target.value; render(); } });
 document.getElementById('fab').innerHTML = svg('plus');
-document.getElementById('fab').onclick = ()=>formTx();
+document.getElementById('fab').onclick = ()=> document.getElementById('fab').dataset.mode==='event' ? formEvent(null,{date:agSel}) : formTx();
 let tt; function toast(m){ const t = document.getElementById('toast'); t.textContent = m; t.classList.add('show'); clearTimeout(tt); tt = setTimeout(()=>t.classList.remove('show'), 2600); }
 window.addEventListener('hashchange', ()=>{ const [v,id] = location.hash.slice(1).split('/'); if (VIEWS.some(x=>x[0]===v) && (v!==view || (id||null)!==noteOpen)){ view = v; noteOpen = id||null; enterNext = true; render(); } });
 document.addEventListener('visibilitychange', ()=>{ if (!document.hidden){ Sync.run(); const before = S.tx.length; processSubs(); if (S.tx.length!==before) render(); } });
