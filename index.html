@@ -548,6 +548,7 @@ function load(){
   try { const d = JSON.parse(localStorage.getItem(KEY)); if (d && d.accounts) return Object.assign(blank(), d); } catch(e){}
   return blank();
 }
+const APP_VER = 6;
 const COLLS = ['accounts','tx','subs','notes','events'];
 let snap = new Map();
 const recJson = (r) => JSON.stringify(Object.assign({}, r, {_u:0}));
@@ -559,7 +560,7 @@ function stamp(){
   const sj = recJson(S.settings); if (snap.get('settings')!==sj){ S.settings._u = now; snap.set('settings', sj); }
 }
 function persist(){ try { localStorage.setItem(KEY, JSON.stringify(S)); } catch(e){ toast('Δεν αποθηκεύτηκε (storage)'); } }
-function save(){ stamp(); persist(); Sync.schedule(); }
+function save(){ S.appVer = Math.max(S.appVer||0, APP_VER); stamp(); persist(); Sync.schedule(); }
 function mergeStates(a, b){
   const out = blank(); out.deleted = Object.assign({}, b.deleted||{});
   for (const [k,t] of Object.entries(a.deleted||{})) out.deleted[k] = Math.max(t, out.deleted[k]||0);
@@ -569,6 +570,9 @@ function mergeStates(a, b){
     for (const r of (a[c]||[])){ const o = m.get(r.id); if (!o || (r._u||0) >= (o._u||0)) m.set(r.id, r); }
     out[c] = [...m.values()].filter(r => !(out.deleted[c+':'+r.id] >= (r._u||0)));
   }
+  // keep collections this version doesn't know about (written by a newer version on another device)
+  for (const src of [b, a]) for (const [k,v] of Object.entries(src||{})) if (Array.isArray(v) && !COLLS.includes(k) && !(k in out && out[k].length)) out[k] = v;
+  out.appVer = Math.max(a.appVer||0, b.appVer||0, APP_VER);
   out.settings = ((a.settings||{})._u||0) >= ((b.settings||{})._u||0) ? Object.assign({}, b.settings, a.settings) : Object.assign({}, a.settings, b.settings);
   return out;
 }
@@ -624,6 +628,7 @@ const Sync = (() => {
     try {
       const remote = await pull();
       const before = JSON.stringify(S);
+      if (remote && (remote.appVer||0) > APP_VER){ updateApp(); busy = false; return; }
       if (remote){
         S = mergeStates(S, remote); buildSnap(); persist();
         const changed = JSON.stringify(S) !== before;
@@ -656,6 +661,13 @@ const Sync = (() => {
     disconnect(){ cfg = {}; try { localStorage.removeItem(CFG_KEY); } catch(e){} state = 'off'; paint(); }
   };
 })();
+function updateApp(){
+  let n = 0; try { n = +sessionStorage.getItem('spyr.upd')||0; } catch(e){}
+  if (n >= 2){ toast('Υπάρχει νέα έκδοση: κλείσε και άνοιξε ξανά την εφαρμογή'); return; }
+  try { sessionStorage.setItem('spyr.upd', n+1); } catch(e){}
+  toast('Ενημέρωση εφαρμογής…');
+  (navigator.serviceWorker?.getRegistration?.() || Promise.resolve()).then(reg => reg && reg.update()).catch(()=>{}).finally(()=> setTimeout(()=>location.reload(), 600));
+}
 function formSync(){
   if (Sync.on){
     openModal(`<h2>Συγχρονισμός</h2>
