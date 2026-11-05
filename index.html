@@ -1,0 +1,1332 @@
+<!doctype html>
+<html lang="el">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#1d2f33">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icon.svg">
+<title>Spyrlidis Wallet</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+<script src="jszip.min.js"></script>
+<style>
+:root{
+  --glass:rgba(38,56,58,.24); --glass-hi:rgba(255,255,255,.10);
+  --line:rgba(255,255,255,.22); --line-soft:rgba(255,255,255,.12);
+  --text:#fbfaf7; --muted:rgba(251,250,247,.70); --faint:rgba(251,250,247,.46);
+  --accent:#4fd1a5; --accent-2:#9ff0d3; --accent-ink:#0b3328; --danger:#ff8a7a;
+  --pos:#bff7e1; --neg:#ffd0c8; --neg-2:#e97a66; --acc-rgb:79,209,165;
+  --bg-grad:linear-gradient(135deg,#a8987c 0%,#7f9488 32%,#45706f 62%,#1c2d32 100%); --body:#1e3035;
+  --blob1:#d9be93; --blob2:#2fae92; --blob3:#0f1f24; --sheet:rgba(44,66,68,.78);
+  --hl:linear-gradient(150deg,rgba(94,224,180,.92),rgba(28,140,116,.85)); --hl-ink:#06281f;
+  --orb:radial-gradient(circle at 32% 28%,#fff 0,#d7fff0 9%,#7fe6c2 28%,#2aa585 58%,#145a4c 85%); --orb-glow:rgba(20,90,76,.7);
+  --logo:radial-gradient(circle at 30% 25%,#d6fff0,#4fd1a5 45%,#1f8f78);
+  --ascii:linear-gradient(160deg,#9ff0d3,#4fd1a5 40%,#d9be93);
+  --ci1:#9ff0d3; --ci2:#2fae88; --ce1:#ffd2c9; --ce2:#e97a66; --pt:235,255,245; --pl:190,255,225;
+  --ink:#16201f; --r:26px; --r-sm:16px;
+  --ease:cubic-bezier(.22,1,.36,1); --spring:cubic-bezier(.34,1.45,.5,1);
+  --shadow:0 30px 60px -30px rgba(5,14,16,.6);
+}
+:root[data-theme="amethyst"]{
+  --glass:rgba(42,30,77,.30); --accent:#8b7cc7; --accent-2:#c9c2e3; --accent-ink:#0e0b1d;
+  --pos:#d6cff5; --neg:#ffb8cf; --neg-2:#d9779b; --acc-rgb:139,124,199;
+  --bg-grad:linear-gradient(140deg,#8b7cc7 0%,#5a3b8c 28%,#2a1e4d 58%,#0e0b1d 100%); --body:#0e0b1d;
+  --blob1:#c9c2e3; --blob2:#5a3b8c; --blob3:#0e0b1d; --sheet:rgba(42,30,77,.86);
+  --hl:linear-gradient(150deg,rgba(201,194,227,.95),rgba(139,124,199,.9)); --hl-ink:#1a1233;
+  --orb:radial-gradient(circle at 32% 28%,#fff 0,#ece8f8 9%,#c9c2e3 26%,#8b7cc7 52%,#2a1e4d 88%); --orb-glow:rgba(42,30,77,.8);
+  --logo:radial-gradient(circle at 30% 25%,#f1edff,#8b7cc7 45%,#5a3b8c);
+  --ascii:linear-gradient(160deg,#c9c2e3,#8b7cc7 45%,#5a3b8c);
+  --ci1:#e4dff6; --ci2:#8b7cc7; --ce1:#ffd0de; --ce2:#c25b85; --pt:236,230,255; --pl:201,194,227;
+  --shadow:0 30px 60px -30px rgba(5,3,14,.75);
+}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%}
+body{font-family:Manrope,system-ui,-apple-system,Segoe UI,Roboto,sans-serif;color:var(--text);background:var(--body);transition:background .6s;
+  -webkit-font-smoothing:antialiased;-webkit-tap-highlight-color:transparent;overflow-x:hidden}
+button,input,select,textarea{font:inherit;color:inherit}
+button{-webkit-user-select:none;user-select:none}
+::selection{background:rgba(var(--acc-rgb),.35)}
+
+/* ---------- background ---------- */
+.backdrop{position:fixed;inset:0;z-index:-2;overflow:hidden;
+  background:var(--bg-grad)}
+.backdrop i{position:absolute;border-radius:50%;filter:blur(80px);will-change:transform}
+.backdrop i:nth-child(1){width:48vw;height:48vw;left:-10vw;top:-12vw;background:var(--blob1);opacity:.5;animation:drift1 26s ease-in-out infinite alternate}
+.backdrop i:nth-child(2){width:42vw;height:42vw;right:-12vw;top:8vh;background:var(--blob2);opacity:.42;animation:drift2 32s ease-in-out infinite alternate}
+.backdrop i:nth-child(3){width:55vw;height:55vw;left:20vw;bottom:-30vw;background:var(--blob3);opacity:.85;animation:drift3 38s ease-in-out infinite alternate}
+@keyframes drift1{to{transform:translate(8vw,6vh) scale(1.1)}}
+@keyframes drift2{to{transform:translate(-10vw,14vh) scale(.92)}}
+@keyframes drift3{to{transform:translate(-8vw,-6vh) scale(1.08)}}
+#fx{position:fixed;inset:0;z-index:-1;pointer-events:none}
+
+/* ---------- liquid glass ---------- */
+.glass{position:relative;border-radius:var(--r);
+  background:radial-gradient(520px circle at var(--mx,30%) var(--my,-20%),rgba(255,255,255,.10),transparent 45%),var(--glass);
+  border:1px solid rgba(255,255,255,.06);
+  backdrop-filter:blur(26px) saturate(150%);-webkit-backdrop-filter:blur(26px) saturate(150%);
+  box-shadow:var(--shadow),inset 0 1px 0 rgba(255,255,255,.28),inset 0 -1px 0 rgba(255,255,255,.05),inset 0 0 40px rgba(255,255,255,.035)}
+.glass::before{content:"";position:absolute;inset:-1px;border-radius:inherit;padding:1px;pointer-events:none;
+  background:linear-gradient(145deg,rgba(255,255,255,.7),rgba(255,255,255,.1) 30%,rgba(255,255,255,.04) 60%,rgba(255,255,255,.4));
+  -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude}
+.tilt{transition:transform .5s var(--ease),box-shadow .5s var(--ease);transform-style:preserve-3d;will-change:transform}
+.tilt:hover{box-shadow:0 40px 70px -30px rgba(5,14,16,.7),inset 0 1px 0 rgba(255,255,255,.32),inset 0 0 40px rgba(255,255,255,.05)}
+
+/* ---------- layout ---------- */
+.app{display:grid;grid-template-columns:248px 1fr;gap:22px;padding:22px;min-height:100vh;max-width:1560px;margin:0 auto}
+.side{position:sticky;top:22px;height:calc(100vh - 44px);display:flex;flex-direction:column;padding:18px 14px}
+.brand{display:flex;gap:12px;align-items:center;padding:4px 8px 18px;border-bottom:1px solid var(--line-soft);margin-bottom:10px}
+.brand b{display:block;font-size:15px}.brand small{color:var(--muted);font-size:12px}
+.logo{width:40px;height:40px;border-radius:13px;display:grid;place-items:center;font-weight:800;color:var(--accent-ink);
+  background:var(--logo);box-shadow:inset 0 -4px 8px rgba(0,0,0,.2),inset 0 2px 3px rgba(255,255,255,.6),0 8px 18px -6px rgba(31,143,120,.8)}
+.navlabel{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--faint);margin:16px 12px 6px;font-weight:700}
+.nav{position:relative}
+.nav button{position:relative;z-index:1;display:flex;align-items:center;gap:12px;width:100%;padding:11px 12px;border:none;background:none;border-radius:13px;cursor:pointer;color:var(--muted);font-weight:600;font-size:14px;text-align:left;transition:color .3s,background .3s}
+.nav button:hover{color:var(--text);background:rgba(255,255,255,.06)}
+.nav button.on{color:var(--text);background:rgba(255,255,255,.17);box-shadow:inset 0 1px 0 rgba(255,255,255,.3),0 6px 16px -8px rgba(0,0,0,.4)}
+.nav svg{width:18px;height:18px;flex:none}
+.nav .count{margin-left:auto;font-size:11px;padding:2px 7px;border-radius:99px;background:rgba(255,255,255,.14);color:var(--muted)}
+.side .foot{margin-top:auto;padding:14px;border-radius:18px;background:rgba(0,0,0,.16);box-shadow:inset 0 1px 0 rgba(255,255,255,.08)}
+.side .foot .v{font-weight:800;font-size:16px;font-variant-numeric:tabular-nums}
+.side .foot small{display:block;color:var(--muted);font-size:12px;margin-top:2px}
+.side .foot .themes{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:12px}
+.side .foot .themes button{display:flex;align-items:center;gap:7px;padding:7px 8px;border-radius:12px;border:1px solid var(--line-soft);background:rgba(255,255,255,.06);cursor:pointer;font-size:12px;font-weight:700;color:var(--muted);transition:.25s}
+.side .foot .themes button.on{background:rgba(255,255,255,.18);color:var(--text);border-color:var(--line)}
+.side .foot .themes i{width:14px;height:14px;border-radius:50%;flex:none;box-shadow:inset 0 -2px 3px rgba(0,0,0,.25),inset 0 1px 2px rgba(255,255,255,.5)}
+.side .foot .two-btn{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}
+.side .foot .two-btn .btn{padding:8px 6px;font-size:12.5px;min-width:0;gap:6px}
+main{min-width:0;padding-bottom:40px}
+.top{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;margin:4px 4px 22px;flex-wrap:wrap}
+.top h1{font-size:clamp(26px,3.2vw,38px);margin:0;letter-spacing:-.025em;font-weight:800}
+.top p{margin:6px 0 0;color:var(--muted);font-size:14px}
+.top .row{flex-wrap:wrap}
+
+/* ---------- controls ---------- */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:11px 18px;border-radius:999px;border:1px solid var(--line);background:rgba(255,255,255,.12);cursor:pointer;font-weight:700;font-size:14px;white-space:nowrap;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.18);transition:transform .25s var(--spring),background .25s,box-shadow .25s}
+.btn:hover{background:rgba(255,255,255,.22)}
+.btn:active{transform:scale(.96)}
+.btn.primary{background:linear-gradient(180deg,#fff,#ece8df);color:var(--ink);border-color:transparent;box-shadow:0 10px 24px -10px rgba(0,0,0,.5),inset 0 -2px 0 rgba(0,0,0,.06)}
+.btn.primary:hover{background:#fff;transform:translateY(-1px)}
+.btn.accent{background:linear-gradient(180deg,#6ee0b8,#3cbf93);color:var(--accent-ink);border-color:transparent;box-shadow:0 10px 24px -10px rgba(31,143,120,.9),inset 0 1px 0 rgba(255,255,255,.5)}
+.btn.ghost{background:none;box-shadow:none}
+.btn.sm{padding:7px 13px;font-size:13px}
+.btn.danger{color:var(--danger)}
+.btn svg{width:16px;height:16px;flex:none}
+.iconbtn{width:34px;height:34px;border-radius:11px;border:1px solid var(--line-soft);background:rgba(255,255,255,.08);display:grid;place-items:center;cursor:pointer;flex:none;transition:background .2s,transform .25s var(--spring)}
+.iconbtn:hover{background:rgba(255,255,255,.2)}
+.iconbtn:active{transform:scale(.9)}
+.iconbtn svg{width:15px;height:15px}
+.inp,select.inp{padding:11px 14px;border-radius:13px;border:1px solid var(--line);background:rgba(255,255,255,.10);outline:none;min-width:0;transition:border-color .2s,background .2s,box-shadow .2s}
+.inp:focus{border-color:rgba(255,255,255,.65);background:rgba(255,255,255,.16);box-shadow:0 0 0 4px rgba(var(--acc-rgb),.2)}
+.inp::placeholder{color:var(--faint)}
+select.inp option{color:#111}
+textarea.inp{resize:vertical;line-height:1.5}
+.seg{position:relative;display:inline-flex;padding:4px;border-radius:999px;background:rgba(0,0,0,.18);border:1px solid var(--line-soft)}
+.seg button{position:relative;z-index:1;border:none;background:none;padding:7px 14px;border-radius:999px;cursor:pointer;font-weight:700;font-size:13px;color:var(--muted);transition:color .25s}
+.seg button.on{color:var(--ink)}
+.seg .pill{position:absolute;z-index:0;top:4px;bottom:4px;border-radius:999px;background:var(--text);box-shadow:0 4px 12px -4px rgba(0,0,0,.4);transition:left .4s var(--spring),width .4s var(--spring)}
+
+/* ---------- bento ---------- */
+.bento{display:grid;gap:18px;grid-template-columns:repeat(12,minmax(0,1fr))}
+.c-hero{grid-column:span 5;grid-row:span 2}
+.c-stat{grid-column:span 2}
+.c-ascii{grid-column:span 3;grid-row:span 2}
+.c-chart{grid-column:span 7}
+.c-budget{grid-column:span 5}
+.c-recent{grid-column:span 5}
+.c-up{grid-column:span 4}
+.c-notes{grid-column:span 3}
+.card{padding:22px;overflow:hidden}
+.card h3{position:relative;margin:0 0 4px;font-size:13.5px;font-weight:700;color:var(--muted);display:flex;align-items:center;justify-content:space-between;gap:8px;min-height:30px}
+.big{font-size:clamp(34px,3.8vw,48px);font-weight:800;letter-spacing:-.035em;margin:6px 0 4px;font-variant-numeric:tabular-nums;line-height:1.05}
+.mid{font-size:clamp(22px,2vw,27px);font-weight:800;letter-spacing:-.02em;font-variant-numeric:tabular-nums;margin:10px 0 4px;line-height:1.1}
+.muted{color:var(--muted)} .faint{color:var(--faint)}
+.chip{display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:999px;font-size:12px;font-weight:700;background:rgba(255,255,255,.14);box-shadow:inset 0 1px 0 rgba(255,255,255,.15)}
+.chip.pos{background:rgba(var(--acc-rgb),.26);color:var(--pos)}
+.chip.neg{background:rgba(255,138,122,.22);color:#ffd9d3}
+.stat{padding:18px;display:flex;flex-direction:column}
+.stat small{font-size:12.5px;font-weight:600}
+.stat .mid{margin-top:auto}
+.stat.hl{background:radial-gradient(400px circle at var(--mx,30%) var(--my,0%),rgba(255,255,255,.25),transparent 50%),var(--hl);color:var(--hl-ink)}
+.stat.hl .muted,.stat.hl .faint{color:var(--hl-ink);opacity:.72}
+.hero{display:flex;flex-direction:column}
+.hero > *{position:relative;z-index:1}
+.orb{position:absolute!important;z-index:0!important;right:-54px;top:18px;width:170px;height:170px;border-radius:50%;pointer-events:none;
+  background:var(--orb);
+  box-shadow:inset -18px -26px 50px rgba(0,30,25,.45),inset 10px 10px 30px rgba(255,255,255,.35),0 40px 70px -20px var(--orb-glow);
+  animation:float 9s ease-in-out infinite;opacity:.85}
+.orb.s2{right:auto;left:auto;top:auto;bottom:-70px;right:120px;width:90px;height:90px;opacity:.5;animation-duration:12s;animation-delay:-4s;
+  background:radial-gradient(circle at 32% 28%,#fff 0,#f6e7cc 15%,#cfae7a 50%,#7a5d34 90%)}
+@keyframes float{0%,100%{transform:translate(0,0) rotate(0)}50%{transform:translate(-10px,14px) rotate(8deg)}}
+.acc-mini{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:auto;padding-top:18px}
+.acc-mini > div{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:16px;background:rgba(255,255,255,.10);border:1px solid var(--line-soft);min-width:0;transition:background .25s,transform .3s var(--spring);cursor:pointer}
+.acc-mini > div:hover{background:rgba(255,255,255,.17);transform:translateY(-2px)}
+.acc-mini small{display:block;color:var(--muted);font-size:12px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.acc-mini b{display:block;font-size:15px;font-variant-numeric:tabular-nums;white-space:nowrap}
+.acc-mini .tx{min-width:0}
+.row{display:flex;align-items:center;gap:10px}
+.between{display:flex;align-items:center;justify-content:space-between;gap:10px}
+
+/* brand badges (soft 3d) */
+.bi{--s:40px;width:var(--s);height:var(--s);border-radius:calc(var(--s)*.32);flex:none;display:grid;place-items:center;background:var(--bg);color:var(--fg);
+  font-weight:800;font-size:calc(var(--s)*.46);line-height:1;letter-spacing:-.04em;
+  box-shadow:inset 0 1px 1px rgba(255,255,255,.45),inset 0 -3px 6px rgba(0,0,0,.22),0 6px 14px -6px rgba(0,0,0,.55)}
+.bi svg{width:58%;height:58%}
+.bi.sm{--s:30px}.bi.lg{--s:52px}
+
+/* lists */
+.list{display:flex;flex-direction:column}
+.li{display:grid;grid-template-columns:40px minmax(0,1fr) auto auto;gap:12px;align-items:center;padding:11px 6px;border-top:1px solid var(--line-soft);border-radius:12px;transition:background .2s}
+.li:hover{background:rgba(255,255,255,.05)}
+.li:first-child{border-top-color:transparent}
+.li.c{grid-template-columns:40px minmax(0,1fr) auto}
+.li .t b{display:block;font-size:14px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.li .t small{display:block;color:var(--muted);font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.li .t{min-width:0}
+.emo{width:40px;height:40px;border-radius:13px;display:grid;place-items:center;background:rgba(255,255,255,.13);font-size:18px;box-shadow:inset 0 1px 0 rgba(255,255,255,.2)}
+.amt{font-weight:800;font-variant-numeric:tabular-nums;white-space:nowrap}
+.amt.neg{color:var(--neg)}.amt.pos{color:var(--pos)}
+.li .acts{display:flex;gap:6px;opacity:0;transition:opacity .2s}
+.li:hover .acts,.li:focus-within .acts{opacity:1}
+.dayhead{display:flex;justify-content:space-between;padding:16px 6px 6px;font-size:12px;font-weight:700;color:var(--faint);text-transform:uppercase;letter-spacing:.08em}
+.dayhead:first-child{padding-top:2px}
+.empty{padding:28px;text-align:center;color:var(--muted);font-size:14px;line-height:1.6}
+.bar{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:14px;align-items:center}
+
+/* accounts page */
+.accs{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:18px}
+.acc{padding:22px;min-height:190px;display:flex;flex-direction:column;overflow:hidden}
+.acc .glow{position:absolute;right:-50px;top:-50px;width:170px;height:170px;border-radius:50%;background:var(--c);opacity:.32;filter:blur(26px);pointer-events:none}
+.acc .ty{font-size:11.5px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.1em;margin-top:14px}
+.acc .nm{font-size:19px;font-weight:800;margin-top:2px}
+.acc .bal{margin-top:auto;padding-top:16px;font-size:30px;font-weight:800;letter-spacing:-.03em;font-variant-numeric:tabular-nums}
+.acc .acts{position:absolute;right:16px;top:16px;display:flex;gap:6px;z-index:2}
+
+/* charts */
+.chart{width:100%;height:auto;display:block;overflow:visible}
+.chartwrap{position:relative}
+.chartwrap .nodata{position:absolute;inset:0;display:grid;place-items:center;color:var(--faint);font-size:13px;font-weight:600}
+.legend{display:flex;gap:14px;font-size:12px;color:var(--muted);font-weight:600}
+.legend span{display:flex;align-items:center;gap:6px}
+.dot{width:8px;height:8px;border-radius:50%;flex:none;display:inline-block}
+.cat{display:grid;grid-template-columns:minmax(0,120px) 1fr auto;gap:12px;align-items:center;font-size:13px;margin:10px 0}
+.cat span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.track{height:8px;border-radius:99px;background:rgba(255,255,255,.12);overflow:hidden}
+.track i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,var(--accent),var(--accent-2))}
+.cat b{text-align:right;font-variant-numeric:tabular-nums}
+.meter{height:12px;border-radius:99px;background:rgba(0,0,0,.18);overflow:hidden;margin:14px 0 10px;box-shadow:inset 0 1px 3px rgba(0,0,0,.25)}
+.meter i{display:block;height:100%;background:linear-gradient(90deg,var(--accent),var(--accent-2));border-radius:99px;box-shadow:0 0 16px rgba(var(--acc-rgb),.6)}
+
+/* ascii tile */
+.ascii{display:flex;flex-direction:column;background:radial-gradient(500px circle at var(--mx,50%) var(--my,50%),rgba(255,255,255,.08),transparent 50%),rgba(10,22,24,.42)}
+.ascii pre{position:absolute;inset:0;margin:0;padding:14px;font:500 11px/1.05 'JetBrains Mono',ui-monospace,monospace;letter-spacing:.06em;color:transparent;white-space:pre;overflow:hidden;
+  background:var(--ascii);-webkit-background-clip:text;background-clip:text;opacity:.55;pointer-events:none;
+  -webkit-mask:linear-gradient(180deg,transparent 0,#000 30%,#000 70%,transparent);mask:linear-gradient(180deg,transparent 0,#000 30%,#000 70%,transparent)}
+.ascii .over{position:relative;z-index:1;margin-top:auto;padding:14px 16px;border-radius:18px;background:rgba(20,34,36,.55);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:1px solid var(--line-soft)}
+
+/* notes */
+.notes-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:18px}
+.note{padding:20px;cursor:pointer;display:flex;flex-direction:column;min-height:210px}
+.note .head{display:flex;align-items:center;gap:12px}
+.note .head b{font-size:17px}
+.note .net{font-size:28px;font-weight:800;letter-spacing:-.02em;margin:14px 0 6px;font-variant-numeric:tabular-nums}
+.split{display:flex;height:8px;border-radius:99px;overflow:hidden;background:rgba(255,255,255,.1);margin:6px 0 12px}
+.split i{display:block;height:100%}
+.note .lines{font-size:13px;color:var(--muted);display:flex;flex-direction:column;gap:5px;margin-top:auto}
+.note .lines div{display:flex;justify-content:space-between;gap:10px}
+.note .lines span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.note.add{display:grid;place-items:center;text-align:center;color:var(--muted);border:1.5px dashed rgba(255,255,255,.3);background:rgba(255,255,255,.04);box-shadow:none;backdrop-filter:none;-webkit-backdrop-filter:none}
+.note.add::before{display:none}
+.note.add:hover{color:var(--text);background:rgba(255,255,255,.08)}
+.ledger{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);gap:18px}
+.quick{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.quick .inp{flex:1 1 220px}
+.kpis{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:18px 0 6px}
+.kpi{padding:14px;border-radius:18px;background:rgba(255,255,255,.08);border:1px solid var(--line-soft)}
+.kpi small{color:var(--muted);font-size:12px;font-weight:600}
+.kpi b{display:block;font-size:20px;margin-top:6px;font-variant-numeric:tabular-nums}
+.hint{font-size:12px;color:var(--faint);margin-top:8px}
+.hint code{font-family:'JetBrains Mono',monospace;font-size:11.5px;background:rgba(255,255,255,.1);padding:1px 6px;border-radius:6px;color:var(--muted)}
+.emojis{display:flex;flex-wrap:wrap;gap:6px}
+.emojis button{width:38px;height:38px;border-radius:12px;border:1px solid var(--line-soft);background:rgba(255,255,255,.08);cursor:pointer;font-size:18px;transition:transform .25s var(--spring)}
+.emojis button.on{background:rgba(255,255,255,.3);border-color:#fff;transform:scale(1.08)}
+
+/* projects */
+.projs{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:18px}
+.proj{overflow:hidden;display:flex;flex-direction:column}
+.thumb{height:176px;position:relative;overflow:hidden;background:rgba(0,0,0,.2);border-bottom:1px solid var(--line-soft);cursor:pointer;margin:8px 8px 0;border-radius:19px}
+.thumb iframe{position:absolute;left:0;top:0;width:400%;height:400%;transform:scale(.25);transform-origin:0 0;border:0;pointer-events:none;background:#fff;transition:transform 1.2s var(--ease)}
+.proj:hover .thumb iframe{transform:scale(.25) translateY(-12%)}
+.thumb .ph{position:absolute;inset:0;display:grid;place-items:center;font-size:44px;font-weight:800;color:rgba(255,255,255,.45)}
+.proj .body{padding:14px 16px 16px}
+.proj .body b{font-size:15px}
+.proj .body small{display:block;color:var(--muted);font-size:12px;margin-top:2px}
+.drop{border:1.5px dashed rgba(255,255,255,.4);border-radius:var(--r);padding:28px;text-align:center;color:var(--muted);cursor:pointer;margin-bottom:18px;transition:background .25s,transform .3s var(--spring),border-color .25s}
+.drop:hover{background:rgba(255,255,255,.06)}
+.drop.over{background:rgba(var(--acc-rgb),.16);color:var(--text);border-color:var(--accent);transform:scale(1.01)}
+.drop b{color:var(--text)}
+
+/* viewer */
+.viewer{position:fixed;inset:0;z-index:50;display:flex;flex-direction:column;padding:14px;gap:12px;background:rgba(14,24,26,.6);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
+  opacity:0;visibility:hidden;transition:opacity .35s var(--ease),visibility .35s}
+.viewer.open{opacity:1;visibility:visible}
+.vbar{display:flex;align-items:center;gap:10px;padding:10px 12px;flex-wrap:wrap}
+.vbar .path{flex:1;min-width:120px;font-size:13px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.vstage{flex:1;display:flex;justify-content:center;align-items:stretch;min-height:0;overflow:auto}
+.vstage iframe{border:0;background:#fff;border-radius:16px;width:100%;height:100%;box-shadow:0 30px 80px -20px rgba(0,0,0,.6);transition:width .5s var(--spring);transform:translateY(16px) scale(.98);opacity:0}
+.viewer.open .vstage iframe{transform:none;opacity:1;transition:width .5s var(--spring),transform .5s var(--ease) .05s,opacity .4s .05s}
+.vfiles{position:absolute;right:20px;top:84px;bottom:20px;width:300px;padding:14px;overflow:auto;font-size:12px;z-index:2;opacity:0;transform:translateX(20px);pointer-events:none;transition:.35s var(--ease)}
+.vfiles.open{opacity:1;transform:none;pointer-events:auto}
+.vfiles div{padding:5px 6px;border-radius:8px;cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.vfiles div:hover{background:rgba(255,255,255,.14)}
+
+/* modal */
+.modal{position:fixed;inset:0;z-index:60;display:flex;align-items:center;justify-content:center;padding:16px;background:rgba(8,16,18,.45);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);
+  opacity:0;visibility:hidden;transition:opacity .3s var(--ease),visibility .3s}
+.modal.open{opacity:1;visibility:visible}
+.sheet{width:100%;max-width:470px;max-height:calc(100vh - 32px);overflow:auto;padding:24px;background:var(--sheet);
+  transform:translateY(24px) scale(.96);transition:transform .5s var(--spring)}
+.modal.open .sheet{transform:none}
+.sheet h2{margin:0 0 16px;font-size:20px;letter-spacing:-.01em}
+.field{display:flex;flex-direction:column;gap:6px;margin-bottom:12px}
+.field label{font-size:12px;font-weight:700;color:var(--muted)}
+.field .inp{width:100%}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.amount-inp{font-size:30px;font-weight:800;padding:12px 16px;letter-spacing:-.02em}
+.sheet .actions{display:flex;justify-content:flex-end;gap:10px;margin-top:10px}
+.colors{display:flex;gap:8px;flex-wrap:wrap}
+.colors button{width:30px;height:30px;border-radius:50%;border:2px solid transparent;cursor:pointer;box-shadow:inset 0 -3px 6px rgba(0,0,0,.2),inset 0 2px 3px rgba(255,255,255,.4);transition:transform .25s var(--spring)}
+.colors button.on{border-color:#fff;transform:scale(1.12)}
+.toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(30px) scale(.9);opacity:0;transition:transform .5s var(--spring),opacity .3s;z-index:80;padding:12px 20px;font-weight:700;font-size:14px;pointer-events:none;border-radius:999px;white-space:nowrap;max-width:calc(100vw - 32px);overflow:hidden;text-overflow:ellipsis}
+.toast.show{opacity:1;transform:translateX(-50%)}
+
+/* ---------- motion ---------- */
+main.enter .rise{animation:rise .8s var(--ease) both;animation-delay:calc(var(--i,0) * 55ms)}
+@keyframes rise{from{opacity:0;transform:translateY(22px) scale(.98);filter:blur(6px)}to{opacity:1;transform:none;filter:none}}
+main.enter .chart .b{animation:grow 1s var(--ease) both;animation-delay:calc(250ms + var(--d,0) * 60ms)}
+.chart .b{transform-box:fill-box;transform-origin:50% 100%}
+@keyframes grow{from{transform:scaleY(0)}}
+main.enter .track i,main.enter .meter i,main.enter .split i{animation:fillx 1.1s var(--ease) both;animation-delay:.35s}
+@keyframes fillx{from{width:0}}
+.li.new{animation:flash 1.4s var(--ease)}
+@keyframes flash{0%{background:rgba(var(--acc-rgb),.3)}100%{background:transparent}}
+
+/* ---------- mobile ---------- */
+.tabbar,.fab{display:none}
+@media (max-width:1200px){
+  .bento{grid-template-columns:repeat(6,minmax(0,1fr))}
+  .c-hero{grid-column:span 6;grid-row:auto}.c-stat{grid-column:span 3}
+  .c-ascii{grid-column:span 6;grid-row:auto;min-height:200px}
+  .c-chart,.c-budget,.c-recent{grid-column:span 6}.c-up,.c-notes{grid-column:span 3}
+  .ledger{grid-template-columns:1fr}
+}
+@media (max-width:820px){
+  .app{grid-template-columns:1fr;padding:14px 16px calc(100px + env(safe-area-inset-bottom));gap:0}
+  .side{display:none}
+  .bento{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+  .c-hero,.c-ascii,.c-chart,.c-budget,.c-recent,.c-up,.c-notes{grid-column:1/-1}
+  .c-stat{grid-column:span 1}
+  .card{padding:18px}
+  .top{margin-top:max(8px,env(safe-area-inset-top))}
+  .hide-m{display:none!important}
+  .tabbar{display:flex;position:fixed;left:12px;right:12px;bottom:calc(12px + env(safe-area-inset-bottom));z-index:40;padding:6px;justify-content:space-between;border-radius:24px}
+  .tabbar button{flex:0 0 auto;display:flex;align-items:center;gap:0;padding:11px 12px;border:none;background:none;color:var(--muted);font-size:13px;font-weight:700;border-radius:18px;cursor:pointer;transition:background .35s var(--ease),color .3s,gap .35s var(--ease)}
+  .tabbar button span{max-width:0;overflow:hidden;white-space:nowrap;transition:max-width .45s var(--ease)}
+  .tabbar button.on{background:rgba(255,255,255,.2);color:var(--text);gap:7px;box-shadow:inset 0 1px 0 rgba(255,255,255,.3)}
+  .tabbar button.on span{max-width:120px}
+  .tabbar svg{width:20px;height:20px;flex:none}
+  .fab{display:grid;place-items:center;position:fixed;right:20px;bottom:calc(96px + env(safe-area-inset-bottom));z-index:41;width:58px;height:58px;border-radius:50%;border:none;
+    background:radial-gradient(circle at 30% 25%,#fff,#e6e1d6);color:var(--ink);box-shadow:0 16px 34px -10px rgba(0,0,0,.6),inset 0 -3px 6px rgba(0,0,0,.1);cursor:pointer;transition:transform .3s var(--spring)}
+  .fab:active{transform:scale(.9)}
+  .fab svg{width:24px;height:24px}
+  .li{grid-template-columns:40px minmax(0,1fr) auto;padding:11px 2px}
+  .li .acts{grid-column:2/-1;justify-content:flex-end;opacity:1;margin-top:-4px}
+  .li.c .acts{display:none}
+  .vfiles{left:14px;right:14px;width:auto}
+  .modal{align-items:flex-end;padding:0}
+  .sheet{max-width:none;border-radius:28px 28px 0 0;padding-bottom:calc(24px + env(safe-area-inset-bottom));transform:translateY(100%)}
+  .inp,select.inp{font-size:16px}
+  .kpis{grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}.kpi{padding:10px}.kpi b{font-size:15px}
+  .orb{width:140px;height:140px}
+}
+@media (hover:none){.tilt{transform:none!important}}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition-duration:.01ms!important}}
+</style>
+</head>
+<body>
+<div class="backdrop"><i></i><i></i><i></i></div>
+<canvas id="fx"></canvas>
+
+<div class="app">
+  <aside class="side glass">
+    <div class="brand"><div class="logo">S</div><div><b>Spyrlidis</b><small>Personal wallet</small></div></div>
+    <nav class="nav" id="nav"></nav>
+    <div class="foot" id="sideFoot"></div>
+  </aside>
+  <main id="main"></main>
+</div>
+
+<nav class="tabbar glass" id="tabbar"></nav>
+<button class="fab" id="fab" aria-label="Νέο έξοδο"></button>
+
+<div class="modal" id="modal"><div class="sheet glass" id="sheet"></div></div>
+
+<div class="viewer" id="viewer">
+  <div class="vbar glass">
+    <button class="iconbtn" id="vClose" title="Κλείσιμο"></button>
+    <b id="vTitle"></b>
+    <span class="path" id="vPath"></span>
+    <div class="seg" id="vSizes">
+      <button data-w="100%" class="on">Desktop</button><button data-w="820px">Tablet</button><button data-w="390px">Mobile</button>
+    </div>
+    <button class="iconbtn" id="vReload" title="Επαναφόρτωση"></button>
+    <button class="iconbtn" id="vFilesBtn" title="Αρχεία"></button>
+    <button class="iconbtn" id="vNewTab" title="Άνοιγμα σε νέα καρτέλα"></button>
+  </div>
+  <div class="vstage" id="vStage"><iframe id="vFrame"></iframe></div>
+  <div class="vfiles glass" id="vFiles"></div>
+</div>
+
+<div class="toast glass" id="toast"></div>
+
+<script>
+const RM = matchMedia('(prefers-reduced-motion: reduce)').matches;
+/* ============ icons ============ */
+const I = {
+  home:'<path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/>',
+  wallet:'<path d="M3 7a2 2 0 0 1 2-2h13v4"/><path d="M3 7v11a2 2 0 0 0 2 2h15V9H5a2 2 0 0 1-2-2z"/><circle cx="16" cy="14.5" r="1.2"/>',
+  list:'<path d="M8 6h13M8 12h13M8 18h13"/><circle cx="3.5" cy="6" r="1"/><circle cx="3.5" cy="12" r="1"/><circle cx="3.5" cy="18" r="1"/>',
+  repeat:'<path d="M17 2l4 4-4 4"/><path d="M3 11V9a3 3 0 0 1 3-3h15"/><path d="M7 22l-4-4 4-4"/><path d="M21 13v2a3 3 0 0 1-3 3H3"/>',
+  note:'<path d="M5 3h10l4 4v14H5z"/><path d="M15 3v4h4"/><path d="M9 12h6M9 16h4"/>',
+  folder:'<path d="M3 6a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>',
+  plus:'<path d="M12 5v14M5 12h14"/>',
+  minus:'<path d="M5 12h14"/>',
+  edit:'<path d="M4 20h4L19 9l-4-4L4 16z"/>',
+  trash:'<path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/>',
+  x:'<path d="M6 6l12 12M18 6L6 18"/>',
+  back:'<path d="M15 18l-6-6 6-6"/>',
+  reload:'<path d="M20 11a8 8 0 1 0-2.3 5.7"/><path d="M20 4v7h-7"/>',
+  files:'<path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6"/>',
+  ext:'<path d="M14 4h6v6M20 4l-9 9"/><path d="M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/>',
+  swap:'<path d="M7 4L3 8l4 4"/><path d="M3 8h14"/><path d="M17 20l4-4-4-4"/><path d="M21 16H7"/>',
+  down:'<path d="M12 4v12M6 10l6 6 6-6M4 20h16"/>',
+  up:'<path d="M12 20V8M6 14l6-6 6 6M4 4h16"/>',
+  pause:'<path d="M9 5v14M15 5v14"/>',
+  play:'<path d="M7 4l13 8-13 8z"/>',
+  cash:'<rect x="2.5" y="6" width="19" height="12" rx="2"/><circle cx="12" cy="12" r="2.6"/><path d="M6 9.5v5M18 9.5v5"/>',
+  bank:'<path d="M3 10l9-6 9 6"/><path d="M5 10v8M9.5 10v8M14.5 10v8M19 10v8M3 20h18"/>',
+  card:'<rect x="2.5" y="5" width="19" height="14" rx="2.5"/><path d="M2.5 10h19M6 15h4"/>',
+  piggy:'<path d="M5 11a7 6 0 0 1 12-3h2v3l2 1v3h-2a7 6 0 0 1-3 3v2h-3v-1.5H9V20H6v-3a6 6 0 0 1-1-6z"/><circle cx="15" cy="11" r=".8"/>',
+  palette:'<path d="M12 3a9 9 0 1 0 0 18c1.2 0 1.8-.9 1.4-1.9-.4-1.1.3-2.1 1.5-2.1H17a4 4 0 0 0 4-4c0-5.5-4-10-9-10z"/><circle cx="7.5" cy="11" r="1"/><circle cx="10.5" cy="7" r="1"/><circle cx="15" cy="7.5" r="1"/>',
+  globe:'<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/>'
+};
+const svg = (n) => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${I[n]}</svg>`;
+
+/* ============ brands (monogram badges in brand colours) ============ */
+const BRANDS = [
+  [/revolut/i,           {bg:'linear-gradient(150deg,#3a3a46,#0b0b10)', fg:'#fff', t:'R'}],
+  [/eurobank/i,          {bg:'linear-gradient(150deg,#1650b8,#072a68)', fg:'#ff4b57', t:'e'}],
+  [/wise|transferwise/i, {bg:'linear-gradient(150deg,#b6f28c,#86d95a)', fg:'#163300', t:'W'}],
+  [/piraeus|πειραι/i,    {bg:'linear-gradient(150deg,#ffe066,#f2b600)', fg:'#0b3a6b', t:'Π'}],
+  [/alpha/i,             {bg:'linear-gradient(150deg,#2a62b0,#0b2f63)', fg:'#fff', t:'α'}],
+  [/εθνικ|nbg|national/i,{bg:'linear-gradient(150deg,#1a86a8,#064b63)', fg:'#fff', t:'Ε'}],
+  [/paypal/i,            {bg:'linear-gradient(150deg,#1d4aa8,#002a75)', fg:'#5fc8ff', t:'P'}],
+  [/viva/i,              {bg:'linear-gradient(150deg,#333,#111)', fg:'#fff', t:'V'}],
+  [/netflix/i,           {bg:'linear-gradient(150deg,#2a2a2a,#0a0a0a)', fg:'#e50914', t:'N'}],
+  [/spotify/i,           {bg:'linear-gradient(150deg,#3be27a,#159a44)', fg:'#06240f', t:'♫'}],
+  [/youtube/i,           {bg:'linear-gradient(150deg,#ff3355,#d10024)', fg:'#fff', t:'▶'}],
+  [/disney/i,            {bg:'linear-gradient(150deg,#2448c8,#0a1d63)', fg:'#fff', t:'D+'}],
+  [/claude|anthropic/i,  {bg:'linear-gradient(150deg,#e8906f,#c4603f)', fg:'#fff', t:'✳'}],
+  [/chatgpt|openai/i,    {bg:'linear-gradient(150deg,#22c497,#0c8264)', fg:'#fff', t:'◎'}],
+  [/icloud|apple/i,      {bg:'linear-gradient(150deg,#ffffff,#c9ccd3)', fg:'#3a3a3c', t:'☁'}],
+  [/google/i,            {bg:'linear-gradient(150deg,#ffffff,#e4e8ef)', fg:'#4285f4', t:'G'}],
+  [/adobe/i,             {bg:'linear-gradient(150deg,#ff3a2e,#c80a00)', fg:'#fff', t:'A'}],
+  [/amazon|prime/i,      {bg:'linear-gradient(150deg,#34465c,#1a2533)', fg:'#ff9900', t:'a'}],
+  [/github/i,            {bg:'linear-gradient(150deg,#3a3f47,#15181c)', fg:'#fff', t:'⌘'}],
+  [/domain|hosting|hostinger|namecheap|vercel|netlify/i, {bg:'linear-gradient(150deg,#8b7dff,#4a3cc8)', fg:'#fff', icon:'globe'}],
+  [/μετρητ|cash/i,       {bg:'linear-gradient(150deg,#7fe6b3,#2c9d6c)', fg:'#06301c', icon:'cash'}],
+];
+function brandFor(name){ for (const [re,b] of BRANDS) if (re.test(name||'')) return b; return null; }
+function badge(b, size=''){ return `<span class="bi ${size}" style="--bg:${b.bg};--fg:${b.fg}">${b.icon?svg(b.icon):esc(b.t)}</span>`; }
+function accBadge(a, size=''){
+  if (!a) return badge({bg:'rgba(255,255,255,.15)',fg:'#fff',t:'?'}, size);
+  const b = brandFor(a.name);
+  if (b) return badge(b, size);
+  const ic = {cash:'cash',bank:'bank',card:'card',savings:'piggy'}[a.type];
+  return badge({bg:`linear-gradient(150deg,${a.color},color-mix(in srgb,${a.color} 55%,#000))`, fg:'#0e1a1b', icon:ic, t:(a.name[0]||'?').toUpperCase()}, size);
+}
+
+/* ============ state ============ */
+const KEY = 'spyr.wallet.v1';
+const COLORS = ['#4fd1a5','#7aa7ff','#ff9f7a','#ffd27a','#c99bff','#ff7ab6','#9ae6ff','#e8e2d4'];
+const CATS = [
+  ['Φαγητό','🍔'],['Σούπερ μάρκετ','🛒'],['Καφές','☕'],['Μεταφορές','🚌'],['Καύσιμα','⛽'],
+  ['Λογαριασμοί','💡'],['Ενοίκιο','🏠'],['Συνδρομές','🔁'],['Ψώνια','🛍️'],['Διασκέδαση','🎬'],
+  ['Υγεία','💊'],['Δουλειά','💼'],['Δώρα','🎁'],['Ταξίδια','✈️'],['Άλλο','•']
+];
+const INCOME_CATS = [['Μισθός','💶'],['Project / Πελάτης','💻'],['Freelance','🧾'],['Επιστροφή','↩️'],['Άλλο','•']];
+const NOTE_EMOJIS = ['🌐','💻','📈','🧾','🏠','🚗','🎓','✈️','🎁','💡','🛠️','📦'];
+const catIcon = (c) => (CATS.find(x=>x[0]===c)||INCOME_CATS.find(x=>x[0]===c)||[0,'•'])[1];
+const ACC_TYPES = {cash:'Μετρητά',bank:'Τράπεζα',card:'Κάρτα',savings:'Αποταμίευση',other:'Άλλο'};
+
+let S = load();
+function blank(){ return {accounts:[], tx:[], subs:[], notes:[], settings:{currency:'EUR', budget:0}}; }
+const THEMES = [['sage','Sage','linear-gradient(135deg,#d9be93,#4fd1a5 55%,#1c2d32)'],['amethyst','Amethyst','linear-gradient(135deg,#c9c2e3,#8b7cc7 40%,#2a1e4d)']];
+function applyTheme(){ const t = S.settings.theme || 'amethyst'; document.documentElement.dataset.theme = t; document.querySelector('meta[name=theme-color]').content = t==='amethyst' ? '#0e0b1d' : '#1d2f33'; }
+function toggleTheme(){ S.settings.theme = (S.settings.theme||'amethyst')==='amethyst' ? 'sage' : 'amethyst'; save(); applyTheme(); render(); toast('Θέμα: '+THEMES.find(x=>x[0]===S.settings.theme)[1]); }
+function load(){
+  try { const d = JSON.parse(localStorage.getItem(KEY)); if (d && d.accounts) return Object.assign(blank(), d); } catch(e){}
+  return blank();
+}
+function save(){ try { localStorage.setItem(KEY, JSON.stringify(S)); } catch(e){ toast('Δεν αποθηκεύτηκε (storage)'); } }
+const uid = () => Math.random().toString(36).slice(2,10) + Date.now().toString(36).slice(-4);
+const today = () => ymd(new Date());
+const ymd = (d) => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+const fmt = (n) => new Intl.NumberFormat('el-GR',{style:'currency',currency:S.settings.currency||'EUR'}).format(n||0);
+const fmtS = (n) => (n>0?'+':n<0?'−':'') + fmt(Math.abs(n));
+const fmtDate = (s) => { const d = new Date(s+'T00:00'); return d.toLocaleDateString('el-GR',{day:'numeric',month:'short',year: d.getFullYear()===new Date().getFullYear()?undefined:'numeric'}); };
+const esc = (s) => String(s??'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const accById = (id) => S.accounts.find(a=>a.id===id);
+const num = (v) => { const n = parseFloat(String(v).replace(/\s/g,'').replace(',','.')); return isFinite(n) ? Math.round(n*100)/100 : 0; };
+const cnt = (key, v) => `<span data-count="${key}" data-v="${v}">${fmt(v)}</span>`;
+
+function balance(accId){
+  const a = accById(accId); if(!a) return 0;
+  let b = a.initial||0;
+  for (const t of S.tx){
+    if (t.type==='expense' && t.accountId===accId) b -= t.amount;
+    else if (t.type==='income' && t.accountId===accId) b += t.amount;
+    else if (t.type==='transfer'){ if (t.accountId===accId) b -= t.amount; if (t.toAccountId===accId) b += t.amount; }
+  }
+  return Math.round(b*100)/100;
+}
+const total = () => Math.round(S.accounts.reduce((s,a)=>s+balance(a.id),0)*100)/100;
+const monthKey = (s) => s.slice(0,7);
+function monthSum(type, mk){ return S.tx.filter(t=>t.type===type && monthKey(t.date)===mk).reduce((s,t)=>s+t.amount,0); }
+function subMonthly(s){ return s.cycle==='yearly' ? s.amount/12 : s.amount; }
+function noteTotals(n){ let inc=0, exp=0; for (const l of n.items){ if (l.amount>=0) inc+=l.amount; else exp+=-l.amount; } return {inc, exp, net:Math.round((inc-exp)*100)/100}; }
+
+/* subscriptions: auto-charge when due */
+function addMonths(dateStr, n, day){
+  const [y,m] = dateStr.split('-').map(Number);
+  const d = new Date(y, m-1+n, 1);
+  const last = new Date(d.getFullYear(), d.getMonth()+1, 0).getDate();
+  d.setDate(Math.min(day,last));
+  return ymd(d);
+}
+function processSubs(){
+  const t = today(); let n = 0;
+  for (const s of S.subs){
+    if (!s.active || !s.next) continue;
+    let guard = 0;
+    while (s.next <= t && guard++ < 120){
+      S.tx.push({id:uid(), type:'expense', amount:s.amount, accountId:s.accountId, place:s.name, category:s.category||'Συνδρομές', date:s.next, note:'Αυτόματη χρέωση συνδρομής', subId:s.id, created:Date.now()});
+      s.next = addMonths(s.next, s.cycle==='yearly'?12:1, s.day || Number(s.next.slice(8,10)));
+      n++;
+    }
+  }
+  if (n){ save(); setTimeout(()=>toast(`Χρεώθηκαν αυτόματα ${n} συνδρομ${n===1?'ή':'ές'}`),400); }
+}
+
+/* ============ router ============ */
+const VIEWS = [
+  ['dash','Επισκόπηση','home'],['accounts','Λογαριασμοί','wallet'],['tx','Κινήσεις','list'],
+  ['subs','Συνδρομές','repeat'],['notes','Σημειώσεις','note'],['projects','Projects','folder']
+];
+const SHORT = {dash:'Αρχική',accounts:'Λογαριασμοί',tx:'Κινήσεις',subs:'Συνδρομές',notes:'Σημειώσεις',projects:'Projects'};
+let view = 'dash', noteOpen = null;
+(function(){ const [v,id] = location.hash.slice(1).split('/'); if (VIEWS.some(x=>x[0]===v)) view = v; if (v==='notes' && id) noteOpen = id; })();
+let enterNext = true, flashId = null;
+function go(v, sub){ view = v; noteOpen = sub||null; history.replaceState(null,'','#'+v+(sub?'/'+sub:'')); enterNext = true; render(); window.scrollTo({top:0, behavior: RM?'auto':'smooth'}); }
+function renderNav(){
+  const btn = ([k,l,ic], short) => `<button class="${view===k?'on':''}" data-go="${k}">${svg(ic)}<span>${short?SHORT[k]:l}</span>${!short&&k==='notes'&&S.notes.length?`<em class="count">${S.notes.length}</em>`:''}${!short&&k==='subs'&&S.subs.filter(s=>s.active).length?`<em class="count">${S.subs.filter(s=>s.active).length}</em>`:''}</button>`;
+  document.getElementById('nav').innerHTML = '<div class="navlabel">Χρήματα</div>' + VIEWS.slice(0,5).map(v=>btn(v)).join('') + '<div class="navlabel">Δουλειά</div>' + btn(VIEWS[5]);
+  document.getElementById('tabbar').innerHTML = VIEWS.map(v=>btn(v,true)).join('');
+  document.getElementById('sideFoot').innerHTML = `<div class="v">${cnt('side',total())}</div><small>Σύνολο σε ${S.accounts.length} λογαριασμούς</small>
+    <div class="themes">${THEMES.map(([k,l,g])=>`<button class="${(S.settings.theme||'amethyst')===k?'on':''}" data-theme-set="${k}" title="${l}"><i style="background:${g}"></i>${l}</button>`).join('')}</div>
+    <div class="two-btn"><button class="btn" data-act="export" title="Κατέβασε αντίγραφο ασφαλείας">${svg('down')}Backup</button><button class="btn" data-act="import" title="Επαναφορά από αρχείο">${svg('up')}Restore</button></div>`;
+}
+function render(){
+  renderNav();
+  const m = document.getElementById('main');
+  m.className = enterNext && !RM ? 'enter' : '';
+  m.innerHTML = ({dash:vDash, accounts:vAccounts, tx:vTx, subs:vSubs, notes:vNotes, projects:vProjects})[view]();
+  m.querySelectorAll('.rise').forEach((el,i)=>el.style.setProperty('--i', i));
+  initSegs(document);
+  countUp(enterNext);
+  if (view==='projects') hydrateProjects();
+  if (view==='dash') startAscii(); else stopAscii();
+  document.getElementById('fab').style.display = (view==='projects'||view==='notes') ? 'none' : '';
+  if (flashId){ const el = m.querySelector(`[data-row="${flashId}"]`); if (el) el.classList.add('new'); flashId = null; }
+  enterNext = false;
+}
+
+/* count-up numbers */
+const prevVals = {};
+function countUp(fromZero){
+  document.querySelectorAll('[data-count]').forEach(el=>{
+    const k = el.dataset.count, v = +el.dataset.v;
+    const from = fromZero ? (prevVals[k] ?? 0) * (prevVals[k]===undefined?1:1) : (prevVals[k] ?? v);
+    const start = (fromZero && prevVals[k]===undefined) ? 0 : from;
+    prevVals[k] = v;
+    if (RM || start===v){ el.textContent = fmt(v); return; }
+    el.textContent = fmt(start);
+    const t0 = performance.now(), dur = 1100;
+    const step = (now)=>{ const p = Math.min(1,(now-t0)/dur); const e = 1-Math.pow(2,-10*p); el.textContent = fmt(p===1?v:start+(v-start)*e); if (p<1) requestAnimationFrame(step); };
+    requestAnimationFrame(step);
+  });
+}
+/* animated segmented controls */
+function initSegs(root){
+  root.querySelectorAll('.seg').forEach(seg=>{
+    let pill = seg.querySelector('.pill'); if (!pill){ pill = document.createElement('i'); pill.className='pill'; seg.prepend(pill); }
+    const on = seg.querySelector('button.on'); if (!on){ pill.style.width='0'; return; }
+    const place = ()=>{ pill.style.left = on.offsetLeft+'px'; pill.style.width = on.offsetWidth+'px'; };
+    if (!seg.dataset.ready){ pill.style.transition='none'; place(); pill.offsetWidth; pill.style.transition=''; seg.dataset.ready='1'; } else place();
+  });
+}
+function segMove(seg, btn){ seg.querySelectorAll('button').forEach(b=>b.classList.toggle('on', b===btn)); initSegs(seg.parentNode); }
+
+/* ============ views ============ */
+function greet(){ const h = new Date().getHours(); return h<5?'Καληνύχτα':h<12?'Καλημέρα':h<18?'Καλησπέρα':'Καλό βράδυ'; }
+function vDash(){
+  const mk = today().slice(0,7);
+  const prev = addMonths(mk+'-01', -1, 1).slice(0,7);
+  const spent = monthSum('expense', mk), spentPrev = monthSum('expense', prev);
+  const inc = monthSum('income', mk);
+  const subsTotal = S.subs.filter(s=>s.active).reduce((s,x)=>s+subMonthly(x),0);
+  const delta = spentPrev ? Math.round((spent-spentPrev)/spentPrev*100) : null;
+  const budget = S.settings.budget||0;
+  const recent = [...S.tx].sort(sortTx).slice(0,5);
+  const upcoming = S.subs.filter(s=>s.active).sort((a,b)=>a.next.localeCompare(b.next)).slice(0,4);
+  const net = inc - spent;
+  if (!S.accounts.length) return `
+    <div class="top rise"><div><h1>${greet()} 👋</h1><p>Ξεκίνα προσθέτοντας τους λογαριασμούς σου: μετρητά, Revolut, Eurobank, Wise…</p></div></div>
+    <div class="glass card hero rise" style="max-width:600px;min-height:260px"><i class="orb"></i>
+      <h3>Γρήγορη αρχή</h3>
+      <p class="muted" style="font-size:14px;line-height:1.6;max-width:380px">Πρόσθεσε κάθε λογαριασμό με το τωρινό του υπόλοιπο. Μετά, κάθε έξοδο που γράφεις αφαιρείται αυτόματα από τον σωστό λογαριασμό.</p>
+      <div class="row" style="flex-wrap:wrap;margin-top:auto">
+        <button class="btn primary" data-act="quickstart">${svg('plus')}Μετρητά, Revolut, Eurobank, Wise</button>
+        <button class="btn" data-act="newAcc">Άλλος λογαριασμός</button>
+      </div>
+    </div>`;
+  return `
+  <div class="top rise">
+    <div><h1>${greet()}, Spyrlidis</h1><p>${new Date().toLocaleDateString('el-GR',{weekday:'long',day:'numeric',month:'long'})} · δες πού βρίσκονται τα χρήματά σου</p></div>
+    <div class="row"><button class="iconbtn" data-act="theme" title="Αλλαγή θέματος" style="width:42px;height:42px;border-radius:50%">${svg('palette')}</button><button class="btn hide-m" data-act="newTx" data-type="income">${svg('down')}Έσοδο</button><button class="btn primary hide-m" data-act="newTx">${svg('plus')}Νέο έξοδο</button></div>
+  </div>
+  <div class="bento">
+    <section class="glass card hero c-hero tilt rise"><i class="orb"></i>
+      <h3>Συνολικό υπόλοιπο</h3>
+      <div class="big">${cnt('total',total())}</div>
+      <div><span class="chip ${net>=0?'pos':'neg'}">${fmtS(net)} αυτόν τον μήνα</span></div>
+      <div class="row" style="margin-top:18px;gap:8px;max-width:420px">
+        <button class="btn primary" style="flex:1" data-act="newTx">${svg('plus')}Έξοδο</button>
+        <button class="btn" style="flex:1" data-act="newTx" data-type="transfer">${svg('swap')}Μεταφορά</button>
+      </div>
+      <div class="acc-mini">${S.accounts.map(a=>`<div data-go="accounts">${accBadge(a,'sm')}<div class="tx"><small>${esc(a.name)}</small><b>${cnt('a'+a.id,balance(a.id))}</b></div></div>`).join('')}</div>
+    </section>
+    <div class="glass stat hl c-stat tilt rise"><small class="muted">Ξοδεύτηκαν τον μήνα</small><div class="mid">${cnt('spent',spent)}</div><small class="muted">${delta===null?'πρώτος μήνας':`${delta>0?'+':''}${delta}% από τον προηγούμενο`}</small></div>
+    <div class="glass stat c-stat tilt rise"><small class="muted">Έσοδα μήνα</small><div class="mid">${cnt('inc',inc)}</div><small class="faint">${S.tx.filter(t=>t.type==='income'&&monthKey(t.date)===mk).length} κινήσεις</small></div>
+    <section class="glass card ascii c-ascii tilt rise"><pre id="asciiPre" aria-hidden="true"></pre>
+      <h3>Ροή μήνα</h3>
+      <div class="over"><small class="muted">Καθαρό αποτέλεσμα</small><div class="mid" style="margin:4px 0 2px;color:${net>=0?'var(--pos)':'var(--neg)'}">${net>=0?'+':'−'}${cnt('net',Math.abs(net))}</div>
+        <small class="faint">${inc?`Κράτησες ${Math.max(0,Math.round(net/inc*100))}% των εσόδων`:'Πρόσθεσε έσοδα για να δεις το ποσοστό'}</small></div>
+    </section>
+    <div class="glass stat c-stat tilt rise"><small class="muted">Συνδρομές / μήνα</small><div class="mid">${cnt('subs',subsTotal)}</div><small class="faint">${S.subs.filter(s=>s.active).length} ενεργές</small></div>
+    <div class="glass stat c-stat tilt rise"><small class="muted">Μ.Ο. ημέρας</small><div class="mid">${cnt('avg',spent/Math.max(1,new Date().getDate()))}</div><small class="faint">έξοδα ανά ημέρα</small></div>
+    <section class="glass card c-chart rise">
+      <h3>Έσοδα vs Έξοδα <span class="legend"><span><i class="dot" style="background:var(--accent)"></i>Έσοδα</span><span><i class="dot" style="background:var(--ce2)"></i>Έξοδα</span></span></h3>
+      <p class="faint" style="margin:0 0 10px;font-size:12px">Τελευταίοι 6 μήνες</p>
+      ${barChart()}
+    </section>
+    <section class="glass card c-budget rise">
+      <h3>Μηνιαίο όριο εξόδων <button class="iconbtn" data-act="budget" title="Ορισμός ορίου">${svg('edit')}</button></h3>
+      ${budget ? `<div class="meter"><i style="width:${Math.min(100,spent/budget*100)}%;${spent>budget?'background:var(--danger);box-shadow:0 0 16px rgba(255,138,122,.6)':''}"></i></div>
+      <div class="between" style="font-size:13px"><b>${fmt(spent)}</b><span class="muted">από ${fmt(budget)}</span></div>
+      <p class="faint" style="font-size:12px;margin:8px 0 0">${spent>budget?'Ξεπέρασες το όριο κατά '+fmt(spent-budget):'Απομένουν '+fmt(budget-spent)}</p>`
+      : `<p class="muted" style="font-size:13px;margin:6px 0 12px">Βάλε ένα όριο για να βλέπεις πόσα σου μένουν κάθε μήνα.</p><button class="btn sm" data-act="budget">Ορισμός ορίου</button>`}
+      <h3 style="margin-top:20px">Κατηγορίες μήνα</h3>
+      ${catBreakdown(mk)}
+    </section>
+    <section class="glass card c-recent rise">
+      <h3>Τελευταίες κινήσεις <button class="btn sm ghost" data-go="tx">Όλες</button></h3>
+      <div class="list">${recent.length?recent.map(t=>txRow(t,true)).join(''):'<div class="empty">Καμία κίνηση ακόμα.<br><button class="btn sm" data-act="newTx" style="margin-top:10px">Γράψε το πρώτο έξοδο</button></div>'}</div>
+    </section>
+    <section class="glass card c-up rise">
+      <h3>Επόμενες χρεώσεις <button class="btn sm ghost" data-go="subs">Συνδρομές</button></h3>
+      <div class="list">${upcoming.length?upcoming.map(s=>`<div class="li c">${badge(brandFor(s.name)||{bg:'rgba(255,255,255,.15)',fg:'#fff',icon:'repeat'})}<div class="t"><b>${esc(s.name)}</b><small>${fmtDate(s.next)} · ${esc(accById(s.accountId)?.name||'—')}</small></div><div class="amt neg">−${fmt(s.amount)}</div></div>`).join(''):'<div class="empty">Δεν έχεις συνδρομές</div>'}</div>
+    </section>
+    <section class="glass card c-notes rise">
+      <h3>Σημειώσεις <button class="btn sm ghost" data-go="notes">Όλες</button></h3>
+      <div class="list">${S.notes.length?S.notes.slice(0,4).map(n=>{const t=noteTotals(n);return `<div class="li c" data-act="openNote" data-id="${n.id}" style="cursor:pointer"><div class="emo">${n.emoji||'📝'}</div><div class="t"><b>${esc(n.name)}</b><small>${n.items.length} γραμμές</small></div><div class="amt ${t.net>=0?'pos':'neg'}">${fmtS(t.net)}</div></div>`}).join(''):'<div class="empty">Κράτα λογαριασμό ανά project.<br><button class="btn sm" data-act="newNote" style="margin-top:10px">Νέα σημείωση</button></div>'}</div>
+    </section>
+  </div>`;
+}
+function barChart(){
+  const now = today().slice(0,7)+'-01';
+  const months = [...Array(6)].map((_,i)=>addMonths(now, i-5, 1).slice(0,7));
+  const data = months.map(m=>({m, inc:monthSum('income',m), exp:monthSum('expense',m)}));
+  const max = Math.max(1, ...data.flatMap(d=>[d.inc,d.exp]));
+  const empty = data.every(d=>!d.inc && !d.exp);
+  const narrow = innerWidth<820; const W=narrow?360:640,H=narrow?190:200,top=10,bottom=30,bw=narrow?13:20, step=W/6, ch=H-top-bottom;
+  let g = `<defs><linearGradient id="gi" x1="0" y1="0" x2="0" y2="1"><stop offset="0" style="stop-color:var(--ci1)"/><stop offset="1" style="stop-color:var(--ci2)"/></linearGradient>
+    <linearGradient id="ge" x1="0" y1="0" x2="0" y2="1"><stop offset="0" style="stop-color:var(--ce1)"/><stop offset="1" style="stop-color:var(--ce2)"/></linearGradient></defs>`;
+  for (let i=0;i<=3;i++){ const y = top+ch*i/3; g += `<line x1="0" x2="${W}" y1="${y}" y2="${y}" stroke="rgba(255,255,255,.1)" stroke-dasharray="3 6"/>`; }
+  data.forEach((d,i)=>{
+    const cx = step*i + step/2;
+    const hi = Math.max(ch*d.inc/max,3), he = Math.max(ch*d.exp/max,3);
+    g += `<rect class="b" style="--d:${i}" x="${cx-bw-3}" y="${top+ch-hi}" width="${bw}" height="${hi}" rx="7" fill="url(#gi)"><title>Έσοδα ${fmt(d.inc)}</title></rect>`;
+    g += `<rect class="b" style="--d:${i+.5}" x="${cx+3}" y="${top+ch-he}" width="${bw}" height="${he}" rx="7" fill="url(#ge)"><title>Έξοδα ${fmt(d.exp)}</title></rect>`;
+    const lbl = new Date(d.m+'-01T00:00').toLocaleDateString('el-GR',{month:'short'});
+    g += `<text x="${cx}" y="${H-6}" text-anchor="middle" fill="rgba(255,255,255,${i===5?.95:.6})" font-size="13" font-weight="${i===5?800:600}" font-family="Manrope">${lbl}</text>`;
+  });
+  return `<div class="chartwrap"><svg class="chart" viewBox="0 0 ${W} ${H}">${g}</svg>${empty?'<div class="nodata">Τα δεδομένα θα εμφανιστούν μόλις γράψεις κινήσεις</div>':''}</div>`;
+}
+function catBreakdown(mk){
+  const m = {};
+  S.tx.filter(t=>t.type==='expense'&&monthKey(t.date)===mk).forEach(t=>{ m[t.category||'Άλλο']=(m[t.category||'Άλλο']||0)+t.amount; });
+  const arr = Object.entries(m).sort((a,b)=>b[1]-a[1]).slice(0,5);
+  if (!arr.length) return '<p class="faint" style="font-size:13px">Τίποτα ακόμα αυτόν τον μήνα</p>';
+  const max = arr[0][1];
+  return arr.map(([c,v])=>`<div class="cat"><span>${catIcon(c)} ${esc(c)}</span><div class="track"><i style="width:${v/max*100}%"></i></div><b>${fmt(v)}</b></div>`).join('');
+}
+function sortTx(a,b){ return b.date.localeCompare(a.date) || (b.created||0)-(a.created||0); }
+function txIcon(t){
+  if (t.type==='transfer') return badge({bg:'rgba(255,255,255,.15)',fg:'#fff',icon:'swap'});
+  const b = brandFor(t.place); if (b) return badge(b);
+  return `<div class="emo">${catIcon(t.category)}</div>`;
+}
+function txRow(t, compact){
+  const a = accById(t.accountId), to = accById(t.toAccountId);
+  const sign = t.type==='income'?'+':t.type==='expense'?'−':'';
+  const cls = t.type==='income'?'pos':t.type==='expense'?'neg':'';
+  const title = t.type==='transfer' ? `${esc(a?.name||'?')} → ${esc(to?.name||'?')}` : esc(t.place||t.category||'Χωρίς περιγραφή');
+  const sub = t.type==='transfer' ? 'Μεταφορά' : `${esc(t.category||'')} · ${esc(a?.name||'—')}`;
+  return `<div class="li${compact?' c':''}" data-row="${t.id}" ${compact?`data-act="editTx" data-id="${t.id}" style="cursor:pointer"`:''}>${txIcon(t)}
+    <div class="t"><b>${title}</b><small>${compact?fmtDate(t.date)+' · ':''}${sub}${t.subId?' · αυτόματο':''}${t.noteId?' · σημείωση':''}${t.note&&!t.subId?' · '+esc(t.note):''}</small></div>
+    <div class="amt ${cls}">${sign}${fmt(t.amount)}</div>
+    ${compact?'':`<div class="acts"><button class="iconbtn" data-act="editTx" data-id="${t.id}" title="Επεξεργασία">${svg('edit')}</button><button class="iconbtn" data-act="delTx" data-id="${t.id}" title="Διαγραφή">${svg('trash')}</button></div>`}</div>`;
+}
+function vAccounts(){
+  const mk = today().slice(0,7);
+  return `<div class="top rise"><div><h1>Λογαριασμοί</h1><p>Σύνολο ${cnt('total',total())}</p></div><button class="btn primary" data-act="newAcc">${svg('plus')}Νέος λογαριασμός</button></div>
+  ${S.accounts.length?'':'<div class="glass card empty rise">Δεν έχεις λογαριασμούς ακόμα.<br><button class="btn sm" data-act="quickstart" style="margin-top:10px">Πρόσθεσε τους βασικούς</button></div>'}
+  <div class="accs">${S.accounts.map(a=>{
+    const sp = S.tx.filter(t=>t.type==='expense'&&t.accountId===a.id&&monthKey(t.date)===mk).reduce((s,t)=>s+t.amount,0);
+    const inn = S.tx.filter(t=>t.type==='income'&&t.accountId===a.id&&monthKey(t.date)===mk).reduce((s,t)=>s+t.amount,0);
+    return `<div class="glass acc tilt rise" style="--c:${a.color}"><i class="glow"></i>
+      <div class="acts"><button class="iconbtn" data-act="editAcc" data-id="${a.id}" title="Επεξεργασία">${svg('edit')}</button></div>
+      ${accBadge(a,'lg')}
+      <div class="ty">${ACC_TYPES[a.type]||'Λογαριασμός'}</div><div class="nm">${esc(a.name)}</div>
+      <div class="bal">${cnt('a'+a.id,balance(a.id))}</div>
+      <div class="between" style="margin-top:8px"><small class="muted">${inn||sp?`Μήνας: ${inn?`<span style="color:var(--pos)">+${fmt(inn)}</span>`:''}${inn&&sp?' · ':''}${sp?`<span style="color:var(--neg)">−${fmt(sp)}</span>`:''}`:'Καμία κίνηση τον μήνα'}</small><button class="btn sm" data-act="newTx" data-acc="${a.id}">${svg('plus')}Έξοδο</button></div>
+    </div>`;}).join('')}</div>`;
+}
+let txFilter = {q:'', acc:'', type:'', month:''};
+function vTx(){
+  const f = txFilter;
+  const list = [...S.tx].sort(sortTx).filter(t =>
+    (!f.acc || t.accountId===f.acc || t.toAccountId===f.acc) &&
+    (!f.type || t.type===f.type) &&
+    (!f.month || monthKey(t.date)===f.month) &&
+    (!f.q || [t.place,t.category,t.note].join(' ').toLowerCase().includes(f.q.toLowerCase())));
+  const exp = list.filter(t=>t.type==='expense').reduce((s,t)=>s+t.amount,0);
+  const inc = list.filter(t=>t.type==='income').reduce((s,t)=>s+t.amount,0);
+  const months = [...new Set(S.tx.map(t=>monthKey(t.date)))].sort().reverse();
+  let rows = '', last = null;
+  for (const t of list){
+    if (t.date!==last){
+      const day = list.filter(x=>x.date===t.date && x.type==='expense').reduce((s,x)=>s+x.amount,0);
+      rows += `<div class="dayhead"><span>${new Date(t.date+'T00:00').toLocaleDateString('el-GR',{weekday:'long',day:'numeric',month:'long'})}</span><span>${day?'−'+fmt(day):''}</span></div>`;
+      last = t.date;
+    }
+    rows += txRow(t);
+  }
+  return `<div class="top rise"><div><h1>Κινήσεις</h1><p>${list.length} κινήσεις · έξοδα ${fmt(exp)} · έσοδα ${fmt(inc)}</p></div><button class="btn primary hide-m" data-act="newTx">${svg('plus')}Νέα κίνηση</button></div>
+  <div class="glass card rise">
+    <div class="bar">
+      <input class="inp" style="flex:1 1 200px" placeholder="Αναζήτηση (π.χ. σούπερ μάρκετ)" value="${esc(f.q)}" data-filter="q">
+      <select class="inp" data-filter="acc"><option value="">Όλοι οι λογαριασμοί</option>${S.accounts.map(a=>`<option value="${a.id}" ${f.acc===a.id?'selected':''}>${esc(a.name)}</option>`).join('')}</select>
+      <select class="inp" data-filter="month"><option value="">Όλοι οι μήνες</option>${months.map(m=>`<option ${f.month===m?'selected':''} value="${m}">${new Date(m+'-01T00:00').toLocaleDateString('el-GR',{month:'long',year:'numeric'})}</option>`).join('')}</select>
+      <div class="seg">${[['','Όλα'],['expense','Έξοδα'],['income','Έσοδα'],['transfer','Μεταφ.']].map(([k,l])=>`<button class="${f.type===k?'on':''}" data-ftype="${k}">${l}</button>`).join('')}</div>
+    </div>
+    <div class="list">${rows || '<div class="empty">Δεν βρέθηκαν κινήσεις</div>'}</div>
+  </div>`;
+}
+function vSubs(){
+  const act = S.subs.filter(s=>s.active);
+  const m = act.reduce((s,x)=>s+subMonthly(x),0);
+  return `<div class="top rise"><div><h1>Συνδρομές</h1><p>${fmt(m)} / μήνα · ${fmt(m*12)} / χρόνο · χρεώνονται αυτόματα στην ημερομηνία τους</p></div><button class="btn primary" data-act="newSub">${svg('plus')}Νέα συνδρομή</button></div>
+  <div class="glass card rise"><div class="list">
+  ${S.subs.length?[...S.subs].sort((a,b)=>(b.active-a.active)||a.next.localeCompare(b.next)).map(s=>`<div class="li" style="${s.active?'':'opacity:.55'}">${badge(brandFor(s.name)||{bg:'rgba(255,255,255,.15)',fg:'#fff',icon:'repeat'})}
+    <div class="t"><b>${esc(s.name)}</b><small>${s.active?'Επόμενη: '+fmtDate(s.next):'Σε παύση'} · ${s.cycle==='yearly'?'ετήσια':'μηνιαία'} · ${esc(accById(s.accountId)?.name||'—')}</small></div>
+    <div class="amt">${fmt(s.amount)}</div>
+    <div class="acts"><button class="iconbtn" data-act="toggleSub" data-id="${s.id}" title="${s.active?'Παύση':'Ενεργοποίηση'}">${svg(s.active?'pause':'play')}</button><button class="iconbtn" data-act="editSub" data-id="${s.id}" title="Επεξεργασία">${svg('edit')}</button><button class="iconbtn" data-act="delSub" data-id="${s.id}" title="Διαγραφή">${svg('trash')}</button></div></div>`).join('')
+  : `<div class="empty">Πρόσθεσε Netflix, Spotify, κινητό, γυμναστήριο…<br><button class="btn sm" data-act="newSub" style="margin-top:10px">Νέα συνδρομή</button></div>`}
+  </div></div>`;
+}
+
+/* ============ notes (per-project money notes) ============ */
+function vNotes(){
+  const n = noteOpen && S.notes.find(x=>x.id===noteOpen);
+  if (n) return vLedger(n);
+  const all = S.notes.reduce((s,n)=>{ const t = noteTotals(n); s.inc+=t.inc; s.exp+=t.exp; return s; },{inc:0,exp:0});
+  return `<div class="top rise"><div><h1>Σημειώσεις</h1><p>Γράψε έξοδα και έσοδα ανά project ή θέμα · σύνολο ${fmtS(all.inc-all.exp)}</p></div><button class="btn primary" data-act="newNote">${svg('plus')}Νέα σημείωση</button></div>
+  <div class="notes-grid">
+    ${S.notes.map(n=>{ const t = noteTotals(n); const tot = t.inc+t.exp || 1;
+      return `<div class="glass note tilt rise" data-act="openNote" data-id="${n.id}">
+        <div class="head"><div class="emo">${n.emoji||'📝'}</div><div style="min-width:0"><b>${esc(n.name)}</b><small class="muted" style="display:block;font-size:12px">${n.items.length} γραμμές</small></div></div>
+        <div class="net" style="color:${t.net>=0?'var(--pos)':'var(--neg)'}">${fmtS(t.net)}</div>
+        <div class="split"><i style="width:${t.inc/tot*100}%;background:var(--accent)"></i><i style="width:${t.exp/tot*100}%;background:var(--neg-2)"></i></div>
+        <div class="lines">${n.items.slice(-3).reverse().map(l=>`<div><span>${esc(l.label)}</span><b style="color:${l.amount>=0?'var(--pos)':'var(--neg)'}">${fmtS(l.amount)}</b></div>`).join('') || '<div><span>Άδεια ακόμα</span></div>'}</div>
+      </div>`; }).join('')}
+    <button class="glass note add rise" data-act="newNote"><div>${svg('plus').replace('<svg','<svg style="width:28px;height:28px"')}<div style="margin-top:8px;font-weight:700">Νέα σημείωση</div><small>π.χ. Ιστοσελίδες, Αυτοκίνητο, Σπίτι</small></div></button>
+  </div>`;
+}
+function vLedger(n){
+  const t = noteTotals(n);
+  return `<div class="top rise"><div class="row" style="align-items:center;gap:14px"><button class="iconbtn" data-go="notes" title="Πίσω">${svg('back')}</button><div class="emo" style="width:48px;height:48px;font-size:24px">${n.emoji||'📝'}</div><div><h1>${esc(n.name)}</h1><p>${n.items.length} γραμμές</p></div></div>
+    <div class="row"><button class="btn" data-act="editNote" data-id="${n.id}">${svg('edit')}Επεξεργασία</button></div></div>
+  <div class="ledger">
+    <section class="glass card rise">
+      <form id="quickForm" class="quick">
+        <div class="seg" id="qSign"><button type="button" data-sign="-1" class="on">− Έξοδο</button><button type="button" data-sign="1">+ Έσοδο</button></div>
+        <input class="inp" id="qText" placeholder="π.χ. domain 12  ή  + ιστοσελίδα Κώστα 350" autocomplete="off">
+        <button class="btn primary">${svg('plus')}Προσθήκη</button>
+      </form>
+      <div class="row" style="margin-top:10px;flex-wrap:wrap;gap:8px">
+        <label class="faint" style="font-size:12px">Να μπει και στον λογαριασμό;</label>
+        <select class="inp" id="qAcc" style="padding:7px 12px;font-size:13px"><option value="">Όχι, μόνο σημείωση</option>${S.accounts.map(a=>`<option value="${a.id}" ${n.lastAcc===a.id?'selected':''}>${esc(a.name)}</option>`).join('')}</select>
+      </div>
+      <p class="hint">Γράψε περιγραφή και ποσό. Με <code>+</code> ή <code>-</code> μπροστά ορίζεις έσοδο ή έξοδο. Μπορείς να επικολλήσεις πολλές γραμμές μαζί.</p>
+      <div class="kpis">
+        <div class="kpi"><small>Έσοδα</small><b style="color:var(--pos)">${cnt('ni'+n.id,t.inc)}</b></div>
+        <div class="kpi"><small>Έξοδα</small><b style="color:var(--neg)">${cnt('ne'+n.id,t.exp)}</b></div>
+        <div class="kpi"><small>Καθαρό</small><b>${t.net<0?'−':''}${cnt('nn'+n.id,Math.abs(t.net))}</b></div>
+      </div>
+      <div class="list" style="margin-top:8px">${n.items.length ? [...n.items].reverse().map(l=>`<div class="li" data-row="${l.id}"><div class="emo" style="font-weight:800;color:${l.amount>=0?'var(--pos)':'var(--neg)'}">${l.amount>=0?'+':'−'}</div>
+        <div class="t"><b>${esc(l.label)}</b><small>${fmtDate(l.date)}${l.txId&&S.tx.some(x=>x.id===l.txId)?' · '+esc(accById(S.tx.find(x=>x.id===l.txId).accountId)?.name||''):''}</small></div>
+        <div class="amt ${l.amount>=0?'pos':'neg'}">${fmtS(l.amount)}</div>
+        <div class="acts"><button class="iconbtn" data-act="editLine" data-id="${l.id}" title="Επεξεργασία">${svg('edit')}</button><button class="iconbtn" data-act="delLine" data-id="${l.id}" title="Διαγραφή">${svg('trash')}</button></div></div>`).join('')
+        : '<div class="empty">Πρόσθεσε την πρώτη γραμμή, π.χ. <b>domain 12</b> ή <b>+ ιστοσελίδα 350</b></div>'}</div>
+    </section>
+    <section class="glass card rise" style="align-self:start">
+      <h3>Ελεύθερες σημειώσεις</h3>
+      <textarea class="inp" id="noteText" rows="12" style="width:100%;margin-top:8px" placeholder="Ιδέες, τιμές, πελάτες, τι μένει να πληρωθεί…">${esc(n.text||'')}</textarea>
+      <p class="hint" id="noteSaved">Αποθηκεύεται αυτόματα</p>
+    </section>
+  </div>`;
+}
+function parseLines(str, defSign){
+  const out = [];
+  for (let s of str.split(/\n/)){
+    s = s.trim(); if (!s) continue;
+    let sign = defSign;
+    if (/^\+/.test(s)){ sign = 1; s = s.slice(1); } else if (/^[-−–]/.test(s)){ sign = -1; s = s.slice(1); }
+    const nums = [...s.matchAll(/(\d+(?:[.,]\d{1,2})?)\s*(?:€|ευρώ|ευρω|eur)?/gi)];
+    if (!nums.length) continue;
+    const m = nums[nums.length-1];
+    const label = (s.slice(0,m.index) + s.slice(m.index+m[0].length)).replace(/^[\s:\-–—,]+|[\s:\-–—,]+$/g,'').trim();
+    out.push({sign, amount:num(m[1]), label: label || 'Χωρίς περιγραφή'});
+  }
+  return out;
+}
+function addNoteLines(n, text, sign, accId){
+  const parsed = parseLines(text, sign);
+  if (!parsed.length){ toast('Γράψε και ένα ποσό, π.χ. domain 12'); return false; }
+  for (const p of parsed){
+    const line = {id:uid(), label:p.label, amount:p.sign*p.amount, date:today()};
+    if (accId){
+      const tx = {id:uid(), created:Date.now(), type:p.sign>0?'income':'expense', amount:p.amount, accountId:accId, place:p.label, category:p.sign>0?'Project / Πελάτης':'Δουλειά', date:today(), note:n.name, noteId:n.id};
+      S.tx.push(tx); line.txId = tx.id;
+    }
+    n.items.push(line); flashId = line.id;
+  }
+  n.lastAcc = accId; n.updated = Date.now();
+  save(); render();
+  toast(parsed.length>1 ? `Προστέθηκαν ${parsed.length} γραμμές` : `${fmtS(parsed[0].sign*parsed[0].amount)} · ${parsed[0].label}`);
+  setTimeout(()=>document.getElementById('qText')?.focus(), 50);
+}
+function formNote(n){
+  const isNew = !n; n = n || {name:'', emoji:'🌐'};
+  openModal(`<h2>${isNew?'Νέα σημείωση':'Επεξεργασία σημείωσης'}</h2>
+    <div class="field"><label>Όνομα</label><input class="inp" name="name" required value="${esc(n.name)}" placeholder="π.χ. Ιστοσελίδες" autofocus></div>
+    <div class="field"><label>Εικονίδιο</label><div class="emojis">${NOTE_EMOJIS.map(e=>`<button type="button" class="${e===n.emoji?'on':''}" data-emo="${e}">${e}</button>`).join('')}</div><input type="hidden" name="emoji" value="${n.emoji}"></div>
+    ${actions(!isNew)}`, (fd)=>{
+      if (isNew){ const nn = {id:uid(), name:fd.get('name').trim(), emoji:fd.get('emoji'), items:[], text:'', created:Date.now()}; S.notes.unshift(nn); save(); go('notes', nn.id); }
+      else { n.name = fd.get('name').trim(); n.emoji = fd.get('emoji'); save(); render(); }
+    });
+  sheet.querySelectorAll('[data-emo]').forEach(b=>b.onclick=()=>{ sheet.querySelectorAll('[data-emo]').forEach(x=>x.classList.remove('on')); b.classList.add('on'); sheet.querySelector('[name=emoji]').value=b.dataset.emo; });
+  const d = sheet.querySelector('[data-del]'); if (d) d.onclick = ()=>{
+    if (!confirm(`Διαγραφή "${n.name}"; (Κινήσεις που μπήκαν σε λογαριασμό μένουν)`)) return;
+    S.notes = S.notes.filter(x=>x!==n); save(); closeModal(); go('notes');
+  };
+}
+function formLine(n, l){
+  let sign = l.amount>=0?1:-1;
+  openModal(`<h2>Επεξεργασία γραμμής</h2>
+    <div class="seg" style="margin-bottom:14px"><button type="button" data-ls="-1" class="${sign<0?'on':''}">− Έξοδο</button><button type="button" data-ls="1" class="${sign>0?'on':''}">+ Έσοδο</button></div>
+    <div class="field"><label>Περιγραφή</label><input class="inp" name="label" value="${esc(l.label)}" required></div>
+    <div class="two"><div class="field"><label>Ποσό (€)</label><input class="inp" name="amount" inputmode="decimal" value="${Math.abs(l.amount)}" required></div>
+    <div class="field"><label>Ημερομηνία</label><input class="inp" type="date" name="date" value="${l.date}"></div></div>
+    ${l.txId?'<p class="hint">Η αλλαγή ενημερώνει και την κίνηση στον λογαριασμό.</p>':''}
+    ${actions(true)}`, (fd)=>{
+      l.label = fd.get('label').trim(); l.amount = sign*Math.abs(num(fd.get('amount'))); l.date = fd.get('date')||l.date;
+      const tx = l.txId && S.tx.find(x=>x.id===l.txId);
+      if (tx){ tx.amount = Math.abs(l.amount); tx.type = sign>0?'income':'expense'; tx.place = l.label; tx.date = l.date; }
+      save(); render();
+    });
+  initSegs(sheet);
+  sheet.querySelectorAll('[data-ls]').forEach(b=>b.onclick=()=>{ sign = +b.dataset.ls; segMove(b.parentNode, b); });
+  sheet.querySelector('[data-del]').onclick = ()=>{ delLine(n, l.id); closeModal(); };
+}
+function delLine(n, id){
+  const l = n.items.find(x=>x.id===id); if (!l) return;
+  if (l.txId && S.tx.some(x=>x.id===l.txId) && !confirm('Η γραμμή έχει μπει και σε λογαριασμό. Να διαγραφεί και η κίνηση;')) { n.items = n.items.filter(x=>x!==l); save(); render(); return; }
+  S.tx = S.tx.filter(x=>x.id!==l.txId);
+  n.items = n.items.filter(x=>x!==l); save(); render();
+}
+
+/* ============ modal forms ============ */
+const modal = document.getElementById('modal'), sheet = document.getElementById('sheet');
+function openModal(html, onSubmit){
+  sheet.innerHTML = `<form id="mf">${html}</form>`;
+  modal.classList.add('open');
+  initSegs(sheet);
+  const f = document.getElementById('mf');
+  f.onsubmit = (e)=>{ e.preventDefault(); if (onSubmit(new FormData(f), f) !== false) closeModal(); };
+  setTimeout(()=>{ const a = f.querySelector('[autofocus]'); if (a && matchMedia('(min-width:821px)').matches) a.focus(); },60);
+}
+function closeModal(){ modal.classList.remove('open'); }
+modal.addEventListener('click', e=>{ if (e.target===modal) closeModal(); });
+document.addEventListener('keydown', e=>{ if (e.key==='Escape'){ closeModal(); closeViewer(); } });
+const accOptions = (sel) => S.accounts.map(a=>`<option value="${a.id}" ${a.id===sel?'selected':''}>${esc(a.name)} (${fmt(balance(a.id))})</option>`).join('');
+const actions = (del) => `<div class="actions">${del?`<button type="button" class="btn ghost danger" data-del style="margin-right:auto">Διαγραφή</button>`:''}<button type="button" class="btn ghost" onclick="closeModal()">Άκυρο</button><button class="btn primary">Αποθήκευση</button></div>`;
+
+function formAcc(a){
+  const isNew = !a; a = a || {name:'', type:'bank', initial:0, color:COLORS[S.accounts.length%COLORS.length]};
+  const cur = isNew ? 0 : balance(a.id);
+  openModal(`<h2>${isNew?'Νέος λογαριασμός':'Επεξεργασία λογαριασμού'}</h2>
+    <div class="field"><label>Όνομα</label><input class="inp" name="name" required value="${esc(a.name)}" placeholder="π.χ. Revolut, Piraeus, PayPal" autofocus></div>
+    <div class="two"><div class="field"><label>Τύπος</label><select class="inp" name="type">${Object.entries(ACC_TYPES).map(([k,l])=>`<option value="${k}" ${a.type===k?'selected':''}>${l}</option>`).join('')}</select></div>
+    <div class="field"><label>${isNew?'Τωρινό υπόλοιπο':'Τωρινό υπόλοιπο (διόρθωση)'}</label><input class="inp" name="bal" inputmode="decimal" value="${cur}"></div></div>
+    <div class="field"><label>Χρώμα</label><div class="colors">${COLORS.map(c=>`<button type="button" style="background:${c}" class="${c===a.color?'on':''}" data-color="${c}"></button>`).join('')}</div><input type="hidden" name="color" value="${a.color}"></div>
+    ${actions(!isNew)}`, (fd)=>{
+      const target = num(fd.get('bal'));
+      if (isNew){ S.accounts.push({id:uid(), name:fd.get('name').trim(), type:fd.get('type'), color:fd.get('color'), initial:target, created:Date.now()}); }
+      else { a.name = fd.get('name').trim(); a.type = fd.get('type'); a.color = fd.get('color'); a.initial = Math.round((a.initial + (target - balance(a.id)))*100)/100; }
+      save(); render(); toast('Αποθηκεύτηκε');
+    });
+  sheet.querySelectorAll('[data-color]').forEach(b=>b.onclick=()=>{ sheet.querySelectorAll('[data-color]').forEach(x=>x.classList.remove('on')); b.classList.add('on'); sheet.querySelector('[name=color]').value=b.dataset.color; });
+  const d = sheet.querySelector('[data-del]'); if (d) d.onclick = ()=>{
+    const n = S.tx.filter(t=>t.accountId===a.id||t.toAccountId===a.id).length;
+    if (!confirm(`Διαγραφή "${a.name}"${n?` και των ${n} κινήσεών του`:''};`)) return;
+    S.tx = S.tx.filter(t=>t.accountId!==a.id && t.toAccountId!==a.id); S.subs = S.subs.filter(s=>s.accountId!==a.id);
+    S.accounts = S.accounts.filter(x=>x!==a); save(); closeModal(); render();
+  };
+}
+function formTx(t, opts={}){
+  if (!S.accounts.length){ toast('Πρόσθεσε πρώτα έναν λογαριασμό'); formAcc(); return; }
+  const isNew = !t;
+  t = t || {type:opts.type||'expense', amount:'', accountId:opts.acc||S.settings.lastAcc||S.accounts[0].id, toAccountId:'', place:'', category:'', date:today(), note:''};
+  let type = t.type;
+  const body = () => {
+    const cats = type==='income'?INCOME_CATS:CATS;
+    return `<h2>${isNew?'Νέα κίνηση':'Επεξεργασία κίνησης'}</h2>
+    <div class="seg" style="margin-bottom:14px">${[['expense','Έξοδο'],['income','Έσοδο'],['transfer','Μεταφορά']].map(([k,l])=>`<button type="button" class="${type===k?'on':''}" data-ttype="${k}">${l}</button>`).join('')}</div>
+    <div class="field"><label>Ποσό (€)</label><input class="inp amount-inp" name="amount" inputmode="decimal" required placeholder="0,00" value="${t.amount}" autofocus></div>
+    <div class="${type==='transfer'?'two':''}"><div class="field"><label>${type==='transfer'?'Από':type==='income'?'Σε λογαριασμό':'Από λογαριασμό / μετρητά'}</label><select class="inp" name="accountId">${accOptions(t.accountId)}</select></div>
+    ${type==='transfer'?`<div class="field"><label>Προς</label><select class="inp" name="toAccountId">${accOptions(t.toAccountId||S.accounts.find(a=>a.id!==t.accountId)?.id)}</select></div>`:''}</div>
+    ${type!=='transfer'?`<div class="field"><label>${type==='income'?'Από ποιον / τι':'Πού ξόδεψες'}</label><input class="inp" name="place" value="${esc(t.place)}" placeholder="${type==='income'?'π.χ. Πελάτης site':'π.χ. Σκλαβενίτης'}" list="places"></div>
+    <div class="field"><label>Κατηγορία</label><select class="inp" name="category">${cats.map(([c,i])=>`<option ${t.category===c?'selected':''} value="${c}">${i} ${c}</option>`).join('')}</select></div>`:''}
+    <div class="two"><div class="field"><label>Ημερομηνία</label><input class="inp" type="date" name="date" value="${t.date}" required></div>
+    <div class="field"><label>Σημείωση</label><input class="inp" name="note" value="${esc(t.note)}" placeholder="προαιρετικό"></div></div>
+    <datalist id="places">${[...new Set(S.tx.map(x=>x.place).filter(Boolean))].slice(0,80).map(p=>`<option value="${esc(p)}">`).join('')}</datalist>
+    ${actions(!isNew)}`;
+  };
+  const submit = (fd)=>{
+    const amount = Math.abs(num(fd.get('amount')));
+    if (!amount){ toast('Βάλε ποσό'); return false; }
+    const rec = {type, amount, accountId:fd.get('accountId'), toAccountId: type==='transfer'?fd.get('toAccountId'):'', place:(fd.get('place')||'').trim(), category: type==='transfer'?'':fd.get('category'), date:fd.get('date'), note:(fd.get('note')||'').trim()};
+    if (type==='transfer' && rec.accountId===rec.toAccountId){ toast('Διάλεξε διαφορετικούς λογαριασμούς'); return false; }
+    let id;
+    if (isNew){ id = uid(); S.tx.push(Object.assign({id, created:Date.now()}, rec)); } else { Object.assign(t, rec); id = t.id; }
+    if (t.noteId){ const n = S.notes.find(x=>x.id===t.noteId); const l = n && n.items.find(x=>x.txId===t.id); if (l){ l.amount = (rec.type==='income'?1:-1)*amount; l.label = rec.place||l.label; l.date = rec.date; } }
+    S.settings.lastAcc = rec.accountId; flashId = id;
+    save(); render();
+    const a = accById(rec.accountId);
+    toast(type==='expense' ? `−${fmt(amount)} από ${a.name} · μένουν ${fmt(balance(a.id))}` : 'Αποθηκεύτηκε');
+  };
+  const mount = () => {
+    const prev = document.getElementById('mf'); if (prev && modal.classList.contains('open')){ const fd = new FormData(prev); for (const k of ['amount','accountId','place','date','note']) if (fd.has(k)) t[k]=fd.get(k); }
+    openModal(body(), submit);
+    sheet.querySelectorAll('[data-ttype]').forEach(b=>b.onclick=()=>{ type=b.dataset.ttype; t.category=''; const seg=b.parentNode; segMove(seg,b); setTimeout(mount,180); });
+    const d = sheet.querySelector('[data-del]'); if (d) d.onclick = ()=>{ if (confirm('Διαγραφή κίνησης;')){ removeTx(t.id); closeModal(); render(); } };
+  };
+  mount();
+}
+function removeTx(id){
+  S.tx = S.tx.filter(x=>x.id!==id);
+  for (const n of S.notes) for (const l of n.items) if (l.txId===id) delete l.txId;
+  save();
+}
+function formSub(s){
+  if (!S.accounts.length){ toast('Πρόσθεσε πρώτα έναν λογαριασμό'); formAcc(); return; }
+  const isNew = !s;
+  s = s || {name:'', amount:'', accountId:S.accounts[0].id, cycle:'monthly', next:today(), category:'Συνδρομές', active:true};
+  openModal(`<h2>${isNew?'Νέα συνδρομή':'Επεξεργασία συνδρομής'}</h2>
+    <div class="field"><label>Όνομα</label><input class="inp" name="name" required value="${esc(s.name)}" placeholder="π.χ. Netflix" list="subnames" autofocus>
+      <datalist id="subnames">${['Netflix','Spotify','YouTube Premium','Disney+','iCloud','Google One','ChatGPT Plus','Claude Pro','Adobe','Revolut Plus','Κινητό','Internet','Γυμναστήριο','Hosting','Domain'].map(n=>`<option value="${n}">`).join('')}</datalist></div>
+    <div class="two"><div class="field"><label>Ποσό (€)</label><input class="inp" name="amount" inputmode="decimal" required value="${s.amount}" placeholder="0,00"></div>
+    <div class="field"><label>Κάθε</label><select class="inp" name="cycle"><option value="monthly">Μήνα</option><option value="yearly" ${s.cycle==='yearly'?'selected':''}>Χρόνο</option></select></div></div>
+    <div class="field"><label>Χρέωση από</label><select class="inp" name="accountId">${accOptions(s.accountId)}</select></div>
+    <div class="field"><label>Επόμενη χρέωση</label><input class="inp" type="date" name="next" value="${s.next}" required>
+      <small class="faint" style="font-size:12px;line-height:1.5">Όταν φτάσει η μέρα, το ποσό αφαιρείται αυτόματα από τον λογαριασμό. Αν βάλεις παλιότερη ημερομηνία, θα χρεωθούν και οι περασμένοι μήνες.</small></div>
+    ${actions(!isNew)}`, (fd)=>{
+      const rec = {name:fd.get('name').trim(), amount:Math.abs(num(fd.get('amount'))), cycle:fd.get('cycle'), accountId:fd.get('accountId'), next:fd.get('next')};
+      rec.day = Number(rec.next.slice(8,10));
+      if (isNew) S.subs.push(Object.assign({id:uid(), active:true, category:'Συνδρομές'}, rec)); else Object.assign(s, rec);
+      save(); processSubs(); render(); toast('Αποθηκεύτηκε');
+    });
+  const d = sheet.querySelector('[data-del]'); if (d) d.onclick = ()=>delSub(s.id);
+}
+function delSub(id){
+  const s = S.subs.find(x=>x.id===id); if (!s) return;
+  if (!confirm(`Διαγραφή συνδρομής "${s.name}"; (Οι χρεώσεις που έγιναν ήδη μένουν στις κινήσεις)`)) return;
+  S.subs = S.subs.filter(x=>x!==s); save(); closeModal(); render();
+}
+function formBudget(){
+  openModal(`<h2>Μηνιαίο όριο εξόδων</h2><div class="field"><label>Ποσό (€), 0 για κανένα</label><input class="inp amount-inp" name="b" inputmode="decimal" value="${S.settings.budget||''}" autofocus></div>${actions()}`,
+    (fd)=>{ S.settings.budget = num(fd.get('b')); save(); render(); });
+}
+function quickstart(){
+  const base = [['Μετρητά','cash'],['Revolut','card'],['Eurobank','bank'],['Wise','card']];
+  openModal(`<h2>Τα υπόλοιπά σου τώρα</h2><p class="muted" style="font-size:13px;margin-top:-6px">Γράψε πόσα έχεις σε κάθε έναν. Μπορείς να αλλάξεις ή να προσθέσεις κι άλλους μετά.</p>
+    ${base.map(([n,t],i)=>`<div class="field"><label style="display:flex;align-items:center;gap:8px">${accBadge({name:n,type:t,color:COLORS[i]},'sm')}${n}</label><input class="inp" name="b${i}" inputmode="decimal" placeholder="0,00" ${i===0?'autofocus':''}></div>`).join('')}${actions()}`,
+    (fd)=>{ base.forEach(([n,t],i)=>S.accounts.push({id:uid(), name:n, type:t, color:COLORS[(S.accounts.length)%COLORS.length], initial:num(fd.get('b'+i)), created:Date.now()})); enterNext = true; save(); render(); toast('Έτοιμοι οι λογαριασμοί σου'); });
+}
+
+/* ============ backup ============ */
+function exportData(){
+  const blob = new Blob([JSON.stringify(S,null,2)],{type:'application/json'});
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `wallet-backup-${today()}.json`; a.click();
+  setTimeout(()=>URL.revokeObjectURL(a.href),2000); toast('Το backup κατέβηκε');
+}
+function importData(){
+  const i = document.createElement('input'); i.type='file'; i.accept='application/json,.json';
+  i.onchange = async ()=>{ try{ const d = JSON.parse(await i.files[0].text()); if (!d.accounts) throw 0;
+    if (!confirm('Να αντικατασταθούν τα τωρινά δεδομένα με το backup;')) return;
+    S = Object.assign(blank(), d); save(); processSubs(); enterNext = true; render(); toast('Έγινε επαναφορά'); } catch(e){ toast('Μη έγκυρο αρχείο backup'); } };
+  i.click();
+}
+
+/* ============ projects ============ */
+let projMeta = [];
+function vProjects(){
+  return `<div class="top rise"><div><h1>Projects</h1><p>Ανέβασε το zip ενός site και δες το αμέσως σε desktop, tablet και κινητό</p></div><button class="btn primary" data-act="pickZip">${svg('plus')}Νέο project</button></div>
+  <div class="drop rise" id="drop"><b>Σύρε εδώ ένα .zip</b> ή πάτα για επιλογή · τα αρχεία μένουν μόνο σε αυτή τη συσκευή</div>
+  <div class="projs" id="projs"><div class="empty">Φόρτωση…</div></div>`;
+}
+async function hydrateProjects(){
+  const drop = document.getElementById('drop');
+  drop.onclick = ()=>pickZip();
+  drop.ondragover = e=>{ e.preventDefault(); drop.classList.add('over'); };
+  drop.ondragleave = ()=>drop.classList.remove('over');
+  drop.ondrop = e=>{ e.preventDefault(); drop.classList.remove('over'); [...e.dataTransfer.files].forEach(f=>addZip(f)); };
+  try { projMeta = (await DB.all()).sort((a,b)=>b.updated-a.updated); } catch(e){ projMeta = []; }
+  const el = document.getElementById('projs'); if (!el) return;
+  if (!projMeta.length){ el.innerHTML = '<div class="glass card empty rise" style="grid-column:1/-1">Κανένα project ακόμα. Ανέβασε το πρώτο σου zip.</div>'; return; }
+  el.innerHTML = projMeta.map((p,i)=>`<div class="glass proj tilt" style="animation:rise .8s var(--ease) both;animation-delay:${i*60}ms">
+    <div class="thumb" data-act="openProj" data-id="${p.id}"><div class="ph">${esc((p.name[0]||'?').toUpperCase())}</div></div>
+    <div class="body"><div class="between"><div style="min-width:0"><b>${esc(p.name)}</b><small>${p.files} αρχεία · ${(p.size/1024/1024).toFixed(2)} MB · ${new Date(p.updated).toLocaleDateString('el-GR')}</small></div>
+      <div class="row" style="gap:6px"><button class="iconbtn" data-act="editProj" data-id="${p.id}" title="Μετονομασία / σημειώσεις">${svg('edit')}</button><button class="iconbtn" data-act="delProj" data-id="${p.id}" title="Διαγραφή">${svg('trash')}</button></div></div>
+      ${p.notes?`<small style="margin-top:8px">${esc(p.notes)}</small>`:''}
+      <div class="row" style="margin-top:12px;gap:8px"><button class="btn sm primary" data-act="openProj" data-id="${p.id}">Preview</button><button class="btn sm" data-act="replaceZip" data-id="${p.id}">Νέα έκδοση zip</button></div>
+    </div></div>`).join('');
+  for (const p of projMeta){
+    const th = el.querySelector(`.thumb[data-id="${p.id}"]`); if (!th) continue;
+    try { const site = await buildSite(p.id); if (!site.entry) continue;
+      const f = document.createElement('iframe'); f.setAttribute('sandbox','allow-same-origin'); f.setAttribute('loading','lazy'); f.src = site.render(site.entry); th.appendChild(f);
+    } catch(e){}
+  }
+}
+/* ============ projects (IndexedDB + zip preview) ============ */
+const DB = { db:null,
+  open(){ return this.db ? Promise.resolve(this.db) : new Promise((res,rej)=>{ const r = indexedDB.open('spyr-projects',1);
+    r.onupgradeneeded = ()=>{ r.result.createObjectStore('projects',{keyPath:'id'}); };
+    r.onsuccess = ()=>{ this.db = r.result; res(this.db); }; r.onerror = ()=>rej(r.error); }); },
+  async tx(mode, fn){ const db = await this.open(); return new Promise((res,rej)=>{ const t = db.transaction('projects',mode); const st = t.objectStore('projects'); const out = fn(st); t.oncomplete=()=>res(out && out.result!==undefined ? out.result : out); t.onerror=()=>rej(t.error); }); },
+  all(){ return this.tx('readonly', st=>st.getAll()); },
+  get(id){ return this.tx('readonly', st=>st.get(id)); },
+  put(p){ return this.tx('readwrite', st=>st.put(p)); },
+  del(id){ return this.tx('readwrite', st=>st.delete(id)); }
+};
+function pickZip(replaceId){
+  const i = document.createElement('input'); i.type='file'; i.accept='.zip,application/zip'; if (!replaceId) i.multiple = true;
+  i.onchange = ()=>[...i.files].forEach(f=>addZip(f, typeof replaceId==='string'?replaceId:null)); i.click();
+}
+async function addZip(file, replaceId){
+  if (!/\.zip$/i.test(file.name)){ toast('Μόνο αρχεία .zip'); return; }
+  try {
+    const zip = await JSZip.loadAsync(file);
+    const files = Object.values(zip.files).filter(f=>!f.dir && !/(^|\/)(__MACOSX|\.DS_Store)/.test(f.name));
+    if (!files.some(f=>/\.html?$/i.test(f.name))) toast('Προσοχή: δεν βρέθηκε αρχείο .html στο zip');
+    const old = replaceId ? await DB.get(replaceId) : null;
+    const p = { id: replaceId||uid(), name: old?.name || file.name.replace(/\.zip$/i,''), notes: old?.notes||'', blob:file, size:file.size, files:files.length, created: old?.created||Date.now(), updated:Date.now() };
+    await DB.put(p); siteCache.delete(p.id);
+    toast(replaceId?'Ενημερώθηκε το project':'Προστέθηκε το project'); if (view==='projects') render();
+  } catch(e){ console.error(e); toast('Δεν άνοιξε το zip'); }
+}
+function editProj(id){
+  const p = projMeta.find(x=>x.id===id); if (!p) return;
+  openModal(`<h2>Project</h2><div class="field"><label>Όνομα</label><input class="inp" name="name" value="${esc(p.name)}" required autofocus></div>
+    <div class="field"><label>Σημειώσεις (πελάτης, κατάσταση, τιμή…)</label><textarea class="inp" name="notes" rows="3">${esc(p.notes)}</textarea></div>${actions()}`,
+    (fd)=>{ (async()=>{ const full = await DB.get(id); full.name = fd.get('name').trim(); full.notes = fd.get('notes').trim(); await DB.put(full); render(); })(); });
+}
+async function delProj(id){
+  const p = projMeta.find(x=>x.id===id); if (!p || !confirm(`Διαγραφή project "${p.name}";`)) return;
+  await DB.del(id); siteCache.delete(id); render();
+}
+
+/* turn a zip into a browsable site using blob: URLs */
+const MIME = {html:'text/html',htm:'text/html',css:'text/css',js:'text/javascript',mjs:'text/javascript',json:'application/json',svg:'image/svg+xml',png:'image/png',jpg:'image/jpeg',jpeg:'image/jpeg',gif:'image/gif',webp:'image/webp',avif:'image/avif',ico:'image/x-icon',woff:'font/woff',woff2:'font/woff2',ttf:'font/ttf',otf:'font/otf',mp4:'video/mp4',webm:'video/webm',mp3:'audio/mpeg',wav:'audio/wav',txt:'text/plain',xml:'application/xml',pdf:'application/pdf',webmanifest:'application/manifest+json'};
+const siteCache = new Map();
+function normPath(p){ const out=[]; for (const s of p.split('/')){ if (!s||s==='.') continue; if (s==='..') out.pop(); else out.push(s); } return out.join('/'); }
+async function buildSite(id){
+  if (siteCache.has(id)) return siteCache.get(id);
+  const p = await DB.get(id);
+  const zip = await JSZip.loadAsync(p.blob);
+  const entries = Object.values(zip.files).filter(f=>!f.dir && !/(^|\/)(__MACOSX|\.DS_Store)/.test(f.name));
+  // site root = folder of the shallowest index.html (handles zips with a wrapper folder)
+  const htmls = entries.filter(f=>/\.html?$/i.test(f.name)).map(f=>f.name).sort((a,b)=>a.split('/').length-b.split('/').length || (/index\.html?$/i.test(b)-/index\.html?$/i.test(a)));
+  const entryFull = htmls.find(h=>/(^|\/)index\.html?$/i.test(h) && h.split('/').length===htmls[0].split('/').length) || htmls[0];
+  const root = entryFull ? entryFull.split('/').slice(0,-1).join('/') : '';
+  const raw = new Map(), text = new Map();
+  for (const f of entries){
+    let rel = f.name; if (root){ if (!rel.startsWith(root+'/')) continue; rel = rel.slice(root.length+1); }
+    const ext = (rel.split('.').pop()||'').toLowerCase();
+    if (/^(html?|css)$/.test(ext)) text.set(rel, await f.async('string'));
+    else raw.set(rel, new Blob([await f.async('uint8array')], {type: MIME[ext]||'application/octet-stream'}));
+  }
+  const urls = new Map(); const cssDone = new Map();
+  const resolve = (from, ref) => {
+    if (!ref || /^(data:|blob:|https?:|\/\/|mailto:|tel:|#|javascript:)/i.test(ref.trim())) return null;
+    const clean = ref.trim().split('#')[0].split('?')[0]; if (!clean) return null;
+    let path = clean.startsWith('/') ? clean.slice(1) : normPath(from.split('/').slice(0,-1).concat(clean).join('/'));
+    try { path = decodeURIComponent(path); } catch(e){}
+    path = normPath(path);
+    if (raw.has(path) || text.has(path)) return path;
+    for (const c of [path+'/index.html', path+'.html', path+'index.html']) if (text.has(normPath(c))) return normPath(c);
+    return null;
+  };
+  const assetUrl = (path) => {
+    if (/\.html?$/i.test(path)) return null;
+    if (urls.has(path)) return urls.get(path);
+    let u;
+    if (/\.css$/i.test(path)) u = URL.createObjectURL(new Blob([cssRewrite(path, text.get(path))],{type:'text/css'}));
+    else u = URL.createObjectURL(raw.get(path));
+    urls.set(path,u); return u;
+  };
+  function cssRewrite(from, css){
+    if (cssDone.has(from)) return cssDone.get(from);
+    cssDone.set(from, css); // guard cycles
+    const out = css.replace(/url\(\s*(['"]?)([^'")]+)\1\s*\)/g, (m,q,ref)=>{ const p = resolve(from, ref); return p && !/\.html?$/i.test(p) ? `url("${assetUrl(p)}")` : m; })
+                   .replace(/@import\s+(['"])([^'"]+)\1/g, (m,q,ref)=>{ const p = resolve(from, ref); return p ? `@import "${assetUrl(p)}"` : m; });
+    cssDone.set(from, out); return out;
+  }
+  const navScript = `<script>document.addEventListener('click',function(e){var a=e.target.closest&&e.target.closest('a[data-zipnav]');if(!a)return;e.preventDefault();parent.postMessage({zipnav:a.getAttribute('data-zipnav')},'*');},true);<\/script>`;
+  const htmlCache = new Map();
+  function render(path){
+    if (htmlCache.has(path)) return htmlCache.get(path);
+    const doc = new DOMParser().parseFromString(text.get(path), 'text/html');
+    doc.querySelectorAll('base').forEach(b=>b.remove());
+    for (const el of doc.querySelectorAll('[src],[href],[poster],[data-src]')){
+      for (const attr of ['src','href','poster','data-src']){
+        const v = el.getAttribute(attr); if (v==null) continue;
+        const p = resolve(path, v); if (!p) continue;
+        if (/\.html?$/i.test(p)){ if (el.tagName==='A'){ el.setAttribute('href','#'); el.setAttribute('data-zipnav', p); } }
+        else el.setAttribute(attr, assetUrl(p));
+      }
+    }
+    for (const el of doc.querySelectorAll('[srcset]')){
+      el.setAttribute('srcset', el.getAttribute('srcset').split(',').map(part=>{ const [u,...rest] = part.trim().split(/\s+/); const p = resolve(path,u); return [p?assetUrl(p):u, ...rest].join(' '); }).join(', '));
+    }
+    for (const st of doc.querySelectorAll('style')) st.textContent = cssRewrite(path+'#inline'+Math.random(), st.textContent);
+    for (const el of doc.querySelectorAll('[style]')) el.setAttribute('style', cssRewrite(path+'#attr'+Math.random(), el.getAttribute('style')));
+    const html = '<!doctype html>\n' + doc.documentElement.outerHTML.replace(/<\/body>/i, navScript+'</body>');
+    const u = URL.createObjectURL(new Blob([html],{type:'text/html'}));
+    htmlCache.set(path,u); return u;
+  }
+  const site = { name:p.name, entry: entryFull ? entryFull.slice(root?root.length+1:0) : null, pages:[...text.keys()].filter(k=>/\.html?$/i.test(k)).sort(), all:[...text.keys(), ...raw.keys()].sort(), render, text, raw };
+  siteCache.set(id, site); return site;
+}
+let viewerSite = null, viewerPath = null, viewerId = null;
+const vFrame = document.getElementById('vFrame');
+async function openProj(id){
+  try {
+    viewerId = id; viewerSite = await buildSite(id);
+    if (!viewerSite.entry){ toast('Δεν υπάρχει σελίδα .html στο zip'); return; }
+    document.getElementById('vTitle').textContent = viewerSite.name;
+    document.getElementById('viewer').classList.add('open'); requestAnimationFrame(()=>initSegs(document.getElementById('viewer')));
+    showPage(viewerSite.entry);
+    document.getElementById('vFiles').innerHTML = `<b style="display:block;margin:0 6px 8px">Σελίδες</b>${viewerSite.pages.map(p=>`<div data-page="${esc(p)}">📄 ${esc(p)}</div>`).join('')}<b style="display:block;margin:14px 6px 8px">Όλα τα αρχεία (${viewerSite.all.length})</b>${viewerSite.all.map(p=>`<div data-file="${esc(p)}" class="faint">${esc(p)}</div>`).join('')}`;
+  } catch(e){ console.error(e); toast('Σφάλμα στο άνοιγμα'); }
+}
+function showPage(path){ viewerPath = path; vFrame.src = viewerSite.render(path); document.getElementById('vPath').textContent = '/' + path; }
+function closeViewer(){ document.getElementById('viewer').classList.remove('open'); vFrame.src='about:blank'; document.getElementById('vFiles').classList.remove('open'); }
+window.addEventListener('message', e=>{ if (e.source===vFrame.contentWindow && e.data && e.data.zipnav && viewerSite && viewerSite.text.has(e.data.zipnav)) showPage(e.data.zipnav); });
+document.getElementById('vClose').innerHTML = svg('x');
+document.getElementById('vReload').innerHTML = svg('reload');
+document.getElementById('vFilesBtn').innerHTML = svg('files');
+document.getElementById('vNewTab').innerHTML = svg('ext');
+document.getElementById('vClose').onclick = closeViewer;
+document.getElementById('vReload').onclick = async ()=>{ siteCache.delete(viewerId); viewerSite = await buildSite(viewerId); showPage(viewerPath); };
+document.getElementById('vFilesBtn').onclick = ()=>document.getElementById('vFiles').classList.toggle('open');
+document.getElementById('vNewTab').onclick = ()=>{ const w = window.open(vFrame.src,'_blank'); if (!w) toast('Ο browser μπλόκαρε το νέο παράθυρο'); };
+document.getElementById('vSizes').onclick = e=>{ const b = e.target.closest('button'); if (!b) return; segMove(document.getElementById('vSizes'), b); vFrame.style.width = b.dataset.w; vFrame.style.maxWidth = '100%'; };
+document.getElementById('vFiles').onclick = e=>{
+  const pg = e.target.closest('[data-page]'); if (pg){ showPage(pg.dataset.page); return; }
+  const f = e.target.closest('[data-file]'); if (f){ const p = f.dataset.file; const b = viewerSite.raw.get(p) || new Blob([viewerSite.text.get(p)],{type:'text/plain;charset=utf-8'}); window.open(URL.createObjectURL(/\.html?$/i.test(p)?new Blob([viewerSite.text.get(p)],{type:'text/plain;charset=utf-8'}):b),'_blank'); }
+};
+
+
+/* ============ events ============ */
+document.addEventListener('click', e=>{
+  const th = e.target.closest('[data-theme-set]'); if (th){ S.settings.theme = th.dataset.themeSet; save(); applyTheme(); render(); return; }
+  const g = e.target.closest('[data-go]'); if (g && !e.target.closest('[data-act]')){ go(g.dataset.go); return; }
+  const ft = e.target.closest('[data-ftype]'); if (ft){ txFilter.type = ft.dataset.ftype; segMove(ft.parentNode, ft); setTimeout(render, 220); return; }
+  const qs = e.target.closest('[data-sign]'); if (qs){ segMove(qs.parentNode, qs); document.getElementById('qText')?.focus(); return; }
+  const b = e.target.closest('[data-act]'); if (!b) return;
+  const id = b.dataset.id;
+  const note = () => S.notes.find(x=>x.id===noteOpen);
+  ({
+    newTx:()=>formTx(null,{type:b.dataset.type, acc:b.dataset.acc}),
+    editTx:()=>formTx(S.tx.find(t=>t.id===id)),
+    delTx:()=>{ if (confirm('Διαγραφή κίνησης; Το υπόλοιπο θα διορθωθεί.')){ removeTx(id); render(); } },
+    newAcc:()=>formAcc(), editAcc:()=>formAcc(accById(id)), quickstart,
+    newSub:()=>formSub(), editSub:()=>formSub(S.subs.find(s=>s.id===id)), delSub:()=>delSub(id),
+    toggleSub:()=>{ const s = S.subs.find(x=>x.id===id); s.active = !s.active; if (s.active && s.next < today()){ s.next = today(); } save(); render(); },
+    newNote:()=>formNote(), openNote:()=>go('notes', id), editNote:()=>formNote(S.notes.find(x=>x.id===id)),
+    editLine:()=>{ const n = note(); n && formLine(n, n.items.find(l=>l.id===id)); },
+    delLine:()=>{ const n = note(); n && delLine(n, id); },
+    theme:toggleTheme, budget:formBudget, export:exportData, import:importData,
+    pickZip:()=>pickZip(), replaceZip:()=>pickZip(id), openProj:()=>openProj(id), editProj:()=>editProj(id), delProj:()=>delProj(id)
+  })[b.dataset.act]?.();
+});
+document.addEventListener('submit', e=>{
+  if (e.target.id!=='quickForm') return;
+  e.preventDefault();
+  const n = S.notes.find(x=>x.id===noteOpen); if (!n) return;
+  const sign = +(document.querySelector('#qSign button.on')?.dataset.sign || -1);
+  addNoteLines(n, document.getElementById('qText').value, sign, document.getElementById('qAcc').value);
+});
+document.addEventListener('paste', e=>{
+  if (e.target.id!=='qText') return;
+  const t = e.clipboardData.getData('text'); if (!t.includes('\n')) return;
+  e.preventDefault(); const n = S.notes.find(x=>x.id===noteOpen);
+  const sign = +(document.querySelector('#qSign button.on')?.dataset.sign || -1);
+  if (n) addNoteLines(n, t, sign, document.getElementById('qAcc').value);
+});
+let noteTimer;
+document.addEventListener('input', e=>{
+  const f = e.target.dataset.filter;
+  if (f==='q'){ txFilter.q = e.target.value; const pos = e.target.selectionStart; render(); const i = document.querySelector('[data-filter=q]'); i.focus(); i.setSelectionRange(pos,pos); }
+  if (e.target.id==='noteText'){ const n = S.notes.find(x=>x.id===noteOpen); if (!n) return; n.text = e.target.value; clearTimeout(noteTimer);
+    document.getElementById('noteSaved').textContent = 'Αποθήκευση…';
+    noteTimer = setTimeout(()=>{ save(); const s = document.getElementById('noteSaved'); if (s) s.textContent = 'Αποθηκεύτηκε ✓'; }, 500); }
+});
+document.addEventListener('change', e=>{ const f = e.target.dataset.filter; if (f && f!=='q'){ txFilter[f] = e.target.value; render(); } });
+document.getElementById('fab').innerHTML = svg('plus');
+document.getElementById('fab').onclick = ()=>formTx();
+let tt; function toast(m){ const t = document.getElementById('toast'); t.textContent = m; t.classList.add('show'); clearTimeout(tt); tt = setTimeout(()=>t.classList.remove('show'), 2600); }
+window.addEventListener('hashchange', ()=>{ const [v,id] = location.hash.slice(1).split('/'); if (VIEWS.some(x=>x[0]===v) && (v!==view || (id||null)!==noteOpen)){ view = v; noteOpen = id||null; enterNext = true; render(); } });
+document.addEventListener('visibilitychange', ()=>{ if (!document.hidden){ const before = S.tx.length; processSubs(); if (S.tx.length!==before) render(); } });
+window.addEventListener('resize', ()=>initSegs(document));
+
+/* ============ pointer light + soft 3D tilt ============ */
+const fine = matchMedia('(hover:hover) and (pointer:fine)').matches;
+let tiltEl = null;
+document.addEventListener('pointermove', e=>{
+  const gl = e.target.closest && e.target.closest('.glass');
+  if (gl){ const r = gl.getBoundingClientRect(); gl.style.setProperty('--mx', (e.clientX-r.left)+'px'); gl.style.setProperty('--my', (e.clientY-r.top)+'px'); }
+  if (!fine || RM) return;
+  const t = e.target.closest && e.target.closest('.tilt');
+  if (tiltEl && tiltEl!==t){ tiltEl.style.transform = ''; }
+  tiltEl = t;
+  if (t){ const r = t.getBoundingClientRect(); const x = (e.clientX-r.left)/r.width-.5, y = (e.clientY-r.top)/r.height-.5;
+    const k = Math.max(2, 7 - r.width/120);
+    t.style.transform = `perspective(1000px) rotateX(${(-y*k).toFixed(2)}deg) rotateY(${(x*k).toFixed(2)}deg) translateY(-3px)`; }
+}, {passive:true});
+document.addEventListener('pointerleave', ()=>{ if (tiltEl){ tiltEl.style.transform=''; tiltEl=null; } });
+
+/* ============ particles ============ */
+(function particles(){
+  const c = document.getElementById('fx'), x = c.getContext('2d');
+  let W, H, dpr, P = [], mouse = {x:-999,y:-999}, PT='235,255,245', PL='190,255,225';
+  function size(){ dpr = Math.min(2, devicePixelRatio||1); W = innerWidth; H = innerHeight; c.width = W*dpr; c.height = H*dpr; c.style.width=W+'px'; c.style.height=H+'px'; x.setTransform(dpr,0,0,dpr,0,0);
+    const n = Math.round(Math.min(90, W*H/16000));
+    P = Array.from({length:n}, ()=>({x:Math.random()*W, y:Math.random()*H, vx:(Math.random()-.5)*.18, vy:(Math.random()-.5)*.18-.05, r:Math.random()*1.6+.4, a:Math.random()*.5+.2, tw:Math.random()*6.28})); }
+  size(); addEventListener('resize', size);
+  addEventListener('pointermove', e=>{ mouse.x=e.clientX; mouse.y=e.clientY; }, {passive:true});
+  function frame(t){
+    x.clearRect(0,0,W,H);
+    const th = document.documentElement.dataset.theme; if (frame.k!==th){ frame.k = th; const cs = getComputedStyle(document.documentElement); PT = cs.getPropertyValue('--pt').trim(); PL = cs.getPropertyValue('--pl').trim(); }
+    for (const p of P){
+      const dx = p.x-mouse.x, dy = p.y-mouse.y, d2 = dx*dx+dy*dy;
+      if (d2 < 22000){ const f = (1-d2/22000)*.6; p.x += dx/Math.sqrt(d2+1)*f; p.y += dy/Math.sqrt(d2+1)*f; }
+      p.x += p.vx; p.y += p.vy;
+      if (p.x<-10) p.x=W+10; if (p.x>W+10) p.x=-10; if (p.y<-10) p.y=H+10; if (p.y>H+10) p.y=-10;
+      const a = p.a*(.6+.4*Math.sin(t/900+p.tw));
+      x.beginPath(); x.arc(p.x,p.y,p.r,0,6.283); x.fillStyle = `rgba(${PT},${a})`; x.fill();
+    }
+    x.lineWidth = .6;
+    for (let i=0;i<P.length;i++) for (let j=i+1;j<P.length;j++){
+      const a = P[i], b = P[j], dx = a.x-b.x, dy = a.y-b.y, d = dx*dx+dy*dy;
+      if (d < 11000){ x.strokeStyle = `rgba(${PL},${(1-d/11000)*.12})`; x.beginPath(); x.moveTo(a.x,a.y); x.lineTo(b.x,b.y); x.stroke(); }
+    }
+    if (!RM && !document.hidden) requestAnimationFrame(frame); else if (!RM) document.addEventListener('visibilitychange', ()=>requestAnimationFrame(frame), {once:true});
+  }
+  requestAnimationFrame(frame);
+})();
+
+/* ============ ASCII flow ============ */
+let asciiRaf = null;
+function startAscii(){
+  stopAscii();
+  const pre = document.getElementById('asciiPre'); if (!pre) return;
+  const chars = ' .·:-=+*%#@';
+  let cols = 0, rows = 0, last = 0;
+  const measure = ()=>{ const r = pre.getBoundingClientRect(); cols = Math.max(10, Math.floor((r.width-28)/7.3)); rows = Math.max(6, Math.floor((r.height-28)/11.55)); };
+  measure();
+  const spentRatio = Math.min(2, (monthSum('expense', today().slice(0,7)) / Math.max(1, monthSum('income', today().slice(0,7)) || 1)));
+  const speed = .6 + Math.min(1, spentRatio) * .8;
+  const draw = (t)=>{
+    if (!document.getElementById('asciiPre')) return stopAscii();
+    if (t - last > 66){
+      last = t; const T = t/1000*speed; let s = '';
+      for (let y=0;y<rows;y++){
+        for (let x=0;x<cols;x++){
+          const v = Math.sin(x*.16 + T) + Math.sin(y*.32 - T*1.3) + Math.sin((x+y)*.09 + T*.7) + Math.cos(Math.hypot(x-cols/2, (y-rows/2)*2)*.18 - T*1.6);
+          s += chars[Math.max(0, Math.min(chars.length-1, Math.floor((v+4)/8*chars.length)))];
+        }
+        s += '\n';
+      }
+      pre.textContent = s;
+    }
+    if (!RM) asciiRaf = requestAnimationFrame(draw);
+  };
+  addEventListener('resize', measure);
+  asciiRaf = requestAnimationFrame(draw);
+}
+function stopAscii(){ if (asciiRaf) cancelAnimationFrame(asciiRaf); asciiRaf = null; }
+
+applyTheme(); processSubs(); render();
+if ('serviceWorker' in navigator && location.protocol.startsWith('http')) navigator.serviceWorker.register('sw.js').catch(()=>{});
+</script>
+</body>
+</html>
