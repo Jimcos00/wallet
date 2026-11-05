@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><defs>
+<linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#3a2a66"/><stop offset=".55" stop-color="#2a1e4d"/><stop offset="1" stop-color="#0e0b1d"/></linearGradient>
+<radialGradient id="glow" cx=".28" cy=".2" r=".75"><stop offset="0" stop-color="#8b7cc7" stop-opacity=".55"/><stop offset="1" stop-color="#8b7cc7" stop-opacity="0"/></radialGradient>
+<linearGradient id="gS" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#a395dc"/><stop offset="1" stop-color="#6c52a8"/></linearGradient>
+<linearGradient id="gP" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffffff"/><stop offset="1" stop-color="#c9c2e3"/></linearGradient>
+<linearGradient id="gW" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#c9c2e3"/><stop offset="1" stop-color="#8b7cc7"/></linearGradient>
+<filter id="sh" x="-20%" y="-20%" width="140%" height="140%"><feDropShadow dx="0" dy="10" stdDeviation="12" flood-color="#05030e" flood-opacity=".55"/></filter>
+</defs><rect width="512" height="512" rx="120" fill="url(#bg)"/><rect width="512" height="512" rx="120" fill="url(#glow)"/><g transform="translate(256 256) scale(1.55) translate(-242 -240)"><path d="M124,162 L140,148 L298,97 L263,140 L161,176 L161,212 L213,200 L213,234 L165,250 L124,230 Z M212,279 L212,309 L124,340 L124,311 Z" fill="url(#gS)"/><path d="M215,205 L258,188 L342,214 L360,236 L360,290 L275,326 L275,296 L319,278 L319,247 L254,223 L254,360 L215,383 Z" fill="url(#gP)"/></g></svg>

@@ -1,1 +1,16 @@
-{"name":"Personal Wallet","short_name":"Wallet","start_url":"./index.html","scope":"./","display":"standalone","background_color":"#22363c","theme_color":"#1d2f33","icons":[{"src":"icon.svg","sizes":"any","type":"image/svg+xml","purpose":"any maskable"}]}
+{
+  "name": "SP Wallet",
+  "short_name": "SP Wallet",
+  "description": "Χρήματα, ατζέντα & projects σε ένα μέρος",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#0e0b1d",
+  "theme_color": "#0e0b1d",
+  "icons": [
+    {"src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any"},
+    {"src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any"},
+    {"src": "icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable"},
+    {"src": "icons/favicon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any"}
+  ]
+}

@@ -7,9 +7,20 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <link rel="manifest" href="manifest.webmanifest">
-<link rel="icon" href="icon.svg" type="image/svg+xml">
-<link rel="apple-touch-icon" href="icon.svg">
-<title>Wallet</title>
+<meta name="apple-mobile-web-app-title" content="SP Wallet">
+<meta name="application-name" content="SP Wallet">
+<meta name="description" content="SP Wallet: προσωπική εφαρμογή για χρήματα, λογαριασμούς, συνδρομές, ατζέντα και projects.">
+<meta property="og:title" content="SP Wallet">
+<meta property="og:description" content="Χρήματα, ατζέντα & projects σε ένα μέρος.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://jimcos00.github.io/wallet/">
+<meta property="og:image" content="https://jimcos00.github.io/wallet/icons/og-image.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="favicon.ico" sizes="any">
+<link rel="icon" href="icons/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="icons/favicon-32.png" type="image/png" sizes="32x32">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<title>SP Wallet</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
 <script src="jszip.min.js"></script>
@@ -80,8 +91,8 @@ button{-webkit-user-select:none;user-select:none}
 .side{position:sticky;top:22px;height:calc(100vh - 44px);display:flex;flex-direction:column;padding:18px 14px}
 .brand{display:flex;gap:12px;align-items:center;padding:4px 8px 18px;border-bottom:1px solid var(--line-soft);margin-bottom:10px}
 .brand b{display:block;font-size:15px}.brand small{color:var(--muted);font-size:12px}
-.logo{width:40px;height:40px;border-radius:13px;display:grid;place-items:center;font-weight:800;color:var(--accent-ink);
-  background:var(--logo);box-shadow:inset 0 -4px 8px rgba(0,0,0,.2),inset 0 2px 3px rgba(255,255,255,.6),0 8px 18px -6px rgba(31,143,120,.8)}
+.logo{width:40px;height:40px;border-radius:12px;display:block;object-fit:cover;
+  box-shadow:0 8px 18px -6px rgba(5,3,14,.7);flex:none}
 .navlabel{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--faint);margin:16px 12px 6px;font-weight:700}
 .nav{position:relative}
 .nav button{position:relative;z-index:1;display:flex;align-items:center;gap:12px;width:100%;padding:11px 12px;border:none;background:none;border-radius:13px;cursor:pointer;color:var(--muted);font-weight:600;font-size:14px;text-align:left;transition:color .3s,background .3s}
@@ -424,7 +435,7 @@ main.enter .track i,main.enter .meter i,main.enter .split i{animation:fillx 1.1s
 
 <div class="app">
   <aside class="side glass">
-    <div class="brand" data-act="rename" style="cursor:pointer" title="Αλλαγή ονόματος"><div class="logo" id="brandLogo">W</div><div><b id="brandName">Wallet</b><small>Personal wallet</small></div></div>
+    <div class="brand" data-act="rename" style="cursor:pointer" title="Αλλαγή ονόματος"><img class="logo" src="icons/favicon.svg" alt="" width="40" height="40"><div><b>SP Wallet</b><small id="brandName">Personal wallet</small></div></div>
     <nav class="nav" id="nav"></nav>
     <div class="foot" id="sideFoot"></div>
   </aside>
@@ -579,7 +590,7 @@ function mergeStates(a, b){
 
 /* ============ sync: encrypted file in a private GitHub Gist ============ */
 const Sync = (() => {
-  const CFG_KEY = 'spyr.sync.v1', FILE = 'spyr-wallet.enc.json', DESC = 'Spyrlidis Wallet sync (encrypted)';
+  const CFG_KEY = 'spyr.sync.v1', FILE = 'spyr-wallet.enc.json', DESC = 'SP Wallet sync (encrypted)';
   let cfg = {}; try { cfg = JSON.parse(localStorage.getItem(CFG_KEY)) || {}; } catch(e){}
   let state = cfg.gistId ? 'idle' : 'off', msg = '', timer = null, busy = false, again = false, keyCache = null;
   const saveCfg = () => { try { localStorage.setItem(CFG_KEY, JSON.stringify(cfg)); } catch(e){} };
@@ -683,7 +694,7 @@ function formSync(){
   openModal(`<h2>Συγχρονισμός PC ↔ κινητό</h2>
     <p class="muted" style="font-size:13px;line-height:1.6;margin-top:-6px">Κάνε το ίδιο σε κάθε συσκευή, με το ίδιο token και τον ίδιο κωδικό.</p>
     <ol class="muted" style="font-size:13px;line-height:1.7;padding-left:18px;margin:0 0 14px">
-      <li>Άνοιξε <a href="https://github.com/settings/tokens/new?scopes=gist&description=Spyrlidis%20Wallet" target="_blank" rel="noopener" style="color:var(--accent-2)">αυτό το link</a>, βάλε Expiration «No expiration» και πάτα <b>Generate token</b>.</li>
+      <li>Άνοιξε <a href="https://github.com/settings/tokens/new?scopes=gist&description=SP%20Wallet" target="_blank" rel="noopener" style="color:var(--accent-2)">αυτό το link</a>, βάλε Expiration «No expiration» και πάτα <b>Generate token</b>.</li>
       <li>Αντέγραψε το token (ξεκινά με <code>ghp_</code>) και κράτα το κάπου, θα το χρειαστείς και στο κινητό.</li>
       <li>Διάλεξε έναν κωδικό κρυπτογράφησης. Αν τον ξεχάσεις, τα δεδομένα στο cloud δεν ανοίγουν.</li>
     </ol>
@@ -759,7 +770,7 @@ let view = 'dash', noteOpen = null;
 let enterNext = true, flashId = null;
 function go(v, sub){ view = v; noteOpen = sub||null; history.replaceState(null,'','#'+v+(sub?'/'+sub:'')); enterNext = true; render(); window.scrollTo({top:0, behavior: RM?'auto':'smooth'}); }
 function renderNav(){
-  const nm = S.settings.name || ''; document.getElementById('brandName').textContent = nm || 'Wallet'; document.getElementById('brandLogo').textContent = (nm[0]||'W').toUpperCase(); document.title = nm ? nm+' · Wallet' : 'Wallet';
+  const nm = S.settings.name || ''; document.getElementById('brandName').textContent = nm ? 'Γεια σου, '+nm : 'Personal wallet'; document.title = 'SP Wallet';
   const btn = ([k,l,ic], short) => `<button class="${view===k?'on':''}" data-go="${k}">${svg(ic)}<span>${short?SHORT[k]:l}</span>${!short&&k==='notes'&&S.notes.length?`<em class="count">${S.notes.length}</em>`:''}${!short&&k==='subs'&&S.subs.filter(s=>s.active).length?`<em class="count">${S.subs.filter(s=>s.active).length}</em>`:''}</button>`;
   const todayN = eventsOn(today()).filter(e=>!isDone(e,today())).length;
   const btn2 = (v) => btn(v).replace('</button>', v[0]==='agenda' && todayN ? `<em class="count">${todayN}</em></button>` : '</button>');
