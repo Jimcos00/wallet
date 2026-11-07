@@ -231,9 +231,11 @@ textarea.inp{resize:vertical;line-height:1.5}
 .chart{width:100%;height:auto;display:block;overflow:visible}
 .chartwrap{position:relative}
 .chartbar{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin:2px 0 10px;font-size:12px}
-.chartsel{padding:6px 30px 6px 12px!important;font-size:12.5px!important;font-weight:700;border-radius:999px!important;width:auto;-webkit-appearance:none;appearance:none;cursor:pointer;
-  background:rgba(255,255,255,.10) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2.5' stroke-linecap='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E") no-repeat right 11px center}
-.chartsel option,.chartsel optgroup{background:var(--body);color:#fff}
+.rchips{display:flex;align-items:center;gap:3px;padding:3px;border-radius:999px;background:rgba(255,255,255,.08);border:1px solid var(--line-soft);flex-wrap:wrap}
+.rchips button{border:0;background:transparent;color:var(--muted);font:inherit;font-size:12px;font-weight:700;padding:5px 10px;border-radius:999px;cursor:pointer;transition:background .25s,color .25s}
+.rchips button:hover{color:var(--text);background:rgba(255,255,255,.08)}
+.rchips button.on{background:rgba(255,255,255,.92);color:var(--accent-ink);box-shadow:0 4px 12px -4px rgba(0,0,0,.4)}
+.rchips i{width:1px;height:14px;background:var(--line);margin:0 3px}
 .chart .hit{cursor:pointer}
 .chart .b{transition:filter .25s,opacity .25s}
 .chartwrap:has(.b.on) .b:not(.on){opacity:.45}
@@ -937,8 +939,8 @@ function chartPicker(){
   const cy = Number(today().slice(0,4));
   const first = S.tx.reduce((m,t)=>t.date && t.date.slice(0,4) < m ? t.date.slice(0,4) : m, String(cy));
   const years = []; for (let y=cy; y>=Math.min(Number(first),cy); y--) years.push(y);
-  const o = (v,l)=>`<option value="${v}" ${chartRange===v?'selected':''}>${l}</option>`;
-  return `<select class="inp chartsel" id="chartRange" aria-label="Περίοδος γραφήματος">${o('3','Τελευταίοι 3 μήνες')}${o('6','Τελευταίοι 6 μήνες')}${o('12','Τελευταίοι 12 μήνες')}<optgroup label="Ανά έτος">${years.map(y=>o('y'+y,'Έτος '+y)).join('')}</optgroup></select>`;
+  const o = (v,l,t)=>`<button type="button" class="${chartRange===v?'on':''}" data-range="${v}" title="${t}">${l}</button>`;
+  return `<div class="rchips" id="chartRange" role="group" aria-label="Περίοδος γραφήματος">${o('3','3μ','Τελευταίοι 3 μήνες')}${o('6','6μ','Τελευταίοι 6 μήνες')}${o('12','12μ','Τελευταίοι 12 μήνες')}<i></i>${years.map(y=>o('y'+y,y,'Έτος '+y)).join('')}</div>`;
 }
 function chartSummary(){
   const ms = chartMonths(); let i=0,e=0; ms.forEach(m=>{ i+=monthSum('income',m); e+=monthSum('expense',m); });
@@ -1817,7 +1819,9 @@ document.addEventListener('input', e=>{
     document.getElementById('noteSaved').textContent = 'Αποθήκευση…';
     noteTimer = setTimeout(()=>{ save(); const s = document.getElementById('noteSaved'); if (s) s.textContent = 'Αποθηκεύτηκε ✓'; }, 500); }
 });
-document.addEventListener('change', e=>{ if (e.target.id==='chartRange'){ chartRange = e.target.value; try{ localStorage.setItem('spyr.chart', chartRange); }catch(_){} const c = e.target.closest('.c-chart'); c.querySelector('.chartwrap').outerHTML = barChart(); c.querySelector('#chartSum').innerHTML = chartSummary(); c.classList.add('regrow'); clearTimeout(c._rg); c._rg = setTimeout(()=>c.classList.remove('regrow'), 1400); return; } if (e.target.id==='firstName'){ S.settings.name = e.target.value.trim(); save(); renderNav(); return; } const f = e.target.dataset.filter; if (f && f!=='q'){ txFilter[f] = e.target.value; render(); } });
+document.addEventListener('click', e=>{ const rb = e.target.closest('#chartRange [data-range]'); if (!rb) return; chartRange = rb.dataset.range; try{ localStorage.setItem('spyr.chart', chartRange); }catch(_){}
+  rb.parentNode.querySelectorAll('button').forEach(b=>b.classList.toggle('on', b===rb)); const c = rb.closest('.c-chart'); c.querySelector('.chartwrap').outerHTML = barChart(); c.querySelector('#chartSum').innerHTML = chartSummary(); c.classList.add('regrow'); clearTimeout(c._rg); c._rg = setTimeout(()=>c.classList.remove('regrow'), 1400); });
+document.addEventListener('change', e=>{ if (e.target.id==='firstName'){ S.settings.name = e.target.value.trim(); save(); renderNav(); return; } const f = e.target.dataset.filter; if (f && f!=='q'){ txFilter[f] = e.target.value; render(); } });
 document.getElementById('fab').innerHTML = svg('plus');
 document.getElementById('fab').onclick = ()=> document.getElementById('fab').dataset.mode==='event' ? formEvent(null,{date:agSel}) : formTx();
 let tt; function toast(m){ const t = document.getElementById('toast'); t.textContent = m; t.classList.add('show'); clearTimeout(tt); tt = setTimeout(()=>t.classList.remove('show'), 2600); }
