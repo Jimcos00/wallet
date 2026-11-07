@@ -1553,7 +1553,7 @@ async function addZip(file, replaceId){
     if (!files.some(f=>/\.html?$/i.test(f.name)) && !isSrc) toast('Προσοχή: δεν βρέθηκε αρχείο .html στο zip');
     const old = replaceId ? await DB.get(replaceId) : null;
     const p = { id: replaceId||uid(), name: old?.name || await zipName(zip, files, file.name), notes: old?.notes||'', blob:file, size:file.size, files:files.length, created: old?.created||Date.now(), updated:Date.now() };
-    await DB.put(p); siteCache.delete(p.id);
+    await DB.put(p); siteCache.delete(p.id); navigator.serviceWorker?.controller?.postMessage({zipFlush:p.id});
     toast(replaceId?'Ενημερώθηκε το project':'Προστέθηκε το project'); if (view==='projects') render();
   } catch(e){ console.error(e); toast('Δεν άνοιξε το zip'); }
 }
@@ -1660,7 +1660,9 @@ async function buildSite(id){
   }
   let entry = entryFull ? entryFull.slice(root?root.length+1:0) : null, info = null;
   if (source){ info = sourceInfo(text, raw); text.set('__overview__.html', overviewHtml(p.name, info, text, raw)); entry = '__overview__.html'; }
-  const site = { name:p.name, entry, source: info, pages:[...text.keys()].filter(k=>/\.html?$/i.test(k) && k!=='__overview__.html').sort(), all:[...text.keys(), ...raw.keys()].filter(k=>k!=='__overview__.html').sort(), render, text, raw };
+  const rootRec = source ? '' : root;
+  if ((p.root||'') !== rootRec){ p.root = rootRec; try { await DB.put(p); } catch(e){} }
+  const site = { id, name:p.name, entry, source: info, pages:[...text.keys()].filter(k=>/\.html?$/i.test(k) && k!=='__overview__.html').sort(), all:[...text.keys(), ...raw.keys()].filter(k=>k!=='__overview__.html').sort(), render, text, raw };
   siteCache.set(id, site); return site;
 }
 /* a zip with code but no built html (Next.js, Vite, Astro…): show a project overview instead */
@@ -1751,7 +1753,14 @@ async function openProj(id){
     document.getElementById('vFiles').innerHTML = `<b style="display:block;margin:0 6px 8px">Σελίδες</b>${viewerSite.source?'<div data-page="__overview__.html">✨ Επισκόπηση project</div>':''}${viewerSite.pages.map(p=>`<div data-page="${esc(p)}">📄 ${esc(p)}</div>`).join('')}<b style="display:block;margin:14px 6px 8px">Όλα τα αρχεία (${viewerSite.all.length})</b>${viewerSite.all.map(p=>`<div data-file="${esc(p)}" class="faint">${esc(p)}</div>`).join('')}`;
   } catch(e){ console.error(e); toast('Σφάλμα στο άνοιγμα'); }
 }
-function showPage(path){ viewerPath = path; vFrame.src = viewerSite.render(path); document.getElementById('vPath').textContent = path==='__overview__.html' ? `Κώδικας ${viewerSite.source.framework} · επισκόπηση` : '/' + path; }
+const swLive = () => !!(navigator.serviceWorker && navigator.serviceWorker.controller) && location.protocol.startsWith('http');
+const zipBase = id => new URL(`__zip/${id}/`, location.href).href;
+function syncVPath(){ try { const b = new URL(zipBase(viewerId)).pathname, lp = vFrame.contentWindow.location.pathname;
+  if (lp.startsWith(b)){ viewerPath = decodeURIComponent(lp.slice(b.length)) || 'index.html'; const t = '/' + decodeURIComponent(lp.slice(b.length)); const el = document.getElementById('vPath'); if (el.textContent!==t) el.textContent = t; } } catch(e){} }
+vFrame.addEventListener('load', syncVPath); setInterval(()=>{ if (document.getElementById('viewer').classList.contains('open')) syncVPath(); }, 800);
+function showPage(path){ viewerPath = path;
+  if (!viewerSite.source && swLive()){ vFrame.src = zipBase(viewerId) + path.split('/').map(encodeURIComponent).join('/').replace(/(^|\/)index\.html$/,'$1'); document.getElementById('vPath').textContent = '/' + path; return; }
+  vFrame.src = viewerSite.render(path); document.getElementById('vPath').textContent = path==='__overview__.html' ? `Κώδικας ${viewerSite.source.framework} · επισκόπηση` : '/' + path; }
 function closeViewer(){ document.getElementById('viewer').classList.remove('open'); vFrame.src='about:blank'; document.getElementById('vFiles').classList.remove('open'); }
 window.addEventListener('message', e=>{ if (e.source===vFrame.contentWindow && e.data && e.data.zipnav && viewerSite && viewerSite.text.has(e.data.zipnav)) showPage(e.data.zipnav); });
 document.getElementById('vClose').innerHTML = svg('x');
@@ -1759,9 +1768,9 @@ document.getElementById('vReload').innerHTML = svg('reload');
 document.getElementById('vFilesBtn').innerHTML = svg('files');
 document.getElementById('vNewTab').innerHTML = svg('ext');
 document.getElementById('vClose').onclick = closeViewer;
-document.getElementById('vReload').onclick = async ()=>{ siteCache.delete(viewerId); viewerSite = await buildSite(viewerId); showPage(viewerPath); };
+document.getElementById('vReload').onclick = async ()=>{ siteCache.delete(viewerId); navigator.serviceWorker?.controller?.postMessage({zipFlush:viewerId}); viewerSite = await buildSite(viewerId); showPage(viewerPath); };
 document.getElementById('vFilesBtn').onclick = ()=>document.getElementById('vFiles').classList.toggle('open');
-document.getElementById('vNewTab').onclick = ()=>{ const w = window.open(vFrame.src,'_blank'); if (!w) toast('Ο browser μπλόκαρε το νέο παράθυρο'); };
+document.getElementById('vNewTab').onclick = ()=>{ let src = vFrame.src; try { src = vFrame.contentWindow.location.href; } catch(e){} const w = window.open(src,'_blank'); if (!w) toast('Ο browser μπλόκαρε το νέο παράθυρο'); };
 document.getElementById('vSizes').onclick = e=>{ const b = e.target.closest('button'); if (!b) return; segMove(document.getElementById('vSizes'), b); vFrame.style.width = b.dataset.w; vFrame.style.maxWidth = '100%'; };
 document.getElementById('vFiles').onclick = e=>{
   const pg = e.target.closest('[data-page]'); if (pg){ showPage(pg.dataset.page); return; }
