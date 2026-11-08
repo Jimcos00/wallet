@@ -338,7 +338,25 @@ input.inp[type=date],input.inp[type=time]{-webkit-appearance:none;appearance:non
 input.inp[type=date]::-webkit-date-and-time-value,input.inp[type=time]::-webkit-date-and-time-value{text-align:left;margin:0}
 input.inp[type=date]::-webkit-calendar-picker-indicator,input.inp[type=time]::-webkit-calendar-picker-indicator{filter:invert(1);opacity:.6;cursor:pointer}
 .amount-inp{font-size:30px;font-weight:800;padding:12px 16px;letter-spacing:-.02em}
-.sheet .actions{display:flex;justify-content:flex-end;gap:10px;margin-top:10px}
+.sheet .actions{display:flex;justify-content:flex-end;gap:10px;margin-top:10px;flex-wrap:wrap}
+.sheet{overflow-x:hidden}
+.linkbtn{display:inline-flex;align-items:center;gap:6px;margin-top:10px;padding:6px 10px 6px 8px;border:1px solid transparent;border-radius:999px;background:none;color:var(--muted);font:inherit;font-size:12.5px;font-weight:700;cursor:pointer;transition:.2s}
+.linkbtn svg{width:14px;height:14px}
+.linkbtn.danger:hover{color:var(--danger);background:rgba(255,120,120,.10);border-color:rgba(255,120,120,.25)}
+.emopick{display:grid;grid-template-columns:repeat(auto-fill,minmax(40px,1fr));gap:6px}
+.emopick button{aspect-ratio:1;border-radius:12px;border:1px solid var(--line-soft);background:rgba(255,255,255,.06);font-size:19px;cursor:pointer;display:grid;place-items:center;transition:transform .2s var(--ease),background .2s,border-color .2s}
+.emopick button:hover{transform:translateY(-2px);background:rgba(255,255,255,.12)}
+.emopick button.on{background:rgba(255,255,255,.22);border-color:rgba(255,255,255,.7);box-shadow:0 0 0 3px rgba(var(--acc-rgb),.35)}
+/* time picker */
+.tpin{font-variant-numeric:tabular-nums;cursor:pointer}
+.tpop{position:fixed;z-index:80;display:flex;gap:6px;padding:8px;border-radius:18px;background:var(--sheet);border:1px solid var(--line);backdrop-filter:blur(20px) saturate(1.3);-webkit-backdrop-filter:blur(20px) saturate(1.3);
+  box-shadow:0 24px 50px -16px rgba(0,0,0,.6);opacity:0;transform:translateY(-6px) scale(.97);transform-origin:top center;transition:opacity .18s,transform .25s var(--ease);pointer-events:none}
+.tpop.open{opacity:1;transform:none;pointer-events:auto}
+.tpop .tcol{display:flex;flex-direction:column;gap:3px;max-height:228px;overflow-y:auto;padding:2px 4px 2px 2px;scrollbar-width:thin;overscroll-behavior:contain}
+.tpop .tcol b{position:sticky;top:-2px;font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--faint);padding:4px 0 6px;text-align:center;background:var(--sheet);z-index:1}
+.tpop button{border:0;background:none;color:var(--text);font:inherit;font-size:15px;font-weight:700;font-variant-numeric:tabular-nums;width:58px;padding:8px 0;border-radius:11px;cursor:pointer;transition:background .15s}
+.tpop button:hover{background:rgba(255,255,255,.12)}
+.tpop button.on{background:rgba(255,255,255,.92);color:var(--accent-ink)}
 .colors{display:flex;gap:8px;flex-wrap:wrap}
 .colors button{width:30px;height:30px;border-radius:50%;border:2px solid transparent;cursor:pointer;box-shadow:inset 0 -3px 6px rgba(0,0,0,.2),inset 0 2px 3px rgba(255,255,255,.4);transition:transform .25s var(--spring)}
 .colors button.on{border-color:#fff;transform:scale(1.12)}
@@ -565,11 +583,12 @@ const COLORS = ['#4fd1a5','#7aa7ff','#ff9f7a','#ffd27a','#c99bff','#ff7ab6','#9a
 const CATS = [
   ['Φαγητό','🍔'],['Σούπερ μάρκετ','🛒'],['Καφές','☕'],['Μεταφορές','🚌'],['Καύσιμα','⛽'],
   ['Λογαριασμοί','💡'],['Ενοίκιο','🏠'],['Συνδρομές','🔁'],['Ψώνια','🛍️'],['Διασκέδαση','🎬'],
-  ['Υγεία','💊'],['Δουλειά','💼'],['Δώρα','🎁'],['Ταξίδια','✈️'],['Άλλο','•']
+  ['Υγεία','💊'],['Δουλειά','💼'],['Δώρα','🎁'],['Ταξίδια','✈️'],['Άλλο','📌']
 ];
-const INCOME_CATS = [['Μισθός','💶'],['Project / Πελάτης','💻'],['Freelance','🧾'],['Επιστροφή','↩️'],['Άλλο','•']];
+const INCOME_CATS = [['Μισθός','💶'],['Project / Πελάτης','💻'],['Freelance','🧾'],['Επιστροφή','↩️'],['Άλλο','💰']];
+const OTHER_EMOJIS = ['📌','🧾','🔧','🚗','🅿️','🐶','💇','👕','🎮','📚','📱','💻','🏋️','🧴','🍺','🎟️','🎂','🚬','🧸','🌿','💰','🪙','🏦','🤝'];
 const NOTE_EMOJIS = ['🌐','💻','📈','🧾','🏠','🚗','🎓','✈️','🎁','💡','🛠️','📦'];
-const catIcon = (c) => (CATS.find(x=>x[0]===c)||INCOME_CATS.find(x=>x[0]===c)||[0,'•'])[1];
+const catIcon = (c) => (CATS.find(x=>x[0]===c)||INCOME_CATS.find(x=>x[0]===c)||[0,'📌'])[1];
 const ACC_TYPES = {cash:'Μετρητά',bank:'Τράπεζα',card:'Κάρτα',savings:'Αποταμίευση',other:'Άλλο'};
 
 let S = load();
@@ -707,8 +726,9 @@ function formSync(){
     openModal(`<h2>Συγχρονισμός</h2>
       <div class="glass" style="padding:16px;border-radius:18px;margin-bottom:14px"><div class="row"><i class="syncdot" data-sync-dot data-state="${Sync.state}"></i><b data-sync-label></b></div>
       ${Sync.msg?`<p class="hint" style="color:var(--neg)">${esc(Sync.msg)}</p>`:''}
-      <p class="hint">Τα δεδομένα σου αποθηκεύονται κρυπτογραφημένα σε ένα ιδιωτικό gist στο GitHub σου και ενημερώνονται αυτόματα σε κάθε αλλαγή.</p></div>
-      <div class="actions"><button type="button" class="btn ghost danger" data-sync-off style="margin-right:auto">Αποσύνδεση</button><button type="button" class="btn ghost" onclick="closeModal()">Κλείσιμο</button><button class="btn primary">${svg('reload')}Συγχρονισμός τώρα</button></div>`,
+      <p class="hint">Τα δεδομένα σου αποθηκεύονται κρυπτογραφημένα σε ένα ιδιωτικό gist στο GitHub σου και ενημερώνονται αυτόματα σε κάθε αλλαγή.</p>
+      <button type="button" class="linkbtn danger" data-sync-off>${svg('x')}Αποσύνδεση αυτής της συσκευής</button></div>
+      <div class="actions"><button type="button" class="btn ghost" onclick="closeModal()">Κλείσιμο</button><button class="btn primary">${svg('reload')}Συγχρονισμός τώρα</button></div>`,
       ()=>{ Sync.run(); toast('Συγχρονισμός…'); });
     Sync.paint();
     sheet.querySelector('[data-sync-off]').onclick = ()=>{ if (confirm('Αποσύνδεση αυτής της συσκευής από τον συγχρονισμό; Τα δεδομένα μένουν εδώ.')){ Sync.disconnect(); closeModal(); render(); } };
@@ -996,7 +1016,7 @@ function sortTx(a,b){ return b.date.localeCompare(a.date) || (b.created||0)-(a.c
 function txIcon(t){
   if (t.type==='transfer') return badge({bg:'rgba(255,255,255,.15)',fg:'#fff',icon:'swap'});
   const b = brandFor(t.place); if (b) return badge(b);
-  return `<div class="emo">${catIcon(t.category)}</div>`;
+  return `<div class="emo">${t.emoji || (t.type==='income' && t.category==='Άλλο' ? '💰' : catIcon(t.category))}</div>`;
 }
 function txRow(t, compact){
   const a = accById(t.accountId), to = accById(t.toAccountId);
@@ -1323,15 +1343,15 @@ function formEvent(e, opts={}){
     <div class="field"><label>Τι έχεις να κάνεις;</label><input class="inp" name="title" required value="${esc(e.title)}" placeholder="π.χ. Γυμναστήριο, Meeting με πελάτη" autofocus></div>
     <div class="field"><label>Ημερομηνία</label><input class="inp" type="date" name="date" value="${e.date}" required></div>
     <label class="switch"><input type="checkbox" name="allday" ${e.start?'':'checked'}>Χωρίς συγκεκριμένη ώρα</label>
-    <div class="two" id="times" style="${e.start?'':'display:none'}"><div class="field"><label>Από</label><input class="inp" type="time" name="start" value="${e.start||st}"></div>
-    <div class="field"><label>Μέχρι <span id="nextDay" style="color:var(--accent-2);display:none">· επόμενη μέρα</span></label><input class="inp" type="time" name="end" value="${e.end||plus1(e.start||st)}"></div></div>
+    <div class="two" id="times" style="${e.start?'':'display:none'}"><div class="field"><label>Από</label><input class="inp tpin" name="start" value="${e.start||st}" data-time autocomplete="off" inputmode="numeric" maxlength="5"></div>
+    <div class="field"><label>Μέχρι <span id="nextDay" style="color:var(--accent-2);display:none">· επόμενη μέρα</span></label><input class="inp tpin" name="end" value="${e.end||plus1(e.start||st)}" data-time autocomplete="off" inputmode="numeric" maxlength="5"></div></div>
     <div class="field"><label>Χρώμα</label><div class="ecolors">${EV_COLORS.map(c=>`<button type="button" style="background:${c}" class="${c===e.color?'on':''}" data-ecolor="${c}"></button>`).join('')}</div><input type="hidden" name="color" value="${e.color}"></div>
     <div class="field"><label>Επανάληψη</label><select class="inp" name="repeat">${Object.entries(REPEATS).map(([k,l])=>`<option value="${k}" ${e.repeat===k?'selected':''}>${l}</option>`).join('')}</select></div>
     <div class="field"><label>Σημείωση</label><input class="inp" name="note" value="${esc(e.note||'')}" placeholder="προαιρετικό"></div>
     ${!isNew?`<label class="switch"><input type="checkbox" name="done" ${isDone(e,occ)?'checked':''}>Έγινε${e.repeat&&e.repeat!=='none'?' (αυτή τη μέρα)':''}</label>`:''}
     ${actions(!isNew)}`, (fd)=>{
       const allday = !!fd.get('allday');
-      let start = allday ? '' : fd.get('start'), end = allday ? '' : fd.get('end');
+      let start = allday ? '' : (normTime(fd.get('start'))||st), end = allday ? '' : (normTime(fd.get('end'))||plus1(start));
       if (start && end && toMin(end) === toMin(start)) end = plus1(start);
       const rec = {title:fd.get('title').trim(), date:fd.get('date'), start, end, color:fd.get('color'), repeat:fd.get('repeat'), note:fd.get('note').trim()};
       if (isNew){ S.events.push(Object.assign({id:uid(), created:Date.now(), done:false, doneDates:[]}, rec)); agSel = rec.date; agMonth = rec.date.slice(0,7); }
@@ -1344,6 +1364,7 @@ function formEvent(e, opts={}){
     });
   const ad = sheet.querySelector('[name=allday]'); ad.onchange = ()=>{ document.getElementById('times').style.display = ad.checked ? 'none' : ''; };
   const sIn = sheet.querySelector('[name=start]'), eIn = sheet.querySelector('[name=end]');
+  if (matchMedia('(pointer:coarse)').matches) [sIn,eIn].forEach(i=>i.readOnly = true);
   const hint = ()=>{ const h = document.getElementById('nextDay'); if (h) h.style.display = (sIn.value && eIn.value && toMin(eIn.value) < toMin(sIn.value)) ? '' : 'none'; };
   sIn.onchange = ()=>{ if (toMin(eIn.value) === toMin(sIn.value)) eIn.value = plus1(sIn.value); hint(); }; eIn.onchange = hint; eIn.oninput = hint; hint();
   sheet.querySelectorAll('[data-ecolor]').forEach(b=>b.onclick=()=>{ sheet.querySelectorAll('[data-ecolor]').forEach(x=>x.classList.remove('on')); b.classList.add('on'); sheet.querySelector('[name=color]').value=b.dataset.ecolor; });
@@ -1356,6 +1377,47 @@ function formEvent(e, opts={}){
     S.events = S.events.filter(x=>x!==e); save(); closeModal(); render();
   };
 }
+/* glass time picker (replaces the browser's own, which scrolls badly on desktop) */
+const TP = { el:null, inp:null };
+function normTime(v){
+  const d = String(v||'').replace(/[^\d]/g,''); if (!d) return '';
+  let h, m; if (d.length<=2){ h=+d; m=0; } else if (d.length===3){ h=+d[0]; m=+d.slice(1); } else { h=+d.slice(0,2); m=+d.slice(2,4); }
+  if (h>23 || m>59) return null; return String(h).padStart(2,'0')+':'+String(m).padStart(2,'0');
+}
+function tpSet(inp, v){ if (inp.value===v) return; inp.value = v; inp.dispatchEvent(new Event('input',{bubbles:true})); inp.dispatchEvent(new Event('change',{bubbles:true})); }
+function tpOpen(inp){
+  if (TP.inp===inp && TP.el.classList.contains('open')) return;
+  tpClose(); TP.inp = inp;
+  if (!TP.el){ TP.el = document.createElement('div'); TP.el.className = 'tpop'; document.body.appendChild(TP.el);
+    TP.el.addEventListener('pointerdown', e=>e.preventDefault());
+    TP.el.addEventListener('click', e=>{ const b = e.target.closest('button'); if (!b || !TP.inp) return;
+      const [h,m] = (normTime(TP.inp.value)||'09:00').split(':');
+      if (b.dataset.h!=null){ tpSet(TP.inp, b.dataset.h+':'+m); tpPaint(); }
+      else { tpSet(TP.inp, h+':'+b.dataset.m); tpClose(); } }); }
+  const [h,m] = (normTime(inp.value)||'09:00').split(':');
+  const mins = [...Array(12)].map((_,i)=>String(i*5).padStart(2,'0')); if (!mins.includes(m)) { mins.push(m); mins.sort(); }
+  TP.el.innerHTML = `<div class="tcol" data-col="h"><b>Ώρα</b>${[...Array(24)].map((_,i)=>{ const v=String(i).padStart(2,'0'); return `<button type="button" data-h="${v}">${v}</button>`; }).join('')}</div>
+    <div class="tcol" data-col="m"><b>Λεπτά</b>${mins.map(v=>`<button type="button" data-m="${v}">${v}</button>`).join('')}</div>`;
+  tpPlace(); tpPaint(true); requestAnimationFrame(()=>TP.el.classList.add('open'));
+}
+function tpPaint(scroll){
+  const [h,m] = (normTime(TP.inp.value)||'09:00').split(':');
+  TP.el.querySelectorAll('[data-h]').forEach(b=>b.classList.toggle('on', b.dataset.h===h));
+  TP.el.querySelectorAll('[data-m]').forEach(b=>b.classList.toggle('on', b.dataset.m===m));
+  if (scroll) TP.el.querySelectorAll('.tcol').forEach(c=>{ const on = c.querySelector('.on'); if (on) c.scrollTop = on.offsetTop - c.clientHeight/2 + on.offsetHeight/2; });
+}
+function tpPlace(){
+  if (!TP.inp) return; const r = TP.inp.getBoundingClientRect(), w = 140, hgt = 248;
+  let top = r.bottom + 6; if (top + hgt > innerHeight - 8) top = Math.max(8, r.top - hgt - 6);
+  TP.el.style.left = Math.min(Math.max(8, r.left + r.width/2 - w/2), innerWidth - w - 8) + 'px'; TP.el.style.top = top + 'px';
+}
+function tpClose(){ if (TP.el) TP.el.classList.remove('open'); if (TP.inp){ const n = normTime(TP.inp.value); if (n) tpSet(TP.inp, n); } TP.inp = null; }
+document.addEventListener('focusin', e=>{ if (e.target.matches && e.target.matches('input[data-time]')) tpOpen(e.target); else if (TP.inp && !(TP.el && TP.el.contains(e.target))) tpClose(); });
+document.addEventListener('click', e=>{ if (e.target.matches && e.target.matches('input[data-time]')) tpOpen(e.target); });
+document.addEventListener('pointerdown', e=>{ if (TP.inp && e.target!==TP.inp && !(TP.el && TP.el.contains(e.target))) tpClose(); }, true);
+document.addEventListener('keydown', e=>{ if (TP.inp && (e.key==='Escape' || e.key==='Enter' || e.key==='Tab')){ if (e.key==='Escape') e.stopPropagation(); if (e.key==='Enter') e.preventDefault(); tpClose(); } }, true);
+document.addEventListener('input', e=>{ if (TP.inp && e.target===TP.inp && TP.el) tpPaint(true); });
+addEventListener('resize', tpPlace); document.addEventListener('scroll', ()=>{ if (TP.inp) tpPlace(); }, true);
 // keep "now" markers fresh
 setInterval(()=>{ if (!document.hidden && (view==='agenda' || view==='dash') && !document.getElementById('modal').classList.contains('open')){ const a = document.activeElement; if (!(a && /INPUT|TEXTAREA|SELECT/.test(a.tagName))) render(); } }, 60000);
 
@@ -1369,7 +1431,7 @@ function openModal(html, onSubmit){
   f.onsubmit = (e)=>{ e.preventDefault(); if (onSubmit(new FormData(f), f) !== false) closeModal(); };
   setTimeout(()=>{ const a = f.querySelector('[autofocus]'); if (a && matchMedia('(min-width:821px)').matches) a.focus(); },60);
 }
-function closeModal(){ modal.classList.remove('open'); }
+function closeModal(){ modal.classList.remove('open'); if (typeof tpClose==='function') tpClose(); }
 modal.addEventListener('click', e=>{ if (e.target===modal) closeModal(); });
 document.addEventListener('keydown', e=>{ if (e.key==='Escape'){ closeModal(); closeViewer(); } });
 const accOptions = (sel) => S.accounts.map(a=>`<option value="${a.id}" ${a.id===sel?'selected':''}>${esc(a.name)} (${fmt(balance(a.id))})</option>`).join('');
@@ -1410,7 +1472,8 @@ function formTx(t, opts={}){
     <div class="${type==='transfer'?'two':''}"><div class="field"><label>${type==='transfer'?'Από':type==='income'?'Σε λογαριασμό':'Από λογαριασμό / μετρητά'}</label><select class="inp" name="accountId">${accOptions(t.accountId)}</select></div>
     ${type==='transfer'?`<div class="field"><label>Προς</label><select class="inp" name="toAccountId">${accOptions(t.toAccountId||S.accounts.find(a=>a.id!==t.accountId)?.id)}</select></div>`:''}</div>
     ${type!=='transfer'?`<div class="field"><label>${type==='income'?'Από ποιον / τι':'Πού ξόδεψες'}</label><input class="inp" name="place" value="${esc(t.place)}" placeholder="${type==='income'?'π.χ. Πελάτης site':'π.χ. Σκλαβενίτης'}" list="places"></div>
-    <div class="field"><label>Κατηγορία</label><select class="inp" name="category">${cats.map(([c,i])=>`<option ${t.category===c?'selected':''} value="${c}">${i} ${c}</option>`).join('')}</select></div>`:''}
+    <div class="field"><label>Κατηγορία</label><select class="inp" name="category">${cats.map(([c,i])=>`<option ${t.category===c?'selected':''} value="${c}">${i} ${c}</option>`).join('')}</select></div>
+    <div class="field" id="emoField" style="${(t.category||cats[0][0])==='Άλλο'?'':'display:none'}"><label>Εικονίδιο</label><div class="emopick">${OTHER_EMOJIS.map(e=>`<button type="button" class="${(t.emoji||(type==='income'?'💰':'📌'))===e?'on':''}" data-emo="${e}">${e}</button>`).join('')}</div><input type="hidden" name="emoji" value="${t.emoji||(type==='income'?'💰':'📌')}"></div>`:''}
     <div class="two"><div class="field"><label>Ημερομηνία</label><input class="inp" type="date" name="date" value="${t.date}" required></div>
     <div class="field"><label>Σημείωση</label><input class="inp" name="note" value="${esc(t.note)}" placeholder="προαιρετικό"></div></div>
     <datalist id="places">${[...new Set(S.tx.map(x=>x.place).filter(Boolean))].slice(0,80).map(p=>`<option value="${esc(p)}">`).join('')}</datalist>
@@ -1419,7 +1482,7 @@ function formTx(t, opts={}){
   const submit = (fd)=>{
     const amount = Math.abs(num(fd.get('amount')));
     if (!amount){ toast('Βάλε ποσό'); return false; }
-    const rec = {type, amount, accountId:fd.get('accountId'), toAccountId: type==='transfer'?fd.get('toAccountId'):'', place:(fd.get('place')||'').trim(), category: type==='transfer'?'':fd.get('category'), date:fd.get('date'), note:(fd.get('note')||'').trim()};
+    const rec = {type, amount, accountId:fd.get('accountId'), toAccountId: type==='transfer'?fd.get('toAccountId'):'', place:(fd.get('place')||'').trim(), category: type==='transfer'?'':fd.get('category'), emoji: type!=='transfer' && fd.get('category')==='Άλλο' ? (fd.get('emoji')||'') : '', date:fd.get('date'), note:(fd.get('note')||'').trim()};
     if (type==='transfer' && rec.accountId===rec.toAccountId){ toast('Διάλεξε διαφορετικούς λογαριασμούς'); return false; }
     let id;
     if (isNew){ id = uid(); S.tx.push(Object.assign({id, created:Date.now()}, rec)); } else { Object.assign(t, rec); id = t.id; }
@@ -1430,8 +1493,10 @@ function formTx(t, opts={}){
     toast(type==='expense' ? `−${fmt(amount)} από ${a.name} · μένουν ${fmt(balance(a.id))}` : 'Αποθηκεύτηκε');
   };
   const mount = () => {
-    const prev = document.getElementById('mf'); if (prev && modal.classList.contains('open')){ const fd = new FormData(prev); for (const k of ['amount','accountId','place','date','note']) if (fd.has(k)) t[k]=fd.get(k); }
+    const prev = document.getElementById('mf'); if (prev && modal.classList.contains('open')){ const fd = new FormData(prev); for (const k of ['amount','accountId','place','date','note']) if (fd.has(k)) t[k]=fd.get(k); t.emoji = ''; }
     openModal(body(), submit);
+    const cs = sheet.querySelector('[name=category]'); if (cs) cs.onchange = ()=>{ const f = document.getElementById('emoField'); f.style.display = cs.value==='Άλλο' ? '' : 'none'; if (cs.value==='Άλλο') f.animate([{opacity:0,transform:'translateY(-6px)'},{opacity:1,transform:'none'}],{duration:300,easing:'ease-out'}); };
+    sheet.querySelectorAll('[data-emo]').forEach(b=>b.onclick=()=>{ sheet.querySelectorAll('[data-emo]').forEach(x=>x.classList.toggle('on', x===b)); sheet.querySelector('[name=emoji]').value = b.dataset.emo; });
     sheet.querySelectorAll('[data-ttype]').forEach(b=>b.onclick=()=>{ type=b.dataset.ttype; t.category=''; const seg=b.parentNode; segMove(seg,b); setTimeout(mount,180); });
     const d = sheet.querySelector('[data-del]'); if (d) d.onclick = ()=>{ if (confirm('Διαγραφή κίνησης;')){ removeTx(t.id); closeModal(); render(); } };
   };
