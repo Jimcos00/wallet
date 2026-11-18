@@ -344,7 +344,7 @@ input.inp[type=date]::-webkit-calendar-picker-indicator,input.inp[type=time]::-w
 .linkbtn{display:inline-flex;align-items:center;gap:6px;margin-top:10px;padding:6px 10px 6px 8px;border:1px solid transparent;border-radius:999px;background:none;color:var(--muted);font:inherit;font-size:12.5px;font-weight:700;cursor:pointer;transition:.2s}
 .linkbtn svg{width:14px;height:14px}
 .linkbtn.danger:hover{color:var(--danger);background:rgba(255,120,120,.10);border-color:rgba(255,120,120,.25)}
-.ai{position:fixed;z-index:58;top:16px;right:16px;bottom:16px;width:min(410px,calc(100vw - 32px));display:flex;flex-direction:column;border-radius:28px;background:var(--sheet);overflow:hidden;
+.ai{position:fixed;z-index:58;top:16px;right:16px;bottom:16px;width:min(410px,calc(100vw - 32px));display:flex;flex-direction:column;border-radius:28px;background:linear-gradient(var(--sheet),var(--sheet)),var(--body);overflow:hidden;
   backdrop-filter:blur(28px) saturate(1.4);-webkit-backdrop-filter:blur(28px) saturate(1.4);box-shadow:0 40px 80px -30px rgba(0,0,0,.7);
   transform:translateX(calc(100% + 40px));opacity:.4;visibility:hidden;transition:transform .55s var(--spring),opacity .35s,visibility .55s}
 .ai.open{transform:none;opacity:1;visibility:visible}
@@ -353,7 +353,7 @@ input.inp[type=date]::-webkit-calendar-picker-indicator,input.inp[type=time]::-w
 .ai header .iconbtn{width:34px;height:34px;font-size:14px}
 .aiorb{width:38px;height:38px;border-radius:50%;flex:none;background:var(--orb);box-shadow:0 8px 20px -6px var(--orb-glow);animation:aispin 8s linear infinite}
 @keyframes aispin{to{filter:hue-rotate(360deg)}}
-.aimsgs{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:10px;overscroll-behavior:contain}
+.aimsgs{flex:1;min-height:0;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:10px;overscroll-behavior:contain}
 .msg{max-width:88%;padding:10px 14px;border-radius:18px;font-size:14px;line-height:1.5;animation:rise .45s var(--ease) both}
 .msg.bot{align-self:flex-start;background:rgba(255,255,255,.09);border:1px solid var(--line-soft);border-bottom-left-radius:6px}
 .msg.me{align-self:flex-end;background:rgba(255,255,255,.9);color:var(--accent-ink);font-weight:700;border-bottom-right-radius:6px}
@@ -362,16 +362,16 @@ input.inp[type=date]::-webkit-calendar-picker-indicator,input.inp[type=time]::-w
 .aiex{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
 .aiex button{border:1px solid var(--line);background:rgba(255,255,255,.07);color:var(--text);border-radius:999px;padding:6px 11px;font:inherit;font-size:12.5px;font-weight:600;cursor:pointer;transition:.2s}
 .aiex button:hover{background:rgba(255,255,255,.16);transform:translateY(-1px)}
-.aiprev{display:flex;flex-wrap:wrap;gap:6px;padding:0 16px;max-height:0;opacity:0;overflow:hidden;transition:max-height .3s var(--ease),opacity .25s,padding .3s}
-.aiprev.show{max-height:140px;opacity:1;padding:10px 16px 2px}
-.pc{display:inline-flex;align-items:center;gap:5px;padding:5px 11px;border-radius:999px;background:rgba(255,255,255,.09);border:1px solid var(--line-soft);font-size:12.5px;font-weight:700;animation:pcin .3s var(--ease) both}
+.aiprev{flex:none;display:flex;flex-wrap:wrap;gap:6px;padding:0 16px;max-height:0;opacity:0;overflow:hidden;transition:max-height .3s var(--ease),opacity .25s,padding .3s}
+.aiprev.show{max-height:180px;overflow-y:auto;opacity:1;padding:10px 16px 2px}
+.pc{max-width:100%;overflow-wrap:anywhere;flex:none;display:inline-flex;align-items:center;gap:5px;padding:5px 11px;border-radius:999px;background:rgba(255,255,255,.09);border:1px solid var(--line-soft);font-size:12.5px;font-weight:700;animation:pcin .3s var(--ease) both}
 @keyframes pcin{from{opacity:0;transform:translateY(4px) scale(.95)}}
 .pc i{font-style:normal;font-weight:600;font-size:11px;opacity:.75}
-.pc.exp{background:rgba(255,140,160,.18);color:var(--neg)}.pc.inc{background:rgba(var(--acc-rgb),.25);color:var(--pos)}.pc.ev{background:rgba(255,255,255,.2)}
-.pc.amt{font-size:13.5px}
-.pc.hit{background:rgba(var(--acc-rgb),.3);border-color:rgba(var(--acc-rgb),.8);box-shadow:0 0 0 3px rgba(var(--acc-rgb),.18),0 0 18px rgba(var(--acc-rgb),.35)}
-.pc.warn{background:none;border:0;padding:0;color:var(--muted);font-weight:600;line-height:1.4}
-.aibar{display:flex;gap:8px;align-items:flex-end;padding:12px 16px calc(16px + env(safe-area-inset-bottom))}
+.pc.pc-exp{background:rgba(255,140,160,.18);color:var(--neg)}.pc.pc-inc{background:rgba(var(--acc-rgb),.25);color:var(--pos)}.pc.pc-ev{background:rgba(255,255,255,.2)}
+.pc.pc-amt{font-size:13.5px}
+.pc.pc-hit{background:rgba(var(--acc-rgb),.3);border-color:rgba(var(--acc-rgb),.8);box-shadow:0 0 0 3px rgba(var(--acc-rgb),.18),0 0 18px rgba(var(--acc-rgb),.35)}
+.pc.pc-warn{background:none;border:0;padding:0;color:var(--muted);font-weight:600;line-height:1.4}
+.aibar{flex:none;display:flex;gap:8px;align-items:flex-end;padding:12px 16px calc(16px + env(safe-area-inset-bottom))}
 .aibar textarea{flex:1;resize:none;min-height:46px;max-height:120px;line-height:1.4}
 .aibar .iconbtn{width:46px;height:46px;border-radius:50%;flex:none;background:rgba(255,255,255,.9);color:var(--accent-ink)}
 .aibar .iconbtn svg{width:19px;height:19px}
@@ -1976,7 +1976,7 @@ function parseCmd(raw){
   for (const [w,n] of dw){ if (take(new RegExp(W+w+E))){ date = ymd(dShift(now,n)); dateWord = w; break; } }
   if (!date){ const m = take(new RegExp(W+'(?:την |το |στισ )?(\\d{1,2})[/.](\\d{1,2})(?:[/.](\\d{2,4}))?'+E));
     if (m){ let y = m[4] ? +m[4] : now.getFullYear(); if (y<100) y += 2000; const d = new Date(y, +m[3]-1, +m[2]); if (!isNaN(d)) date = ymd(d); } }
-  if (!date){ const m = take(new RegExp(W+'(?:την |το |αυτη την |αυτο το |αλλη |επομενη )?('+DAYS.join('|')+')'+E)); if (m) dayIdx = DAYS.indexOf(m[2]); }
+  { const m = take(new RegExp(W+'(?:την |το |αυτη την |αυτο το |αλλη |επομενη )?('+DAYS.join('|')+')'+E)); if (m && !date) dayIdx = DAYS.indexOf(m[2]); }
   if (everyDay!=null && dayIdx==null && !date) dayIdx = everyDay;
   const pm = !!take(new RegExp(W+'(το βραδυ|βραδυ|το απογευμα|απογευμα|μμ|μ\\.μ\\.|pm)'+E));
   const am = !!take(new RegExp(W+'(το πρωι|πρωι|πμ|π\\.μ\\.|am)'+E));
@@ -1987,7 +1987,7 @@ function parseCmd(raw){
   let m = take(new RegExp(W+'(?:απο )?(\\d{1,2})(?:[:.](\\d{2}))?\\s*(?:-|–|εωσ|μεχρι|ωσ)\\s*(\\d{1,2})(?:[:.](\\d{2}))?(?!\\s*(?:€|ευρ|eur))'+E));
   if (m){ let h1 = +m[2], h2 = +m[4];
     if (pm){ if (h1<12) h1 += 12; if (h2<12) h2 += 12; }
-    else if (!am && h1<12 && h2<=12 && (!date || date===today())){ // "7-9" said in the evening most likely means 19-21
+    else if (!am && h1<12 && h2<=12 && ((!date && dayIdx==null) || date===today())){ // "7-9" said in the evening most likely means 19-21
       const endMinNow = now.getHours()*60+now.getMinutes(); if (h2*60 < endMinNow && (h2+12)*60 > endMinNow && h2+12<24){ h1 += 12; h2 += 12; } }
     start = hm(h1, +(m[3]||0)); end = hm(h2, +(m[5]||0)); }
   if (!start){ m = take(new RegExp(W+'(?:στισ|στη|στην|@|ωρα) ?(\\d{1,2})(?:[:.](\\d{2}))?'+E)) || take(new RegExp(W+'(\\d{1,2}):(\\d{2})'+E));
@@ -2033,6 +2033,7 @@ function parseCmd(raw){
   if (!accountId){ const mc = take(new RegExp(W+'(?:με |σε )?(μετρητα|cash|κεσ)'+E)); if (mc){ const c = S.accounts.find(a=>a.type==='cash'); if (c) accountId = c.id; } }
   if (!accountId){ const mc = take(new RegExp(W+'(?:με |απο )?(?:την )?(καρτα)'+E)); if (mc){ const c = S.accounts.find(a=>a.type==='card') || S.accounts.find(a=>a.type==='bank'); if (c) accountId = c.id; } }
 
+  const evText = text; // for agenda: "title, note"
   // category: your own presets first, then built-ins (+ common words / brands)
   const words = toks().filter(x=>!STOP.has(x.t) && !/^\d+$/.test(x.t));
   let cat = null, catVia = null, catOwn = false;
@@ -2058,10 +2059,14 @@ function parseCmd(raw){
   }
   if (start || eventWord || date || dayIdx!=null || repeat!=='none'){
     if (!date && dayIdx!=null){ let fwd = (dayIdx-now.getDay()+7)%7; date = ymd(dShift(now, fwd)); }
-    let title = [place, restStr].filter(Boolean).join(' ').trim();
+    const clean = x => x.replace(/\s+/g,' ').replace(/^[\s,;:.\-–]+|[\s,;:\-–]+$/g,'').split(' ').filter(w=>!STOP.has(nrm(w))||true).join(' ').trim();
+    const ci = evText.search(/[,;]/);
+    let title = clean(ci>=0 ? evText.slice(0,ci) : evText), note = ci>=0 ? clean(evText.slice(ci+1)) : '';
+    title = title.split(' ').filter((w,i,a)=>!(STOP.has(nrm(w)) && (i===0 || i===a.length-1))).join(' ');
+    if (!title && note){ title = note; note = ''; }
     if (!title) return Object.assign(out, {kind:'need', why:'Τι θα κάνεις; Γράψε και τι είναι, π.χ. «αύριο γυμναστήριο 7-9».'});
     if (start && !end){ const mm2 = Math.min(toMin(start)+60, 23*60+59); end = pad2(Math.floor(mm2/60))+':'+pad2(mm2%60); }
-    return Object.assign(out, {kind:'event', title: title[0].toUpperCase()+title.slice(1), date: date || today(), start: start||'', end: end||'', repeat});
+    return Object.assign(out, {kind:'event', title: title[0].toUpperCase()+title.slice(1), note: note ? note[0].toUpperCase()+note.slice(1) : '', date: date || today(), start: start||'', end: end||'', repeat});
   }
   if (amount==null && (type || cat)) return Object.assign(out, {kind:'need', why:'Λείπει το ποσό, π.χ. «'+(type==='income'?'έσοδο 130€ ':'έξοδο 5€ ')+(cat?cat.name.toLowerCase():'')+'».', partial:{type: type||cat?.kind, cat}});
   return Object.assign(out, {kind:'need', why:'Δεν το κατάλαβα. Δοκίμασε κάτι σαν «έξοδο 5€ φαγητό» ή «αύριο γυμναστήριο 7-9».'});
@@ -2087,14 +2092,14 @@ function previewHtml(p){
   if (!p) return '';
   const c = (cls, html) => `<span class="pc ${cls||''}">${html}</span>`;
   if (p.kind==='tx'){ const a = accById(p.accountId);
-    return [c(p.type==='income'?'inc':'exp', p.type==='income'?'Έσοδο':'Έξοδο'), c('amt', (p.type==='income'?'+':'−')+fmt(p.amount)),
-      c(p.catMatched?'hit':'', `${p.catEmoji} ${esc(p.category)}${p.catMatched?` <i>${p.catOwn?'δική σου κατηγορία':'κατηγορία'} ✓</i>`:''}`),
+    return [c(p.type==='income'?'pc-inc':'pc-exp', p.type==='income'?'Έσοδο':'Έξοδο'), c('pc-amt', (p.type==='income'?'+':'−')+fmt(p.amount)),
+      c(p.catMatched?'pc-hit':'', `${p.catEmoji} ${esc(p.category)}${p.catMatched?` <i>${p.catOwn?'δική σου κατηγορία':'κατηγορία'} ✓</i>`:''}`),
       p.place?c('', esc(p.place)):'', a?c('', esc(a.name)):'', c('', p.date===today()?'σήμερα':fmtDate(p.date))].join('');
   }
-  if (p.kind==='event') return [c('ev','Ατζέντα'), c('hit', esc(p.title)), c('', p.date===today()?'σήμερα':p.date===ymd(dShift(new Date(),1))?'αύριο':fmtDate(p.date)),
-    p.start?c('', `${p.start}–${p.end}${toMin(p.end)<toMin(p.start)?' (+1)':''}`):c('', 'όλη μέρα'), p.repeat!=='none'?c('', REPEATS[p.repeat]):''].join('');
-  if (p.kind==='ask') return c('ev','Ερώτηση') + c('', 'πάτα Enter για απάντηση');
-  return `<span class="pc warn">${esc(p.why)}</span>`;
+  if (p.kind==='event') return [c('pc-ev','Ατζέντα'), c('pc-hit', esc(p.title)), c('', p.date===today()?'σήμερα':p.date===ymd(dShift(new Date(),1))?'αύριο':fmtDate(p.date)),
+    p.start?c('', `${p.start}–${p.end}${toMin(p.end)<toMin(p.start)?' (+1)':''}`):c('', 'όλη μέρα'), p.repeat!=='none'?c('', REPEATS[p.repeat]):'', p.note?c('', '📝 '+esc(p.note)):''].join('');
+  if (p.kind==='ask') return c('pc-ev','Ερώτηση') + c('', 'πάτα Enter για απάντηση');
+  return `<span class="pc pc-warn">${esc(p.why)}</span>`;
 }
 
 const AI = { log:[], el:null };
@@ -2102,8 +2107,13 @@ try { AI.log = JSON.parse(sessionStorage.getItem('spyr.ai')||'[]'); } catch(e){}
 function aiSaveLog(){ try { sessionStorage.setItem('spyr.ai', JSON.stringify(AI.log.slice(-40))); } catch(e){} }
 function aiOpen(){
   const el = document.getElementById('ai'); el.classList.add('open'); document.body.classList.add('ai-on');
-  aiPaint(); setTimeout(()=>document.getElementById('aiIn').focus({preventScroll:true}), 250);
+  aiPaint(); aiFit(); setTimeout(()=>document.getElementById('aiIn').focus({preventScroll:true}), 250);
 }
+function aiFit(){ const el = document.getElementById('ai'); if (!el || !el.classList.contains('open') || !window.visualViewport || innerWidth>820){ if (el){ el.style.top=''; el.style.height=''; } return; }
+  const vv = visualViewport, h = Math.min(vv.height - 12, 720, Math.max(340, vv.height*.9)); el.style.height = h+'px'; el.style.top = (vv.offsetTop + vv.height - h)+'px';
+  const m = document.getElementById('aiMsgs'); m.scrollTop = m.scrollHeight; }
+if (window.visualViewport){ visualViewport.addEventListener('resize', aiFit); visualViewport.addEventListener('scroll', aiFit); }
+function aiGrow(){ const t = document.getElementById('aiIn'); t.style.height = 'auto'; t.style.height = Math.min(t.scrollHeight+2, 120)+'px'; }
 function aiClose(){ document.getElementById('ai').classList.remove('open'); document.body.classList.remove('ai-on'); }
 function aiPaint(){
   const box = document.getElementById('aiMsgs');
@@ -2125,17 +2135,17 @@ function aiSend(){
       AI.log.push({undo:'tx:'+id, html:`✓ ${p.type==='income'?'Έσοδο':'Έξοδο'} <b>${p.type==='income'?'+':'−'}${fmt(p.amount)}</b> · ${p.catEmoji} ${esc(p.category)}${p.place?' · '+esc(p.place):''}<br><small class="faint">${esc(a.name)}: ${fmt(balance(a.id))} · ${p.date===today()?'σήμερα':fmtDate(p.date)}</small>`});
     }
     if (p.kind==='event'){
-      const id = uid(); S.events.push({id, created:Date.now(), done:false, doneDates:[], title:p.title, date:p.date, start:p.start, end:p.end, color:EV_COLORS[S.events.length%EV_COLORS.length], repeat:p.repeat, note:''});
+      const id = uid(); S.events.push({id, created:Date.now(), done:false, doneDates:[], title:p.title, date:p.date, start:p.start, end:p.end, color:EV_COLORS[S.events.length%EV_COLORS.length], repeat:p.repeat, note:p.note||''});
       save();
-      AI.log.push({undo:'ev:'+id, html:`✓ Στην ατζέντα: <b>${esc(p.title)}</b><br><small class="faint">${p.date===today()?'Σήμερα':fmtDate(p.date)}${p.start?` · ${p.start}–${p.end}`:' · όλη μέρα'}${p.repeat!=='none'?' · '+REPEATS[p.repeat]:''}</small>`});
+      AI.log.push({undo:'ev:'+id, html:`✓ Στην ατζέντα: <b>${esc(p.title)}</b>${p.note?`<br>📝 ${esc(p.note)}`:''}<br><small class="faint">${p.date===today()?'Σήμερα':fmtDate(p.date)}${p.start?` · ${p.start}–${p.end}`:' · όλη μέρα'}${p.repeat!=='none'?' · '+REPEATS[p.repeat]:''}</small>`});
     }
   }
-  inp.value = ''; aiPreview(); aiSaveLog(); aiPaint(); render();
+  inp.value = ''; aiGrow(); aiPreview(); aiSaveLog(); aiPaint(); render();
 }
 function aiPreview(){
   const v = document.getElementById('aiIn').value.split('\n').filter(x=>x.trim()).pop();
   const pv = document.getElementById('aiPrev'); const html = v ? previewHtml(parseCmd(v)) : '';
-  pv.innerHTML = html; pv.classList.toggle('show', !!html);
+  pv.innerHTML = html; pv.classList.toggle('show', !!html); const ms = document.getElementById('aiMsgs'); requestAnimationFrame(()=>{ ms.scrollTop = ms.scrollHeight; });
 }
 document.getElementById('ai').addEventListener('click', e=>{
   const ex = e.target.closest('[data-aiex]'); if (ex){ const i = document.getElementById('aiIn'); i.value = ex.dataset.aiex; aiPreview(); i.focus(); return; }
@@ -2145,7 +2155,7 @@ document.getElementById('ai').addEventListener('click', e=>{
   if (e.target.closest('[data-aiclose]')) aiClose();
   if (e.target.closest('[data-aiclear]')){ AI.log = []; aiSaveLog(); aiPaint(); }
 });
-document.getElementById('aiIn').addEventListener('input', aiPreview);
+document.getElementById('aiIn').addEventListener('input', ()=>{ aiPreview(); aiGrow(); });
 document.getElementById('aiIn').addEventListener('keydown', e=>{ if (e.key==='Enter' && !e.shiftKey){ e.preventDefault(); aiSend(); } if (e.key==='Escape'){ e.stopPropagation(); aiClose(); } });
 document.getElementById('aiSend').onclick = aiSend;
 document.getElementById('aiSend').innerHTML = svg('send');
