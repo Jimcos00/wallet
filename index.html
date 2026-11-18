@@ -55,6 +55,7 @@
   --shadow:0 30px 60px -30px rgba(5,3,14,.75);
 }
 *{box-sizing:border-box}
+[hidden]{display:none!important}
 html,body{margin:0;min-height:100%}
 body{font-family:Manrope,system-ui,-apple-system,Segoe UI,Roboto,sans-serif;color:var(--text);background:var(--body);transition:background .6s;
   -webkit-font-smoothing:antialiased;-webkit-tap-highlight-color:transparent;overflow-x:hidden}
@@ -343,6 +344,45 @@ input.inp[type=date]::-webkit-calendar-picker-indicator,input.inp[type=time]::-w
 .linkbtn{display:inline-flex;align-items:center;gap:6px;margin-top:10px;padding:6px 10px 6px 8px;border:1px solid transparent;border-radius:999px;background:none;color:var(--muted);font:inherit;font-size:12.5px;font-weight:700;cursor:pointer;transition:.2s}
 .linkbtn svg{width:14px;height:14px}
 .linkbtn.danger:hover{color:var(--danger);background:rgba(255,120,120,.10);border-color:rgba(255,120,120,.25)}
+.ai{position:fixed;z-index:58;top:16px;right:16px;bottom:16px;width:min(410px,calc(100vw - 32px));display:flex;flex-direction:column;border-radius:28px;background:var(--sheet);overflow:hidden;
+  backdrop-filter:blur(28px) saturate(1.4);-webkit-backdrop-filter:blur(28px) saturate(1.4);box-shadow:0 40px 80px -30px rgba(0,0,0,.7);
+  transform:translateX(calc(100% + 40px));opacity:.4;visibility:hidden;transition:transform .55s var(--spring),opacity .35s,visibility .55s}
+.ai.open{transform:none;opacity:1;visibility:visible}
+.ai header{display:flex;align-items:center;gap:12px;padding:16px 16px 12px;border-bottom:1px solid var(--line-soft)}
+.ai header > div:nth-child(2){flex:1;min-width:0}.ai header b{display:block;font-size:15.5px}.ai header small{display:block;color:var(--muted);font-size:12px}
+.ai header .iconbtn{width:34px;height:34px;font-size:14px}
+.aiorb{width:38px;height:38px;border-radius:50%;flex:none;background:var(--orb);box-shadow:0 8px 20px -6px var(--orb-glow);animation:aispin 8s linear infinite}
+@keyframes aispin{to{filter:hue-rotate(360deg)}}
+.aimsgs{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:10px;overscroll-behavior:contain}
+.msg{max-width:88%;padding:10px 14px;border-radius:18px;font-size:14px;line-height:1.5;animation:rise .45s var(--ease) both}
+.msg.bot{align-self:flex-start;background:rgba(255,255,255,.09);border:1px solid var(--line-soft);border-bottom-left-radius:6px}
+.msg.me{align-self:flex-end;background:rgba(255,255,255,.9);color:var(--accent-ink);font-weight:700;border-bottom-right-radius:6px}
+.msg .undo{margin-left:8px;border:0;background:rgba(255,255,255,.12);color:var(--text);border-radius:999px;padding:3px 10px;font:inherit;font-size:12px;font-weight:700;cursor:pointer}
+.msg .undo:hover{background:rgba(255,255,255,.22)}
+.aiex{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.aiex button{border:1px solid var(--line);background:rgba(255,255,255,.07);color:var(--text);border-radius:999px;padding:6px 11px;font:inherit;font-size:12.5px;font-weight:600;cursor:pointer;transition:.2s}
+.aiex button:hover{background:rgba(255,255,255,.16);transform:translateY(-1px)}
+.aiprev{display:flex;flex-wrap:wrap;gap:6px;padding:0 16px;max-height:0;opacity:0;overflow:hidden;transition:max-height .3s var(--ease),opacity .25s,padding .3s}
+.aiprev.show{max-height:140px;opacity:1;padding:10px 16px 2px}
+.pc{display:inline-flex;align-items:center;gap:5px;padding:5px 11px;border-radius:999px;background:rgba(255,255,255,.09);border:1px solid var(--line-soft);font-size:12.5px;font-weight:700;animation:pcin .3s var(--ease) both}
+@keyframes pcin{from{opacity:0;transform:translateY(4px) scale(.95)}}
+.pc i{font-style:normal;font-weight:600;font-size:11px;opacity:.75}
+.pc.exp{background:rgba(255,140,160,.18);color:var(--neg)}.pc.inc{background:rgba(var(--acc-rgb),.25);color:var(--pos)}.pc.ev{background:rgba(255,255,255,.2)}
+.pc.amt{font-size:13.5px}
+.pc.hit{background:rgba(var(--acc-rgb),.3);border-color:rgba(var(--acc-rgb),.8);box-shadow:0 0 0 3px rgba(var(--acc-rgb),.18),0 0 18px rgba(var(--acc-rgb),.35)}
+.pc.warn{background:none;border:0;padding:0;color:var(--muted);font-weight:600;line-height:1.4}
+.aibar{display:flex;gap:8px;align-items:flex-end;padding:12px 16px calc(16px + env(safe-area-inset-bottom))}
+.aibar textarea{flex:1;resize:none;min-height:46px;max-height:120px;line-height:1.4}
+.aibar .iconbtn{width:46px;height:46px;border-radius:50%;flex:none;background:rgba(255,255,255,.9);color:var(--accent-ink)}
+.aibar .iconbtn svg{width:19px;height:19px}
+.aibtn{position:relative}.aibtn:after{content:"";position:absolute;inset:-2px;border-radius:50%;border:1px solid rgba(var(--acc-rgb),.6);animation:aipulse 3s ease-out infinite;pointer-events:none}
+@keyframes aipulse{0%{transform:scale(.95);opacity:.9}70%,100%{transform:scale(1.25);opacity:0}}
+.ai-fab{display:none}
+.catnew{margin:-4px 0 14px;padding:12px;border-radius:16px;background:rgba(255,255,255,.06);border:1px dashed var(--line);display:flex;flex-direction:column;gap:10px}
+.catown{display:flex;flex-wrap:wrap;gap:6px}.catown span{display:inline-flex;align-items:center;gap:6px;padding:5px 6px 5px 11px;border-radius:999px;background:rgba(255,255,255,.1);font-size:13px;font-weight:700}
+.catown button{width:20px;height:20px;border-radius:50%;border:0;background:rgba(255,255,255,.12);color:var(--text);cursor:pointer;line-height:1;font-size:14px}.catown button:hover{background:var(--danger);color:#fff}
+.catemo{width:44px;height:44px;flex:none;border-radius:13px;border:1px solid var(--line);background:rgba(255,255,255,.1);font-size:21px;cursor:pointer}
+.emopick.sm button{font-size:17px}
 .emopick{display:grid;grid-template-columns:repeat(auto-fill,minmax(40px,1fr));gap:6px}
 .emopick button{aspect-ratio:1;border-radius:12px;border:1px solid var(--line-soft);background:rgba(255,255,255,.06);font-size:19px;cursor:pointer;display:grid;place-items:center;transition:transform .2s var(--ease),background .2s,border-color .2s}
 .emopick button:hover{transform:translateY(-2px);background:rgba(255,255,255,.12)}
@@ -455,6 +495,9 @@ main.enter .track i,main.enter .meter i,main.enter .split i{animation:fillx 1.1s
   .fab{display:grid;place-items:center;position:fixed;right:20px;bottom:calc(96px + env(safe-area-inset-bottom));z-index:41;width:58px;height:58px;border-radius:50%;border:none;
     background:radial-gradient(circle at 30% 25%,#fff,#e6e1d6);color:var(--ink);box-shadow:0 16px 34px -10px rgba(0,0,0,.6),inset 0 -3px 6px rgba(0,0,0,.1);cursor:pointer;transition:transform .3s var(--spring)}
   .fab:active{transform:scale(.9)}
+  .ai-fab{display:grid;bottom:calc(166px + env(safe-area-inset-bottom));width:48px;height:48px;right:25px;background:var(--sheet)!important;color:var(--text)!important;border:1px solid var(--line)!important;backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px)}
+  .ai{top:auto;left:0;right:0;bottom:0;width:auto;height:min(86vh,720px);border-radius:28px 28px 0 0;transform:translateY(105%)}
+  body.ai-on .tabbar,body.ai-on .fab{opacity:0;pointer-events:none}
   .fab svg{width:24px;height:24px}
   .li{grid-template-columns:40px minmax(0,1fr) auto;padding:11px 2px}
   .li .acts{grid-column:2/-1;justify-content:flex-end;opacity:1;margin-top:-4px}
@@ -485,6 +528,13 @@ main.enter .track i,main.enter .meter i,main.enter .split i{animation:fillx 1.1s
 
 <nav class="tabbar glass" id="tabbar"></nav>
 <button class="fab" id="fab" aria-label="Νέο έξοδο"></button>
+<button class="fab ai-fab" id="aiFab" aria-label="Γρήγορη καταχώρηση" data-act="ai"></button>
+<section class="ai glass" id="ai" aria-label="Βοηθός">
+  <header><div class="aiorb"></div><div><b>Γρήγορη καταχώρηση</b><small>Γράψε όπως μιλάς, το βάζω εγώ στη θέση του</small></div><button class="iconbtn" data-aiclear title="Καθάρισμα">↺</button><button class="iconbtn" data-aiclose title="Κλείσιμο">✕</button></header>
+  <div class="aimsgs" id="aiMsgs"></div>
+  <div class="aiprev" id="aiPrev"></div>
+  <div class="aibar"><textarea class="inp" id="aiIn" rows="1" placeholder="π.χ. έξοδο 5€ 4all φαγητό" autocomplete="off"></textarea><button class="iconbtn" id="aiSend" title="Αποστολή"></button></div>
+</section>
 
 <div class="modal" id="modal"><div class="sheet glass" id="sheet"></div></div>
 
@@ -538,6 +588,8 @@ const I = {
   cal:'<rect x="3" y="4.5" width="18" height="16.5" rx="3"/><path d="M3 9.5h18M8 2.5v4M16 2.5v4"/>',
   check:'<path d="M5 12.5l4.5 4.5L19 7"/>',
   next:'<path d="M9 6l6 6-6 6"/>',
+  spark:'<path d="M12 3l1.9 5.2L19 10l-5.1 1.8L12 17l-1.9-5.2L5 10l5.1-1.8z"/><path d="M19 15l.8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8z"/>',
+  send:'<path d="M4 12l16-8-6 16-2.5-6.5z"/><path d="M11.5 13.5L20 4"/>',
   palette:'<path d="M12 3a9 9 0 1 0 0 18c1.2 0 1.8-.9 1.4-1.9-.4-1.1.3-2.1 1.5-2.1H17a4 4 0 0 0 4-4c0-5.5-4-10-9-10z"/><circle cx="7.5" cy="11" r="1"/><circle cx="10.5" cy="7" r="1"/><circle cx="15" cy="7.5" r="1"/>',
   globe:'<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/>'
 };
@@ -588,12 +640,16 @@ const CATS = [
 const INCOME_CATS = [['Μισθός','💶'],['Project / Πελάτης','💻'],['Freelance','🧾'],['Επιστροφή','↩️'],['Άλλο','💰']];
 const OTHER_EMOJIS = ['📌','🧾','🔧','🚗','🅿️','🐶','💇','👕','🎮','📚','📱','💻','🏋️','🧴','🍺','🎟️','🎂','🚬','🧸','🌿','💰','🪙','🏦','🤝'];
 const NOTE_EMOJIS = ['🌐','💻','📈','🧾','🏠','🚗','🎓','✈️','🎁','💡','🛠️','📦'];
-const catIcon = (c) => (CATS.find(x=>x[0]===c)||INCOME_CATS.find(x=>x[0]===c)||[0,'📌'])[1];
+const catIcon = (c) => { const u = (S.cats||[]).find(x=>x.name===c); if (u) return u.emoji; return (CATS.find(x=>x[0]===c)||INCOME_CATS.find(x=>x[0]===c)||[0,'📌'])[1]; };
+// built-ins + your own presets, "Άλλο" always last
+function catList(kind){ const base = kind==='income' ? INCOME_CATS : CATS; const own = (S.cats||[]).filter(c=>c.kind===kind).map(c=>[c.name, c.emoji, c.id]);
+  return [...base.filter(c=>c[0]!=='Άλλο'), ...own, base.find(c=>c[0]==='Άλλο')]; }
+const CAT_EMOJIS = ['🚚','🚗','🛵','📦','💼','💻','🧰','🔧','🎨','📸','🎧','🎓','🏋️','🐶','👶','💇','🍺','🍕','☕','🎮','📚','🏠','💡','📱','✈️','🎁','💸','💵','🪙','🤝','📈','⭐'];
 const ACC_TYPES = {cash:'Μετρητά',bank:'Τράπεζα',card:'Κάρτα',savings:'Αποταμίευση',other:'Άλλο'};
 
 let S = load();
 if (S.settings.name===undefined && S.accounts.length) S.settings.name = 'Spyrlidis';
-function blank(){ return {accounts:[], tx:[], subs:[], notes:[], events:[], deleted:{}, settings:{currency:'EUR', budget:0}}; }
+function blank(){ return {accounts:[], tx:[], subs:[], notes:[], events:[], cats:[], deleted:{}, settings:{currency:'EUR', budget:0}}; }
 const THEMES = [['sage','Sage','linear-gradient(135deg,#d9be93,#4fd1a5 55%,#1c2d32)'],['amethyst','Amethyst','linear-gradient(135deg,#c9c2e3,#8b7cc7 40%,#2a1e4d)']];
 function applyTheme(){ const t = S.settings.theme || 'amethyst'; document.documentElement.dataset.theme = t; document.querySelector('meta[name=theme-color]').content = t==='amethyst' ? '#0e0b1d' : '#1d2f33'; }
 function toggleTheme(){ S.settings.theme = (S.settings.theme||'amethyst')==='amethyst' ? 'sage' : 'amethyst'; save(); applyTheme(); render(); toast('Θέμα: '+THEMES.find(x=>x[0]===S.settings.theme)[1]); }
@@ -601,8 +657,8 @@ function load(){
   try { const d = JSON.parse(localStorage.getItem(KEY)); if (d && d.accounts) return Object.assign(blank(), d); } catch(e){}
   return blank();
 }
-const APP_VER = 6;
-const COLLS = ['accounts','tx','subs','notes','events'];
+const APP_VER = 7;
+const COLLS = ['accounts','tx','subs','notes','events','cats'];
 let snap = new Map();
 const recJson = (r) => JSON.stringify(Object.assign({}, r, {_u:0}));
 function buildSnap(){ snap = new Map(); for (const c of COLLS) for (const r of S[c]) snap.set(c+':'+r.id, recJson(r)); snap.set('settings', recJson(S.settings)); }
@@ -884,7 +940,7 @@ function vDash(){
   const net = inc - spent;
   if (!S.accounts.length) return `
     <div class="top rise"><div><h1>${greet()} 👋</h1><p>Ξεκίνα προσθέτοντας τους λογαριασμούς σου: μετρητά, Revolut, Eurobank, Wise…</p></div>
-    <div class="row"><button class="iconbtn" data-act="sync" title="Συγχρονισμός" style="width:42px;height:42px;border-radius:50%;position:relative">${svg('cloud')}<i class="syncdot abs" data-sync-dot data-state="${Sync.state}"></i></button><button class="iconbtn" data-act="theme" title="Αλλαγή θέματος" style="width:42px;height:42px;border-radius:50%">${svg('palette')}</button></div></div>
+    <div class="row"><button class="iconbtn" data-act="sync" title="Συγχρονισμός" style="width:42px;height:42px;border-radius:50%;position:relative">${svg('cloud')}<i class="syncdot abs" data-sync-dot data-state="${Sync.state}"></i></button><button class="iconbtn aibtn" data-act="ai" title="Γρήγορη καταχώρηση (Ctrl+K)" style="width:42px;height:42px;border-radius:50%">${svg('spark')}</button><button class="iconbtn" data-act="theme" title="Αλλαγή θέματος" style="width:42px;height:42px;border-radius:50%">${svg('palette')}</button></div></div>
     <div class="glass card hero rise" style="max-width:600px;min-height:260px"><i class="orb"></i>
       <h3>Γρήγορη αρχή</h3>
       <div class="field" style="max-width:320px;margin:6px 0 4px"><label>Πώς σε λένε;</label><input class="inp" id="firstName" placeholder="Το όνομά σου" value="${esc(S.settings.name||'')}" autocomplete="given-name"></div>
@@ -898,7 +954,7 @@ function vDash(){
   return `
   <div class="top rise">
     <div><h1>${greet()}${S.settings.name?', <span data-act="rename" style="cursor:pointer">'+esc(S.settings.name)+'</span>':''}</h1><p>${new Date().toLocaleDateString('el-GR',{weekday:'long',day:'numeric',month:'long'})} · ${(()=>{ const n = eventsOn(today()).filter(e=>!isDone(e,today())).length; return n ? `έχεις <b style="color:var(--text)">${n}</b> πράγμα${n===1?'':'τα'} να κάνεις σήμερα` : 'δες πού βρίσκονται τα χρήματά σου'; })()}</p></div>
-    <div class="row"><button class="iconbtn" data-act="sync" title="Συγχρονισμός" style="width:42px;height:42px;border-radius:50%;position:relative">${svg('cloud')}<i class="syncdot abs" data-sync-dot data-state="${Sync.state}"></i></button><button class="iconbtn" data-act="theme" title="Αλλαγή θέματος" style="width:42px;height:42px;border-radius:50%">${svg('palette')}</button><button class="btn hide-m" data-act="newTx" data-type="income">${svg('down')}Έσοδο</button><button class="btn primary hide-m" data-act="newTx">${svg('plus')}Νέο έξοδο</button></div>
+    <div class="row"><button class="iconbtn" data-act="sync" title="Συγχρονισμός" style="width:42px;height:42px;border-radius:50%;position:relative">${svg('cloud')}<i class="syncdot abs" data-sync-dot data-state="${Sync.state}"></i></button><button class="iconbtn aibtn" data-act="ai" title="Γρήγορη καταχώρηση (Ctrl+K)" style="width:42px;height:42px;border-radius:50%">${svg('spark')}</button><button class="iconbtn" data-act="theme" title="Αλλαγή θέματος" style="width:42px;height:42px;border-radius:50%">${svg('palette')}</button><button class="btn hide-m" data-act="newTx" data-type="income">${svg('down')}Έσοδο</button><button class="btn primary hide-m" data-act="newTx">${svg('plus')}Νέο έξοδο</button></div>
   </div>
   <div class="bento">
     ${todayCard()}
@@ -1433,7 +1489,7 @@ function openModal(html, onSubmit){
 }
 function closeModal(){ modal.classList.remove('open'); if (typeof tpClose==='function') tpClose(); }
 modal.addEventListener('click', e=>{ if (e.target===modal) closeModal(); });
-document.addEventListener('keydown', e=>{ if (e.key==='Escape'){ closeModal(); closeViewer(); } });
+document.addEventListener('keydown', e=>{ if (e.key==='Escape'){ closeModal(); closeViewer(); if (typeof aiClose==='function') aiClose(); } });
 const accOptions = (sel) => S.accounts.map(a=>`<option value="${a.id}" ${a.id===sel?'selected':''}>${esc(a.name)} (${fmt(balance(a.id))})</option>`).join('');
 const actions = (del) => `<div class="actions">${del?`<button type="button" class="btn ghost danger" data-del style="margin-right:auto">Διαγραφή</button>`:''}<button type="button" class="btn ghost" onclick="closeModal()">Άκυρο</button><button class="btn primary">Αποθήκευση</button></div>`;
 
@@ -1465,14 +1521,19 @@ function formTx(t, opts={}){
   t = t || {type:opts.type||'expense', amount:'', accountId:opts.acc||S.settings.lastAcc||S.accounts[0].id, toAccountId:'', place:'', category:'', date:today(), note:''};
   let type = t.type;
   const body = () => {
-    const cats = type==='income'?INCOME_CATS:CATS;
+    const cats = catList(type);
     return `<h2>${isNew?'Νέα κίνηση':'Επεξεργασία κίνησης'}</h2>
     <div class="seg" style="margin-bottom:14px">${[['expense','Έξοδο'],['income','Έσοδο'],['transfer','Μεταφορά']].map(([k,l])=>`<button type="button" class="${type===k?'on':''}" data-ttype="${k}">${l}</button>`).join('')}</div>
     <div class="field"><label>Ποσό (€)</label><input class="inp amount-inp" name="amount" inputmode="decimal" required placeholder="0,00" value="${t.amount}" autofocus></div>
     <div class="${type==='transfer'?'two':''}"><div class="field"><label>${type==='transfer'?'Από':type==='income'?'Σε λογαριασμό':'Από λογαριασμό / μετρητά'}</label><select class="inp" name="accountId">${accOptions(t.accountId)}</select></div>
     ${type==='transfer'?`<div class="field"><label>Προς</label><select class="inp" name="toAccountId">${accOptions(t.toAccountId||S.accounts.find(a=>a.id!==t.accountId)?.id)}</select></div>`:''}</div>
     ${type!=='transfer'?`<div class="field"><label>${type==='income'?'Από ποιον / τι':'Πού ξόδεψες'}</label><input class="inp" name="place" value="${esc(t.place)}" placeholder="${type==='income'?'π.χ. Πελάτης site':'π.χ. Σκλαβενίτης'}" list="places"></div>
-    <div class="field"><label>Κατηγορία</label><select class="inp" name="category">${cats.map(([c,i])=>`<option ${t.category===c?'selected':''} value="${c}">${i} ${c}</option>`).join('')}</select></div>
+    <div class="field"><label style="display:flex;justify-content:space-between;align-items:center">Κατηγορία <button type="button" class="linkbtn" data-catnew style="margin:0;padding:2px 8px">${svg('plus')}Δική μου κατηγορία</button></label><select class="inp" name="category">${cats.map(([c,i])=>`<option ${t.category===c?'selected':''} value="${esc(c)}">${i} ${esc(c)}</option>`).join('')}</select></div>
+    <div class="catnew" id="catNew" hidden>
+      ${(S.cats||[]).filter(c=>c.kind===type).length?`<div class="catown">${(S.cats||[]).filter(c=>c.kind===type).map(c=>`<span>${c.emoji} ${esc(c.name)}<button type="button" data-catdel="${c.id}" title="Διαγραφή">×</button></span>`).join('')}</div>`:''}
+      <div class="row" style="gap:8px;flex-wrap:nowrap"><button type="button" class="catemo" id="catEmo">${type==='income'?'💵':'📦'}</button><input class="inp" id="catName" placeholder="${type==='income'?'π.χ. Δρομολόγια':'π.χ. Γυμναστήριο'}" style="flex:1;min-width:0"><button type="button" class="btn sm primary" data-catadd>Προσθήκη</button></div>
+      <div class="emopick sm" id="catEmos" hidden>${CAT_EMOJIS.map(e=>`<button type="button" data-cemo="${e}">${e}</button>`).join('')}</div>
+    </div>
     <div class="field" id="emoField" style="${(t.category||cats[0][0])==='Άλλο'?'':'display:none'}"><label>Εικονίδιο</label><div class="emopick">${OTHER_EMOJIS.map(e=>`<button type="button" class="${(t.emoji||(type==='income'?'💰':'📌'))===e?'on':''}" data-emo="${e}">${e}</button>`).join('')}</div><input type="hidden" name="emoji" value="${t.emoji||(type==='income'?'💰':'📌')}"></div>`:''}
     <div class="two"><div class="field"><label>Ημερομηνία</label><input class="inp" type="date" name="date" value="${t.date}" required></div>
     <div class="field"><label>Σημείωση</label><input class="inp" name="note" value="${esc(t.note)}" placeholder="προαιρετικό"></div></div>
@@ -1492,9 +1553,19 @@ function formTx(t, opts={}){
     const a = accById(rec.accountId);
     toast(type==='expense' ? `−${fmt(amount)} από ${a.name} · μένουν ${fmt(balance(a.id))}` : 'Αποθηκεύτηκε');
   };
+  let keep = false; const mountKeep = ()=>{ keep = true; mount(); keep = false; };
   const mount = () => {
-    const prev = document.getElementById('mf'); if (prev && modal.classList.contains('open')){ const fd = new FormData(prev); for (const k of ['amount','accountId','place','date','note']) if (fd.has(k)) t[k]=fd.get(k); t.emoji = ''; }
+    const prev = keep ? null : document.getElementById('mf'); if (prev && modal.classList.contains('open')){ const fd = new FormData(prev); for (const k of ['amount','accountId','place','date','note']) if (fd.has(k)) t[k]=fd.get(k); t.emoji = ''; }
     openModal(body(), submit);
+    const cn = sheet.querySelector('[data-catnew]'); if (cn) cn.onclick = ()=>{ const box = document.getElementById('catNew'); box.hidden = !box.hidden; if (!box.hidden){ box.animate([{opacity:0,transform:'translateY(-6px)'},{opacity:1,transform:'none'}],{duration:280,easing:'ease-out'}); document.getElementById('catName').focus(); } };
+    const ce = document.getElementById('catEmo'); if (ce) ce.onclick = ()=>{ const g = document.getElementById('catEmos'); g.hidden = !g.hidden; };
+    sheet.querySelectorAll('[data-cemo]').forEach(b=>b.onclick=()=>{ ce.textContent = b.dataset.cemo; document.getElementById('catEmos').hidden = true; });
+    const remember = ()=>{ const fd = new FormData(document.getElementById('mf')); for (const k of ['amount','accountId','place','date','note','category']) if (fd.has(k)) t[k]=fd.get(k); };
+    const ca = sheet.querySelector('[data-catadd]'); if (ca) ca.onclick = ()=>{ const name = document.getElementById('catName').value.trim(); if (!name){ document.getElementById('catName').focus(); return; }
+      if (catList(type).some(c=>c[0].toLowerCase()===name.toLowerCase())){ toast('Υπάρχει ήδη αυτή η κατηγορία'); return; }
+      remember(); S.cats.push({id:uid(), name, emoji:ce.textContent, kind:type, created:Date.now()}); save(); t.category = name; mountKeep(); toast(`Νέα κατηγορία: ${ce.textContent} ${name}`); };
+    const cnm = document.getElementById('catName'); if (cnm) cnm.onkeydown = e=>{ if (e.key==='Enter'){ e.preventDefault(); ca.click(); } };
+    sheet.querySelectorAll('[data-catdel]').forEach(b=>b.onclick=()=>{ const c = S.cats.find(x=>x.id===b.dataset.catdel); if (!c || !confirm(`Διαγραφή κατηγορίας "${c.name}"; Οι κινήσεις της μένουν όπως είναι.`)) return; remember(); S.cats = S.cats.filter(x=>x!==c); if (t.category===c.name) t.category=''; save(); mountKeep(); });
     const cs = sheet.querySelector('[name=category]'); if (cs) cs.onchange = ()=>{ const f = document.getElementById('emoField'); f.style.display = cs.value==='Άλλο' ? '' : 'none'; if (cs.value==='Άλλο') f.animate([{opacity:0,transform:'translateY(-6px)'},{opacity:1,transform:'none'}],{duration:300,easing:'ease-out'}); };
     sheet.querySelectorAll('[data-emo]').forEach(b=>b.onclick=()=>{ sheet.querySelectorAll('[data-emo]').forEach(x=>x.classList.toggle('on', x===b)); sheet.querySelector('[name=emoji]').value = b.dataset.emo; });
     sheet.querySelectorAll('[data-ttype]').forEach(b=>b.onclick=()=>{ type=b.dataset.ttype; t.category=''; const seg=b.parentNode; segMove(seg,b); setTimeout(mount,180); });
@@ -1843,6 +1914,244 @@ document.getElementById('vFiles').onclick = e=>{
 };
 
 
+/* ============ quick assistant: type "έξοδο 5€ 4all φαγητό" or "αύριο γυμναστήριο 7-9" ============ */
+const nrm1 = ch => { const c = ch.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,''); return (c[0]||' ').replace('ς','σ'); };
+const nrm = s => String(s||'').split('').map(nrm1).join('');
+const CAT_SYN = {
+  'Φαγητό':'φαγητο φαγητα food σουβλακι σουβλακια πιτσα burger μπεργκερ γυρο γυροσ κρεπα εστιατοριο ταβερνα delivery efood wolt μεσημεριανο βραδινο',
+  'Σούπερ μάρκετ':'σουπερ σουπερμαρκετ μαρκετ σκλαβενιτησ μασουτησ lidl βασιλοπουλοσ mymarket γαλαξιασ',
+  'Καφές':'καφε καφεσ καφεδεσ coffee freddo φρεντο εσπρεσο cappuccino',
+  'Μεταφορές':'ταξι uber λεωφορειο μετρο εισιτηριο οασθ οασα beat διοδια παρκινγκ parking',
+  'Καύσιμα':'βενζινη βενζινα πετρελαιο καυσιμα diesel shell eko avin bp',
+  'Λογαριασμοί':'ρευμα δεη νερο ιντερνετ internet cosmote vodafone nova τηλεφωνο λογαριασμοσ λογαριασμο',
+  'Ενοίκιο':'ενοικιο νοικι',
+  'Συνδρομές':'συνδρομη συνδρομεσ netflix spotify youtube icloud chatgpt claude disney',
+  'Ψώνια':'ψωνια ρουχα παπουτσια zara amazon skroutz shein',
+  'Διασκέδαση':'διασκεδαση σινεμα ποτο ποτα μπυρα μπυρεσ club μπαρ bar cinema steam εξοδοσ',
+  'Υγεία':'φαρμακειο φαρμακα γιατροσ υγεια οδοντιατροσ',
+  'Δουλειά':'δουλεια γραφειο',
+  'Δώρα':'δωρο δωρα',
+  'Ταξίδια':'ταξιδι ταξιδια ξενοδοχειο airbnb αεροπλανο πτηση booking',
+  'Μισθός':'μισθοσ μισθο μισθου',
+  'Project / Πελάτης':'project πελατησ πελατη site ιστοσελιδα σαιτ',
+  'Freelance':'freelance',
+  'Επιστροφή':'επιστροφη refund'
+};
+const STOP = new Set('για στο στη στην στον στα στισ απο με σε και το τη την τα ο η οι του τησ των ενα μια εναν ευρω ευρο ευρωπ eur ειχα εκανα'.split(' '));
+const DAYS = ['κυριακη','δευτερα','τριτη','τεταρτη','πεμπτη','παρασκευη','σαββατο'];
+const stemEq = (a, b) => a===b || (a.length>=4 && b.length>=4 && (a.startsWith(b.slice(0, Math.max(4, b.length-2))) || b.startsWith(a.slice(0, Math.max(4, a.length-2)))));
+const pad2 = n => String(n).padStart(2,'0');
+const dShift = (d, n) => { const x = new Date(d); x.setDate(x.getDate()+n); return x; };
+
+function catPools(){
+  const own = (S.cats||[]).map(c=>({name:c.name, emoji:c.emoji, kind:c.kind, own:true, keys:nrm(c.name).split(/[\s/]+/).filter(w=>w.length>=3)}));
+  const builtin = [...CATS.map(c=>({name:c[0], emoji:c[1], kind:'expense'})), ...INCOME_CATS.map(c=>({name:c[0], emoji:c[1], kind:'income'}))].filter(c=>c.name!=='Άλλο')
+    .map(c=>Object.assign(c, {keys:[...nrm(c.name).split(/[\s/]+/).filter(w=>w.length>=3), ...(CAT_SYN[c.name]||'').split(' ').filter(Boolean)]}));
+  return { own, builtin };
+}
+const allCats = () => { const p = catPools(); return [...p.own, ...p.builtin]; };
+function parseCmd(raw){
+  let text = String(raw||'').trim(); if (!text) return null;
+  let N = nrm(text);
+  const cut = (i, len) => { text = text.slice(0,i) + ' '.repeat(len) + text.slice(i+len); N = N.slice(0,i) + ' '.repeat(len) + N.slice(i+len); };
+  const W = '(^|[\\s,.;!?(])';  const E = '(?=$|[\\s,.;!?)])';
+  const take = (re) => { const m = re.exec(N); if (!m) return null; const off = (m[1]||'').length; cut(m.index+off, m[0].length-off); return m; };
+  const out = { raw:String(raw).trim() };
+
+  // question?
+  if (/(^|\s)(ποσα|ποσο|τι εχω|υπολοιπο|υπολοιπα|τι πρεπει)(?=\s|$|\?)/.test(N) && !/\d+\s*(€|ευρ)/.test(N)) return Object.assign(out, {kind:'ask', q:N});
+
+  // repeat
+  let repeat = 'none';
+  if (take(new RegExp(W+'(καθε μερα|καθημερινα)'+E))) repeat = 'daily';
+  else if (take(new RegExp(W+'(καθημερινεσ)'+E))) repeat = 'weekdays';
+  else if (take(new RegExp(W+'(καθε εβδομαδα)'+E))) repeat = 'weekly';
+  else if (take(new RegExp(W+'(καθε μηνα)'+E))) repeat = 'monthly';
+  let everyDay = null; { const m = take(new RegExp(W+'καθε ('+DAYS.join('|')+')'+E)); if (m){ repeat = 'weekly'; everyDay = DAYS.indexOf(m[2].split(' ').pop()); } }
+
+  // date
+  let date = null, dayIdx = null, dateWord = '';
+  const now = new Date();
+  const dw = [['μεθαυριο',2],['αυριο',1],['σημερα',0],['προχθεσ',-2],['προχτεσ',-2],['χθεσ',-1],['χτεσ',-1]];
+  for (const [w,n] of dw){ if (take(new RegExp(W+w+E))){ date = ymd(dShift(now,n)); dateWord = w; break; } }
+  if (!date){ const m = take(new RegExp(W+'(?:την |το |στισ )?(\\d{1,2})[/.](\\d{1,2})(?:[/.](\\d{2,4}))?'+E));
+    if (m){ let y = m[4] ? +m[4] : now.getFullYear(); if (y<100) y += 2000; const d = new Date(y, +m[3]-1, +m[2]); if (!isNaN(d)) date = ymd(d); } }
+  if (!date){ const m = take(new RegExp(W+'(?:την |το |αυτη την |αυτο το |αλλη |επομενη )?('+DAYS.join('|')+')'+E)); if (m) dayIdx = DAYS.indexOf(m[2]); }
+  if (everyDay!=null && dayIdx==null && !date) dayIdx = everyDay;
+  const pm = !!take(new RegExp(W+'(το βραδυ|βραδυ|το απογευμα|απογευμα|μμ|μ\\.μ\\.|pm)'+E));
+  const am = !!take(new RegExp(W+'(το πρωι|πρωι|πμ|π\\.μ\\.|am)'+E));
+
+  // time: range "7-9", "19:00-21:30", "από 7 μέχρι 9", or single "στις 7"
+  let start = null, end = null;
+  const hm = (h, m) => (h>23 || m>59) ? null : pad2(h)+':'+pad2(m||0);
+  let m = take(new RegExp(W+'(?:απο )?(\\d{1,2})(?:[:.](\\d{2}))?\\s*(?:-|–|εωσ|μεχρι|ωσ)\\s*(\\d{1,2})(?:[:.](\\d{2}))?(?!\\s*(?:€|ευρ|eur))'+E));
+  if (m){ let h1 = +m[2], h2 = +m[4];
+    if (pm){ if (h1<12) h1 += 12; if (h2<12) h2 += 12; }
+    else if (!am && h1<12 && h2<=12 && (!date || date===today())){ // "7-9" said in the evening most likely means 19-21
+      const endMinNow = now.getHours()*60+now.getMinutes(); if (h2*60 < endMinNow && (h2+12)*60 > endMinNow && h2+12<24){ h1 += 12; h2 += 12; } }
+    start = hm(h1, +(m[3]||0)); end = hm(h2, +(m[5]||0)); }
+  if (!start){ m = take(new RegExp(W+'(?:στισ|στη|στην|@|ωρα) ?(\\d{1,2})(?:[:.](\\d{2}))?'+E)) || take(new RegExp(W+'(\\d{1,2}):(\\d{2})'+E));
+    if (m){ let h = +m[2]; if (pm && h<12) h += 12; start = hm(h, +(m[3]||0)); } }
+
+  // amount: "5€", "5 ευρώ", "+130", "-12,50", "€7"
+  let amount = null, sign = 0;
+  const toks = () => [...N.matchAll(/[+\-−€]?\d+[.,]\d+[^\s,;!?]*|[^\s,;!?]+/g)].map(t=>({t:t[0], i:t.index}));
+  for (const pass of [1,2,3]){
+    if (amount!=null) break;
+    const T = toks();
+    for (let k=0; k<T.length; k++){
+      const {t,i} = T[k];
+      let mm = t.match(/^([+\-−])?€?(\d+(?:[.,]\d{1,2})?)(€|ευρω|ευρο|eur|ε|e)?$/); if (!mm) continue;
+      const nextCur = T[k+1] && /^(€|ευρω|ευρο|eur|ε)$/.test(T[k+1].t);
+      const hasCur = !!mm[3] || t.includes('€') || nextCur;
+      if (pass===1 && !hasCur) continue;
+      if (pass===2 && !mm[1]) continue;
+      amount = num(mm[2]); sign = mm[1] ? (mm[1]==='+'?1:-1) : 0;
+      cut(i, t.length); if (nextCur) cut(T[k+1].i, T[k+1].t.length);
+      break;
+    }
+    if (pass===2 && amount==null){
+      const ws = toks().map(x=>x.t);
+      const money = /(^|\s)(εξοδ|εσοδ|πληρω|εδωσα|ξοδεψα|αγορασα|εισπραξα|πηρα|μισθ)/.test(N) || /\d[.,]\d/.test(N)
+        || ws.some(w=>allCats().some(c=>c.keys.some(k=>stemEq(w,k)))) || S.accounts.some(a=>N.includes(nrm(a.name)));
+      if (!money) break;
+    }
+  }
+
+  // explicit type words
+  let type = null;
+  if (take(new RegExp(W+'(εσοδο|εσοδα|πληρωθηκα|εισπραξα|μπηκαν|κερδισα|πηρα)'+E))) type = 'income';
+  if (take(new RegExp(W+'(εξοδο|εξοδα|πληρωσα|εδωσα|ξοδεψα|αγορασα|χαλασα)'+E))) type = type || 'expense';
+  if (!type && sign) type = sign>0 ? 'income' : 'expense';
+  const eventWord = !!take(new RegExp(W+'(ραντεβου|task|υπενθυμιση|ατζεντα|meeting|υπενθυμισε μου|θυμισε μου)'+E));
+
+  // account
+  let accountId = null;
+  for (const a of S.accounts){ const an = nrm(a.name).trim(); if (!an) continue;
+    const re = new RegExp(W+'(?:απο (?:τη |την |το )?|με (?:τη |την |το )?|στη |στην |στο |σε )?('+an.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+')'+E);
+    if (take(re)){ accountId = a.id; break; } }
+  if (!accountId){ const mc = take(new RegExp(W+'(?:με |σε )?(μετρητα|cash|κεσ)'+E)); if (mc){ const c = S.accounts.find(a=>a.type==='cash'); if (c) accountId = c.id; } }
+  if (!accountId){ const mc = take(new RegExp(W+'(?:με |απο )?(?:την )?(καρτα)'+E)); if (mc){ const c = S.accounts.find(a=>a.type==='card') || S.accounts.find(a=>a.type==='bank'); if (c) accountId = c.id; } }
+
+  // category: your own presets first, then built-ins (+ common words / brands)
+  const words = toks().filter(x=>!STOP.has(x.t) && !/^\d+$/.test(x.t));
+  let cat = null, catVia = null, catOwn = false;
+  const { own, builtin } = catPools();
+  outer: for (const pool of [own, builtin]) for (const c of pool){
+    if (type && c.kind!==type && !(c.own && !type)) continue;
+    for (const w of words) if (c.keys.some(k=>stemEq(w.t, k))){ cat = c; catOwn = !!c.own; catVia = w; break outer; } }
+  // if a single word matches nothing in the wanted kind, try the other kind (e.g. "μισθός +1200")
+  if (!cat && !type) for (const c of [...own, ...builtin]) for (const w of words) if (c.keys.some(k=>stemEq(w.t,k))){ cat = c; catOwn = !!c.own; catVia = w; break; }
+  let place = '';
+  if (cat){ const orig = text.slice(catVia.i, catVia.i+catVia.t.length).trim(); const isName = nrm(cat.name).split(/[\s/]+/).some(k=>stemEq(catVia.t,k)); cut(catVia.i, catVia.t.length); if (!isName) place = orig; }
+  const rest = text.split(/[\s,;]+/).filter(w=>w && !STOP.has(nrm(w)) && !/^[-–+:.]+$/.test(w));
+  const restStr = rest.join(' ').trim();
+
+  // decide what it is
+  const isTx = amount!=null && (type || !start || cat);
+  if (isTx){
+    type = type || (cat ? cat.kind : 'expense');
+    if (cat && cat.kind!==type) cat = null;
+    if (!date && dayIdx!=null){ const back = (now.getDay()-dayIdx+7)%7; date = ymd(dShift(now,-back)); }
+    const p = place ? [place, restStr].filter(Boolean).join(' ') : restStr;
+    return Object.assign(out, {kind:'tx', type, amount, accountId: accountId || S.settings.lastAcc || S.accounts[0]?.id, category: cat ? cat.name : 'Άλλο', catEmoji: cat ? cat.emoji : (type==='income'?'💰':'📌'), catMatched: !!cat, catOwn, place: p ? p[0].toUpperCase()+p.slice(1) : '', date: date || today()});
+  }
+  if (start || eventWord || date || dayIdx!=null || repeat!=='none'){
+    if (!date && dayIdx!=null){ let fwd = (dayIdx-now.getDay()+7)%7; date = ymd(dShift(now, fwd)); }
+    let title = [place, restStr].filter(Boolean).join(' ').trim();
+    if (!title) return Object.assign(out, {kind:'need', why:'Τι θα κάνεις; Γράψε και τι είναι, π.χ. «αύριο γυμναστήριο 7-9».'});
+    if (start && !end){ const mm2 = Math.min(toMin(start)+60, 23*60+59); end = pad2(Math.floor(mm2/60))+':'+pad2(mm2%60); }
+    return Object.assign(out, {kind:'event', title: title[0].toUpperCase()+title.slice(1), date: date || today(), start: start||'', end: end||'', repeat});
+  }
+  if (amount==null && (type || cat)) return Object.assign(out, {kind:'need', why:'Λείπει το ποσό, π.χ. «'+(type==='income'?'έσοδο 130€ ':'έξοδο 5€ ')+(cat?cat.name.toLowerCase():'')+'».', partial:{type: type||cat?.kind, cat}});
+  return Object.assign(out, {kind:'need', why:'Δεν το κατάλαβα. Δοκίμασε κάτι σαν «έξοδο 5€ φαγητό» ή «αύριο γυμναστήριο 7-9».'});
+}
+
+function askAnswer(q){
+  const mk = today().slice(0,7);
+  const spentRange = (from, to) => S.tx.filter(t=>t.type==='expense' && t.date>=from && t.date<=to).reduce((s,t)=>s+t.amount,0);
+  if (/υπολοιπ/.test(q)) return `Συνολικό υπόλοιπο ${fmt(total())}<br>` + S.accounts.map(a=>`${esc(a.name)}: <b>${fmt(balance(a.id))}</b>`).join(' · ');
+  if (/τι εχω|τι πρεπει|προγραμμα/.test(q)){ const d = /αυριο/.test(q) ? ymd(dShift(new Date(),1)) : today(); const ev = eventsOn(d);
+    return (d===today()?'Σήμερα':'Αύριο') + (ev.length ? ':<br>' + ev.map(e=>`${e.start?`<b>${e.start}</b> `:''}${esc(e.title)}${isDone(e,d)?' ✓':''}`).join('<br>') : ' δεν έχεις τίποτα στην ατζέντα.'); }
+  if (/σημερα/.test(q)) return `Σήμερα ξόδεψες <b>${fmt(spentRange(today(), today()))}</b>.`;
+  if (/εβδομαδα/.test(q)){ const d = new Date(); const from = ymd(dShift(d, -((d.getDay()+6)%7))); return `Αυτή την εβδομάδα ξόδεψες <b>${fmt(spentRange(from, today()))}</b>.`; }
+  if (/εβγαλα|εσοδ|μπηκαν/.test(q)) return `Αυτόν τον μήνα μπήκαν <b>${fmt(monthSum('income', mk))}</b>.`;
+  // per category this month
+  const cats = [...catList('expense'), ...catList('income')];
+  const hit = cats.find(c=>nrm(c[0]).split(/[\s/]+/).some(k=>k.length>=3 && q.split(' ').some(w=>stemEq(w,k))));
+  if (hit) { const v = S.tx.filter(t=>t.category===hit[0] && monthKey(t.date)===mk).reduce((s,t)=>s+t.amount,0); return `${hit[1]} ${esc(hit[0])} αυτόν τον μήνα: <b>${fmt(v)}</b>.`; }
+  return `Αυτόν τον μήνα ξόδεψες <b>${fmt(monthSum('expense', mk))}</b> και μπήκαν <b>${fmt(monthSum('income', mk))}</b>.`;
+}
+
+function previewHtml(p){
+  if (!p) return '';
+  const c = (cls, html) => `<span class="pc ${cls||''}">${html}</span>`;
+  if (p.kind==='tx'){ const a = accById(p.accountId);
+    return [c(p.type==='income'?'inc':'exp', p.type==='income'?'Έσοδο':'Έξοδο'), c('amt', (p.type==='income'?'+':'−')+fmt(p.amount)),
+      c(p.catMatched?'hit':'', `${p.catEmoji} ${esc(p.category)}${p.catMatched?` <i>${p.catOwn?'δική σου κατηγορία':'κατηγορία'} ✓</i>`:''}`),
+      p.place?c('', esc(p.place)):'', a?c('', esc(a.name)):'', c('', p.date===today()?'σήμερα':fmtDate(p.date))].join('');
+  }
+  if (p.kind==='event') return [c('ev','Ατζέντα'), c('hit', esc(p.title)), c('', p.date===today()?'σήμερα':p.date===ymd(dShift(new Date(),1))?'αύριο':fmtDate(p.date)),
+    p.start?c('', `${p.start}–${p.end}${toMin(p.end)<toMin(p.start)?' (+1)':''}`):c('', 'όλη μέρα'), p.repeat!=='none'?c('', REPEATS[p.repeat]):''].join('');
+  if (p.kind==='ask') return c('ev','Ερώτηση') + c('', 'πάτα Enter για απάντηση');
+  return `<span class="pc warn">${esc(p.why)}</span>`;
+}
+
+const AI = { log:[], el:null };
+try { AI.log = JSON.parse(sessionStorage.getItem('spyr.ai')||'[]'); } catch(e){}
+function aiSaveLog(){ try { sessionStorage.setItem('spyr.ai', JSON.stringify(AI.log.slice(-40))); } catch(e){} }
+function aiOpen(){
+  const el = document.getElementById('ai'); el.classList.add('open'); document.body.classList.add('ai-on');
+  aiPaint(); setTimeout(()=>document.getElementById('aiIn').focus({preventScroll:true}), 250);
+}
+function aiClose(){ document.getElementById('ai').classList.remove('open'); document.body.classList.remove('ai-on'); }
+function aiPaint(){
+  const box = document.getElementById('aiMsgs');
+  const hello = `<div class="msg bot"><b>Γεια σου${S.settings.name?' '+esc(S.settings.name):''} 👋</b><br>Γράψε μου κάτι σαν:<div class="aiex">${['έξοδο 5€ 4all φαγητό','έσοδο μισθός +1200','αύριο γυμναστήριο 7-9','καφές 3,5 revolut','πόσα ξόδεψα αυτόν τον μήνα;','τι έχω αύριο;'].map(x=>`<button type="button" data-aiex="${esc(x)}">${esc(x)}</button>`).join('')}</div></div>`;
+  box.innerHTML = hello + AI.log.map(m=>`<div class="msg ${m.me?'me':'bot'}">${m.html}${m.undo&&!m.undone?`<button type="button" class="undo" data-aiundo="${m.undo}">Αναίρεση</button>`:''}${m.undone?'<small class="faint"> · αναιρέθηκε</small>':''}</div>`).join('');
+  box.scrollTop = box.scrollHeight;
+}
+function aiSend(){
+  const inp = document.getElementById('aiIn'); const lines = inp.value.split('\n').map(x=>x.trim()).filter(Boolean); if (!lines.length) return;
+  for (const line of lines){
+    const p = parseCmd(line); AI.log.push({me:true, html:esc(line)});
+    if (!p || p.kind==='need'){ AI.log.push({html: esc(p ? p.why : '')}); continue; }
+    if (p.kind==='ask'){ AI.log.push({html: askAnswer(p.q)}); continue; }
+    if (p.kind==='tx'){
+      if (!S.accounts.length){ AI.log.push({html:'Πρόσθεσε πρώτα έναν λογαριασμό.'}); continue; }
+      const id = uid(); S.tx.push({id, created:Date.now(), type:p.type, amount:p.amount, accountId:p.accountId, toAccountId:'', place:p.place, category:p.category, emoji:'', date:p.date, note:''});
+      S.settings.lastAcc = p.accountId; flashId = id; save();
+      const a = accById(p.accountId);
+      AI.log.push({undo:'tx:'+id, html:`✓ ${p.type==='income'?'Έσοδο':'Έξοδο'} <b>${p.type==='income'?'+':'−'}${fmt(p.amount)}</b> · ${p.catEmoji} ${esc(p.category)}${p.place?' · '+esc(p.place):''}<br><small class="faint">${esc(a.name)}: ${fmt(balance(a.id))} · ${p.date===today()?'σήμερα':fmtDate(p.date)}</small>`});
+    }
+    if (p.kind==='event'){
+      const id = uid(); S.events.push({id, created:Date.now(), done:false, doneDates:[], title:p.title, date:p.date, start:p.start, end:p.end, color:EV_COLORS[S.events.length%EV_COLORS.length], repeat:p.repeat, note:''});
+      save();
+      AI.log.push({undo:'ev:'+id, html:`✓ Στην ατζέντα: <b>${esc(p.title)}</b><br><small class="faint">${p.date===today()?'Σήμερα':fmtDate(p.date)}${p.start?` · ${p.start}–${p.end}`:' · όλη μέρα'}${p.repeat!=='none'?' · '+REPEATS[p.repeat]:''}</small>`});
+    }
+  }
+  inp.value = ''; aiPreview(); aiSaveLog(); aiPaint(); render();
+}
+function aiPreview(){
+  const v = document.getElementById('aiIn').value.split('\n').filter(x=>x.trim()).pop();
+  const pv = document.getElementById('aiPrev'); const html = v ? previewHtml(parseCmd(v)) : '';
+  pv.innerHTML = html; pv.classList.toggle('show', !!html);
+}
+document.getElementById('ai').addEventListener('click', e=>{
+  const ex = e.target.closest('[data-aiex]'); if (ex){ const i = document.getElementById('aiIn'); i.value = ex.dataset.aiex; aiPreview(); i.focus(); return; }
+  const u = e.target.closest('[data-aiundo]'); if (u){ const [k,id] = u.dataset.aiundo.split(':');
+    if (k==='tx') S.tx = S.tx.filter(t=>t.id!==id); else S.events = S.events.filter(x=>x.id!==id);
+    save(); const m = AI.log.find(x=>x.undo===u.dataset.aiundo); if (m) m.undone = true; aiSaveLog(); aiPaint(); render(); toast('Αναιρέθηκε'); return; }
+  if (e.target.closest('[data-aiclose]')) aiClose();
+  if (e.target.closest('[data-aiclear]')){ AI.log = []; aiSaveLog(); aiPaint(); }
+});
+document.getElementById('aiIn').addEventListener('input', aiPreview);
+document.getElementById('aiIn').addEventListener('keydown', e=>{ if (e.key==='Enter' && !e.shiftKey){ e.preventDefault(); aiSend(); } if (e.key==='Escape'){ e.stopPropagation(); aiClose(); } });
+document.getElementById('aiSend').onclick = aiSend;
+document.getElementById('aiSend').innerHTML = svg('send');
+document.addEventListener('keydown', e=>{ if ((e.ctrlKey||e.metaKey) && e.key.toLowerCase()==='k'){ e.preventDefault(); document.getElementById('ai').classList.contains('open') ? aiClose() : aiOpen(); } });
+
+
 /* ============ events ============ */
 document.addEventListener('click', e=>{
   const th = e.target.closest('[data-theme-set]'); if (th){ S.settings.theme = th.dataset.themeSet; save(); applyTheme(); render(); return; }
@@ -1867,7 +2176,7 @@ document.addEventListener('click', e=>{
     newNote:()=>formNote(), openNote:()=>go('notes', id), editNote:()=>formNote(S.notes.find(x=>x.id===id)),
     editLine:()=>{ const n = note(); n && formLine(n, n.items.find(l=>l.id===id)); },
     delLine:()=>{ const n = note(); n && delLine(n, id); },
-    rename:formName, sync:formSync, theme:toggleTheme, budget:formBudget, export:exportData, import:importData,
+    ai:aiOpen, rename:formName, sync:formSync, theme:toggleTheme, budget:formBudget, export:exportData, import:importData,
     pickZip:()=>pickZip(), replaceZip:()=>pickZip(id), openProj:()=>openProj(id), editProj:()=>editProj(id), delProj:()=>delProj(id)
   })[b.dataset.act]?.();
 });
@@ -1896,7 +2205,7 @@ document.addEventListener('input', e=>{
 document.addEventListener('click', e=>{ const rb = e.target.closest('#chartRange [data-range]'); if (!rb) return; chartRange = rb.dataset.range; try{ localStorage.setItem('spyr.chart', chartRange); }catch(_){}
   rb.parentNode.querySelectorAll('button').forEach(b=>b.classList.toggle('on', b===rb)); const c = rb.closest('.c-chart'); c.querySelector('.chartwrap').outerHTML = barChart(); c.querySelector('#chartSum').innerHTML = chartSummary(); c.classList.add('regrow'); clearTimeout(c._rg); c._rg = setTimeout(()=>c.classList.remove('regrow'), 1400); });
 document.addEventListener('change', e=>{ if (e.target.id==='firstName'){ S.settings.name = e.target.value.trim(); save(); renderNav(); return; } const f = e.target.dataset.filter; if (f && f!=='q'){ txFilter[f] = e.target.value; render(); } });
-document.getElementById('fab').innerHTML = svg('plus');
+document.getElementById('fab').innerHTML = svg('plus'); document.getElementById('aiFab').innerHTML = svg('spark');
 document.getElementById('fab').onclick = ()=> document.getElementById('fab').dataset.mode==='event' ? formEvent(null,{date:agSel}) : formTx();
 let tt; function toast(m){ const t = document.getElementById('toast'); t.textContent = m; t.classList.add('show'); clearTimeout(tt); tt = setTimeout(()=>t.classList.remove('show'), 2600); }
 window.addEventListener('hashchange', ()=>{ const [v,id] = location.hash.slice(1).split('/'); if (VIEWS.some(x=>x[0]===v) && (v!==view || (id||null)!==noteOpen)){ view = v; noteOpen = id||null; enterNext = true; render(); } });
