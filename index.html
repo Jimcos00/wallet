@@ -1996,7 +1996,8 @@ function parseCmd(raw){
   // amount: "5€", "5 ευρώ", "+130", "-12,50", "€7"
   let amount = null, sign = 0;
   const toks = () => [...N.matchAll(/[+\-−€]?\d+[.,]\d+[^\s,;!?]*|[^\s,;!?]+/g)].map(t=>({t:t[0], i:t.index}));
-  for (const pass of [1,2,3]){
+  let strong = false;
+  for (const pass of (start ? [1,2] : [1,2,3])){
     if (amount!=null) break;
     const T = toks();
     for (let k=0; k<T.length; k++){
@@ -2006,7 +2007,7 @@ function parseCmd(raw){
       const hasCur = !!mm[3] || t.includes('€') || nextCur;
       if (pass===1 && !hasCur) continue;
       if (pass===2 && !mm[1]) continue;
-      amount = num(mm[2]); sign = mm[1] ? (mm[1]==='+'?1:-1) : 0;
+      strong = pass<3; amount = num(mm[2]); sign = mm[1] ? (mm[1]==='+'?1:-1) : 0;
       cut(i, t.length); if (nextCur) cut(T[k+1].i, T[k+1].t.length);
       break;
     }
@@ -2049,7 +2050,7 @@ function parseCmd(raw){
   const restStr = rest.join(' ').trim();
 
   // decide what it is
-  const isTx = amount!=null && (type || !start || cat);
+  const isTx = amount!=null && (!start || strong || type);
   if (isTx){
     type = type || (cat ? cat.kind : 'expense');
     if (cat && cat.kind!==type) cat = null;
@@ -2060,8 +2061,9 @@ function parseCmd(raw){
   if (start || eventWord || date || dayIdx!=null || repeat!=='none'){
     if (!date && dayIdx!=null){ let fwd = (dayIdx-now.getDay()+7)%7; date = ymd(dShift(now, fwd)); }
     const clean = x => x.replace(/\s+/g,' ').replace(/^[\s,;:.\-–]+|[\s,;:\-–]+$/g,'').split(' ').filter(w=>!STOP.has(nrm(w))||true).join(' ').trim();
-    const ci = evText.search(/[,;]/);
-    let title = clean(ci>=0 ? evText.slice(0,ci) : evText), note = ci>=0 ? clean(evText.slice(ci+1)) : '';
+    const evT = evText.replace(/^[\s,;:.\-–]+/,'');
+    const ci = evT.search(/[,;]/);
+    let title = clean(ci>=0 ? evT.slice(0,ci) : evT), note = ci>=0 ? clean(evT.slice(ci+1)) : '';
     title = title.split(' ').filter((w,i,a)=>!(STOP.has(nrm(w)) && (i===0 || i===a.length-1))).join(' ');
     if (!title && note){ title = note; note = ''; }
     if (!title) return Object.assign(out, {kind:'need', why:'Τι θα κάνεις; Γράψε και τι είναι, π.χ. «αύριο γυμναστήριο 7-9».'});
