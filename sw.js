@@ -1,4 +1,4 @@
-const C='wallet-v13';
+const C='wallet-v14';
 const CORE=['./','./index.html','./manifest.webmanifest','./icons/favicon.svg','./icons/icon-192.png','./favicon.ico','./jszip.min.js'];
 try { importScripts('./jszip.min.js'); } catch(e) {}
 self.addEventListener('install',e=>{e.waitUntil(caches.open(C).then(c=>c.addAll(CORE.map(u=>new Request(u,{cache:'reload'})))).catch(()=>{}));self.skipWaiting();});

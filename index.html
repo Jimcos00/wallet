@@ -26,6 +26,7 @@
 <script src="jszip.min.js"></script>
 <style>
 :root{
+  --loan:#ffad5c;
   --glass:rgba(38,56,58,.24); --glass-hi:rgba(255,255,255,.10);
   --line:rgba(255,255,255,.22); --line-soft:rgba(255,255,255,.12);
   --text:#fbfaf7; --muted:rgba(251,250,247,.70); --faint:rgba(251,250,247,.46);
@@ -159,6 +160,15 @@ textarea.inp{resize:vertical;line-height:1.5}
 .c-budget{grid-column:span 5}
 .c-recent{grid-column:span 5}
 .c-up{grid-column:span 4}
+.c-loans{grid-column:1/-1}
+.bigrow{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
+.loanamt{color:var(--loan);font-weight:800;font-size:clamp(16px,1.7vw,21px);font-variant-numeric:tabular-nums;cursor:pointer;text-shadow:0 0 18px rgba(255,173,92,.35);animation:rise .8s var(--ease) .3s both}
+.loanamt.sm{font-size:12.5px;padding:3px 10px;border-radius:999px;background:rgba(255,173,92,.14);text-shadow:none;animation:none}
+.loans{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,280px),1fr));gap:10px}
+.loan{display:flex;align-items:center;gap:12px;padding:12px;border-radius:18px;background:rgba(255,255,255,.06);border:1px solid var(--line-soft)}
+.loan .lav{width:38px;height:38px;flex:none;border-radius:50%;display:grid;place-items:center;font-weight:800;color:#3a1d00;background:linear-gradient(150deg,#ffd29e,#ff9a3c)}
+.loan .t{flex:1;min-width:0}.loan .t b{display:block}.loan .t small{color:var(--muted);font-size:12px}
+.loanr{display:flex;flex-direction:column;align-items:flex-end;gap:6px}.loanr b{color:var(--loan);font-variant-numeric:tabular-nums}
 .c-notes{grid-column:span 3}
 .card{padding:22px;overflow:hidden}
 .card h3{position:relative;margin:0 0 4px;font-size:13.5px;font-weight:700;color:var(--muted);display:flex;align-items:center;justify-content:space-between;gap:8px;min-height:30px}
@@ -369,6 +379,7 @@ input.inp[type=date]::-webkit-calendar-picker-indicator,input.inp[type=time]::-w
 .pc i{font-style:normal;font-weight:600;font-size:11px;opacity:.75}
 .pc.pc-exp{background:rgba(255,140,160,.18);color:var(--neg)}.pc.pc-inc{background:rgba(var(--acc-rgb),.25);color:var(--pos)}.pc.pc-ev{background:rgba(255,255,255,.2)}
 .pc.pc-amt{font-size:13.5px}
+.pc.pc-loan{background:rgba(255,173,92,.16);border-color:rgba(255,173,92,.45);color:var(--loan)}
 .pc.pc-hit{background:rgba(var(--acc-rgb),.3);border-color:rgba(var(--acc-rgb),.8);box-shadow:0 0 0 3px rgba(var(--acc-rgb),.18),0 0 18px rgba(var(--acc-rgb),.35)}
 .pc.pc-warn{background:none;border:0;padding:0;color:var(--muted);font-weight:600;line-height:1.4}
 .aibar{flex:none;display:flex;gap:8px;align-items:flex-end;padding:12px 16px calc(16px + env(safe-area-inset-bottom))}
@@ -831,7 +842,27 @@ function balance(accId){
 }
 const total = () => Math.round(S.accounts.reduce((s,a)=>s+balance(a.id),0)*100)/100;
 const monthKey = (s) => s.slice(0,7);
-function monthSum(type, mk){ return S.tx.filter(t=>t.type===type && monthKey(t.date)===mk).reduce((s,t)=>s+t.amount,0); }
+const isLoanish = t => !!(t.loan || t.loanId);
+function monthSum(type, mk){ return S.tx.filter(t=>t.type===type && !isLoanish(t) && monthKey(t.date)===mk).reduce((s,t)=>s+t.amount,0); }
+// money you lent and haven't got back yet
+const loanBack = l => S.tx.filter(t=>t.loanId===l.id).reduce((s,t)=>s+t.amount,0);
+const loanLeft = l => Math.max(0, Math.round((l.amount - loanBack(l))*100)/100);
+const openLoans = () => S.tx.filter(t=>t.loan && loanLeft(t)>0).sort(sortTx);
+const loansTotal = () => Math.round(openLoans().reduce((s,l)=>s+loanLeft(l),0)*100)/100;
+function formRepay(l){
+  const left = loanLeft(l);
+  openModal(`<h2>Επιστροφή δανεικών</h2><p class="muted" style="margin-top:-6px;font-size:13px">${esc(l.place||'Δανεικά')} σου χρωστάει <b style="color:var(--loan)">${fmt(left)}</b> από ${fmtDate(l.date)}</p>
+    <div class="field"><label>Πόσα σου έδωσε πίσω (€)</label><input class="inp amount-inp" name="amount" inputmode="decimal" value="${String(left).replace('.',',')}" required autofocus></div>
+    <div class="two"><div class="field"><label>Σε λογαριασμό</label><select class="inp" name="accountId">${accOptions(l.accountId)}</select></div>
+    <div class="field"><label>Ημερομηνία</label><input class="inp" type="date" name="date" value="${today()}" required></div></div>${actions()}`,
+  (fd)=>{ const amount = Math.abs(num(fd.get('amount'))); if (!amount){ toast('Βάλε ποσό'); return false; }
+    repayLoan(l, amount, fd.get('accountId'), fd.get('date')); render(); });
+}
+function repayLoan(l, amount, accountId, date){
+  const id = uid(); S.tx.push({id, created:Date.now(), type:'income', amount, accountId: accountId||l.accountId, toAccountId:'', place:l.place||'', category:'Δανεικά', emoji:'🤝', loanId:l.id, date: date||today(), note:''});
+  flashId = id; save(); const left = loanLeft(l);
+  toast(left>0 ? `+${fmt(amount)} · ${l.place||''} χρωστάει ακόμα ${fmt(left)}` : `${l.place||'Τα δανεικά'}: εξοφλήθηκε ✓`); return id;
+}
 function subMonthly(s){ return s.cycle==='yearly' ? s.amount/12 : s.amount; }
 function noteTotals(n){ let inc=0, exp=0; for (const l of n.items){ if (l.amount==null) continue; if (l.amount>=0) inc+=l.amount; else exp+=-l.amount; } return {inc, exp, net:Math.round((inc-exp)*100)/100}; }
 
@@ -960,7 +991,7 @@ function vDash(){
     ${todayCard()}
     <section class="glass card hero c-hero tilt rise"><i class="orb"></i>
       <h3>Συνολικό υπόλοιπο <button class="btn sm glassbtn" data-act="newTx" data-type="transfer" title="Μεταφορά ανάμεσα σε λογαριασμούς">${svg('swap')}Μεταφορά</button></h3>
-      <div class="big">${cnt('total',total())}</div>
+      <div class="bigrow"><div class="big">${cnt('total',total())}</div>${loansTotal()?`<span class="loanamt" data-go="tx" title="Δανεικά που σου χρωστάνε">(+${fmt(loansTotal())})</span>`:''}</div>
       <div><span class="chip ${net>=0?'pos':'neg'}">${fmtS(net)} αυτόν τον μήνα</span></div>
       <div class="row" style="margin-top:18px;gap:8px;max-width:420px">
         <button class="btn primary" style="flex:1" data-act="newTx">${svg('plus')}Έξοδο</button>
@@ -1003,6 +1034,7 @@ function vDash(){
       <h3>Σημειώσεις <button class="btn sm ghost" data-go="notes">Όλες</button></h3>
       <div class="list">${S.notes.length?S.notes.slice(0,4).map(n=>{const t=noteTotals(n);return `<div class="li c" data-act="openNote" data-id="${n.id}" style="cursor:pointer"><div class="emo">${n.emoji||'📝'}</div><div class="t"><b>${esc(n.name)}</b><small>${n.items.length} γραμμές</small></div><div class="amt ${t.net>=0?'pos':'neg'}">${fmtS(t.net)}</div></div>`}).join(''):'<div class="empty">Κράτα λογαριασμό ανά project.<br><button class="btn sm" data-act="newNote" style="margin-top:10px">Νέα σημείωση</button></div>'}</div>
     </section>
+    ${loansCard()}
   </div>`;
 }
 let chartRange = (()=>{ try { return localStorage.getItem('spyr.chart') || '6'; } catch(e){ return '6'; } })();
@@ -1062,14 +1094,24 @@ document.addEventListener('pointerover', e=>{ const h = e.target.closest && e.ta
 document.addEventListener('pointerout', e=>{ const h = e.target.closest && e.target.closest('.chart .hit'); if (h && !(e.relatedTarget && e.relatedTarget.closest && e.relatedTarget.closest('.chart .hit'))) chartTipHide(h.closest('.chartwrap')); });
 function catBreakdown(mk){
   const m = {};
-  S.tx.filter(t=>t.type==='expense'&&monthKey(t.date)===mk).forEach(t=>{ m[t.category||'Άλλο']=(m[t.category||'Άλλο']||0)+t.amount; });
+  S.tx.filter(t=>t.type==='expense'&&!isLoanish(t)&&monthKey(t.date)===mk).forEach(t=>{ m[t.category||'Άλλο']=(m[t.category||'Άλλο']||0)+t.amount; });
   const arr = Object.entries(m).sort((a,b)=>b[1]-a[1]).slice(0,5);
   if (!arr.length) return '<p class="faint" style="font-size:13px">Τίποτα ακόμα αυτόν τον μήνα</p>';
   const max = arr[0][1];
   return arr.map(([c,v])=>`<div class="cat"><span>${catIcon(c)} ${esc(c)}</span><div class="track"><i style="width:${v/max*100}%"></i></div><b>${fmt(v)}</b></div>`).join('');
 }
+function loansCard(){
+  const L = openLoans(); if (!L.length) return '';
+  const by = {}; for (const l of L){ const k = (l.place||'Χωρίς όνομα').trim(); (by[k] = by[k]||[]).push(l); }
+  return `<section class="glass card c-loans rise"><h3>Δανεικά <span class="loanamt sm">+${fmt(loansTotal())} σου χρωστάνε</span></h3>
+    <div class="loans">${Object.entries(by).map(([who, ls])=>`<div class="loan">
+      <div class="lav">${esc(who[0]||'?').toUpperCase()}</div>
+      <div class="t"><b>${esc(who)}</b><small>${ls.map(l=>`${fmtDate(l.date)}${loanBack(l)?` · έδωσε πίσω ${fmt(loanBack(l))}`:''}`).join('<br>')}</small></div>
+      <div class="loanr"><b>${fmt(ls.reduce((s,l)=>s+loanLeft(l),0))}</b><button class="btn sm" data-act="repay" data-id="${ls[0].id}">${svg('down')}Επιστροφή</button></div></div>`).join('')}</div></section>`;
+}
 function sortTx(a,b){ return b.date.localeCompare(a.date) || (b.created||0)-(a.created||0); }
 function txIcon(t){
+  if (t.loan || t.loanId) return `<div class="emo">🤝</div>`;
   if (t.type==='transfer') return badge({bg:'rgba(255,255,255,.15)',fg:'#fff',icon:'swap'});
   const b = brandFor(t.place); if (b) return badge(b);
   return `<div class="emo">${t.emoji || (t.type==='income' && t.category==='Άλλο' ? '💰' : catIcon(t.category))}</div>`;
@@ -1078,19 +1120,19 @@ function txRow(t, compact){
   const a = accById(t.accountId), to = accById(t.toAccountId);
   const sign = t.type==='income'?'+':t.type==='expense'?'−':'';
   const cls = t.type==='income'?'pos':t.type==='expense'?'neg':'';
-  const title = t.type==='transfer' ? `${esc(a?.name||'?')} → ${esc(to?.name||'?')}` : esc(t.place||t.category||'Χωρίς περιγραφή');
-  const sub = t.type==='transfer' ? 'Μεταφορά' : `${esc(t.category||'')} · ${esc(a?.name||'—')}`;
+  const title = t.type==='transfer' ? `${esc(a?.name||'?')} → ${esc(to?.name||'?')}` : t.loan ? `Δανεικά σε ${esc(t.place||'—')}` : esc(t.place||t.category||'Χωρίς περιγραφή');
+  const sub = t.type==='transfer' ? 'Μεταφορά' : t.loan ? `<span style="color:var(--loan)">Δανεικά${loanLeft(t)>0?` · χρωστάει ${fmt(loanLeft(t))}`:' · εξοφλήθηκε ✓'}</span> · ${esc(a?.name||'—')}` : t.loanId ? `<span style="color:var(--loan)">Επιστροφή δανεικών</span> · ${esc(a?.name||'—')}` : `${esc(t.category||'')} · ${esc(a?.name||'—')}`;
   return `<div class="li${compact?' c':''}" data-row="${t.id}" ${compact?`data-act="editTx" data-id="${t.id}" style="cursor:pointer"`:''}>${txIcon(t)}
     <div class="t"><b>${title}</b><small>${compact?fmtDate(t.date)+' · ':''}${sub}${t.subId?' · αυτόματο':''}${t.noteId?' · σημείωση':''}${t.note&&!t.subId?' · '+esc(t.note):''}</small></div>
-    <div class="amt ${cls}">${sign}${fmt(t.amount)}</div>
+    <div class="amt ${cls}"${isLoanish(t)?' style="color:var(--loan)"':''}>${sign}${fmt(t.amount)}</div>
     ${compact?'':`<div class="acts"><button class="iconbtn" data-act="editTx" data-id="${t.id}" title="Επεξεργασία">${svg('edit')}</button><button class="iconbtn" data-act="delTx" data-id="${t.id}" title="Διαγραφή">${svg('trash')}</button></div>`}</div>`;
 }
 function vAccounts(){
   const mk = today().slice(0,7);
-  return `<div class="top rise"><div><h1>Λογαριασμοί</h1><p>Σύνολο ${cnt('total',total())}</p></div><button class="btn primary" data-act="newAcc">${svg('plus')}Νέος λογαριασμός</button></div>
+  return `<div class="top rise"><div><h1>Λογαριασμοί</h1><p>Σύνολο ${cnt('total',total())}${loansTotal()?` <span style="color:var(--loan);font-weight:800">(+${fmt(loansTotal())} δανεικά)</span>`:''}</p></div><button class="btn primary" data-act="newAcc">${svg('plus')}Νέος λογαριασμός</button></div>
   ${S.accounts.length?'':'<div class="glass card empty rise">Δεν έχεις λογαριασμούς ακόμα.<br><button class="btn sm" data-act="quickstart" style="margin-top:10px">Πρόσθεσε τους βασικούς</button></div>'}
   <div class="accs">${S.accounts.map(a=>{
-    const sp = S.tx.filter(t=>t.type==='expense'&&t.accountId===a.id&&monthKey(t.date)===mk).reduce((s,t)=>s+t.amount,0);
+    const sp = S.tx.filter(t=>t.type==='expense'&&!isLoanish(t)&&t.accountId===a.id&&monthKey(t.date)===mk).reduce((s,t)=>s+t.amount,0);
     const inn = S.tx.filter(t=>t.type==='income'&&t.accountId===a.id&&monthKey(t.date)===mk).reduce((s,t)=>s+t.amount,0);
     return `<div class="glass acc tilt rise" style="--c:${a.color}"><i class="glow"></i>
       <div class="acts"><button class="iconbtn" data-act="editAcc" data-id="${a.id}" title="Επεξεργασία">${svg('edit')}</button></div>
@@ -1519,15 +1561,18 @@ function formTx(t, opts={}){
   if (!S.accounts.length){ toast('Πρόσθεσε πρώτα έναν λογαριασμό'); formAcc(); return; }
   const isNew = !t;
   t = t || {type:opts.type||'expense', amount:'', accountId:opts.acc||S.settings.lastAcc||S.accounts[0].id, toAccountId:'', place:'', category:'', date:today(), note:''};
-  let type = t.type;
+  let type = t.loan ? 'loan' : t.type;
   const body = () => {
     const cats = catList(type);
     return `<h2>${isNew?'Νέα κίνηση':'Επεξεργασία κίνησης'}</h2>
-    <div class="seg" style="margin-bottom:14px">${[['expense','Έξοδο'],['income','Έσοδο'],['transfer','Μεταφορά']].map(([k,l])=>`<button type="button" class="${type===k?'on':''}" data-ttype="${k}">${l}</button>`).join('')}</div>
+    <div class="seg" style="margin-bottom:14px">${[['expense','Έξοδο'],['income','Έσοδο'],['transfer','Μεταφορά'],['loan','Δανεικά']].map(([k,l])=>`<button type="button" class="${type===k?'on':''}" data-ttype="${k}">${l}</button>`).join('')}</div>
     <div class="field"><label>Ποσό (€)</label><input class="inp amount-inp" name="amount" inputmode="decimal" required placeholder="0,00" value="${t.amount}" autofocus></div>
+    ${type==='loan'?`<p class="hint" style="margin:-4px 0 12px;color:var(--loan)">Φεύγουν από τον λογαριασμό σου, αλλά φαίνονται δίπλα στο σύνολο σαν (+…) μέχρι να σου τα επιστρέψουν. Δεν μετράνε στα έξοδα του μήνα.</p>
+    <div class="field"><label>Σε ποιον τα έδωσες</label><input class="inp" name="place" value="${esc(t.place)}" placeholder="π.χ. Μαμά, Θείος Γιώργος" required list="people"></div>
+    <datalist id="people">${[...new Set(S.tx.filter(x=>x.loan).map(x=>x.place).filter(Boolean))].map(p=>`<option value="${esc(p)}">`).join('')}</datalist>`:''}
     <div class="${type==='transfer'?'two':''}"><div class="field"><label>${type==='transfer'?'Από':type==='income'?'Σε λογαριασμό':'Από λογαριασμό / μετρητά'}</label><select class="inp" name="accountId">${accOptions(t.accountId)}</select></div>
     ${type==='transfer'?`<div class="field"><label>Προς</label><select class="inp" name="toAccountId">${accOptions(t.toAccountId||S.accounts.find(a=>a.id!==t.accountId)?.id)}</select></div>`:''}</div>
-    ${type!=='transfer'?`<div class="field"><label>${type==='income'?'Από ποιον / τι':'Πού ξόδεψες'}</label><input class="inp" name="place" value="${esc(t.place)}" placeholder="${type==='income'?'π.χ. Πελάτης site':'π.χ. Σκλαβενίτης'}" list="places"></div>
+    ${type!=='transfer'&&type!=='loan'?`<div class="field"><label>${type==='income'?'Από ποιον / τι':'Πού ξόδεψες'}</label><input class="inp" name="place" value="${esc(t.place)}" placeholder="${type==='income'?'π.χ. Πελάτης site':'π.χ. Σκλαβενίτης'}" list="places"></div>
     <div class="field"><label style="display:flex;justify-content:space-between;align-items:center">Κατηγορία <button type="button" class="linkbtn" data-catnew style="margin:0;padding:2px 8px">${svg('plus')}Δική μου κατηγορία</button></label><select class="inp" name="category">${cats.map(([c,i])=>`<option ${t.category===c?'selected':''} value="${esc(c)}">${i} ${esc(c)}</option>`).join('')}</select></div>
     <div class="catnew" id="catNew" hidden>
       ${(S.cats||[]).filter(c=>c.kind===type).length?`<div class="catown">${(S.cats||[]).filter(c=>c.kind===type).map(c=>`<span>${c.emoji} ${esc(c.name)}<button type="button" data-catdel="${c.id}" title="Διαγραφή">×</button></span>`).join('')}</div>`:''}
@@ -1544,6 +1589,7 @@ function formTx(t, opts={}){
     const amount = Math.abs(num(fd.get('amount')));
     if (!amount){ toast('Βάλε ποσό'); return false; }
     const rec = {type, amount, accountId:fd.get('accountId'), toAccountId: type==='transfer'?fd.get('toAccountId'):'', place:(fd.get('place')||'').trim(), category: type==='transfer'?'':fd.get('category'), emoji: type!=='transfer' && fd.get('category')==='Άλλο' ? (fd.get('emoji')||'') : '', date:fd.get('date'), note:(fd.get('note')||'').trim()};
+    if (type==='loan'){ Object.assign(rec, {type:'expense', loan:true, category:'Δανεικά', emoji:''}); if (!rec.place){ toast('Γράψε σε ποιον τα έδωσες'); return false; } } else rec.loan = false;
     if (type==='transfer' && rec.accountId===rec.toAccountId){ toast('Διάλεξε διαφορετικούς λογαριασμούς'); return false; }
     let id;
     if (isNew){ id = uid(); S.tx.push(Object.assign({id, created:Date.now()}, rec)); } else { Object.assign(t, rec); id = t.id; }
@@ -1551,7 +1597,7 @@ function formTx(t, opts={}){
     S.settings.lastAcc = rec.accountId; flashId = id;
     save(); render();
     const a = accById(rec.accountId);
-    toast(type==='expense' ? `−${fmt(amount)} από ${a.name} · μένουν ${fmt(balance(a.id))}` : 'Αποθηκεύτηκε');
+    toast(type==='loan' ? `Δανεικά σε ${rec.place}: ${fmt(amount)} · σου χρωστάνε συνολικά ${fmt(loansTotal())}` : type==='expense' ? `−${fmt(amount)} από ${a.name} · μένουν ${fmt(balance(a.id))}` : 'Αποθηκεύτηκε');
   };
   let keep = false; const mountKeep = ()=>{ keep = true; mount(); keep = false; };
   const mount = () => {
@@ -2013,12 +2059,15 @@ function parseCmd(raw){
     }
     if (pass===2 && amount==null){
       const ws = toks().map(x=>x.t);
-      const money = /(^|\s)(εξοδ|εσοδ|πληρω|εδωσα|ξοδεψα|αγορασα|εισπραξα|πηρα|μισθ)/.test(N) || /\d[.,]\d/.test(N)
+      const money = /(^|\s)(εξοδ|εσοδ|πληρω|εδωσα|εδωσε|ξοδεψα|αγορασα|εισπραξα|πηρα|μισθ|δανει|επεστρεψ|επιστροφ|πισω)/.test(N) || /\d[.,]\d/.test(N)
         || ws.some(w=>allCats().some(c=>c.keys.some(k=>stemEq(w,k)))) || S.accounts.some(a=>N.includes(nrm(a.name)));
       if (!money) break;
     }
   }
 
+  // loans: "δανεικά 100 στη μαμά", "μου τα έδωσε πίσω η μαμά 50"
+  const retW = !!take(new RegExp(W+'(μου τα εδωσε πισω|μου εδωσε πισω|μου τα επεστρεψε|μου επεστρεψε|επεστρεψε|επεστρεψαν|πηρα πισω|εδωσε πισω|επιστροφη δανεικων|επιστροφη δανεικου|γυρισε τα δανεικα)'+E));
+  const loanW = !retW && !!take(new RegExp(W+'(δανεικα|δανεικο|δανεισα|δανειο)'+E));
   // explicit type words
   let type = null;
   if (take(new RegExp(W+'(εσοδο|εσοδα|πληρωθηκα|εισπραξα|μπηκαν|κερδισα|πηρα)'+E))) type = 'income';
@@ -2034,6 +2083,23 @@ function parseCmd(raw){
   if (!accountId){ const mc = take(new RegExp(W+'(?:με |σε )?(μετρητα|cash|κεσ)'+E)); if (mc){ const c = S.accounts.find(a=>a.type==='cash'); if (c) accountId = c.id; } }
   if (!accountId){ const mc = take(new RegExp(W+'(?:με |απο )?(?:την )?(καρτα)'+E)); if (mc){ const c = S.accounts.find(a=>a.type==='card') || S.accounts.find(a=>a.type==='bank'); if (c) accountId = c.id; } }
 
+  if (retW || loanW){
+    if (!date && dayIdx!=null){ const back = (now.getDay()-dayIdx+7)%7; date = ymd(dShift(now,-back)); }
+    const who = text.split(/[\s,;]+/).filter(w=>w && !STOP.has(nrm(w)) && !['μου','πισω','σου','του','στη','στην','στον','τον'].includes(nrm(w)) && !/^[-–+:.]+$/.test(w)).join(' ').trim();
+    const person = who ? who[0].toUpperCase()+who.slice(1) : '';
+    if (loanW){
+      if (amount==null) return Object.assign(out, {kind:'need', why:'Πόσα έδωσες δανεικά; π.χ. «δανεικά 100€ στη μαμά».'});
+      if (!person) return Object.assign(out, {kind:'need', why:'Σε ποιον τα έδωσες; π.χ. «δανεικά 100€ στη μαμά».'});
+      return Object.assign(out, {kind:'loan', amount, person, accountId: accountId || S.settings.lastAcc || S.accounts[0]?.id, date: date || today()});
+    }
+    const ws = nrm(who).split(' ').filter(w=>w.length>=3);
+    let loans = openLoans().filter(l=>nrm(l.place||'').split(/\s+/).some(k=>ws.some(w=>stemEq(w,k))));
+    if (!loans.length && openLoans().length===1 && !ws.length) loans = openLoans();
+    if (!loans.length) return Object.assign(out, {kind:'need', why: openLoans().length ? `Ποιος σου τα έδωσε πίσω; Χρωστάνε: ${[...new Set(openLoans().map(l=>l.place))].join(', ')}.` : 'Δεν υπάρχουν ανοιχτά δανεικά.'});
+    loans = loans.slice().sort((a,b)=>a.date.localeCompare(b.date));
+    const owed = Math.round(loans.reduce((s,l)=>s+loanLeft(l),0)*100)/100;
+    return Object.assign(out, {kind:'repay', loans:loans.map(l=>l.id), person: loans[0].place, owed, amount: Math.min(amount==null ? owed : amount, owed), accountId: accountId || loans[0].accountId, date: date || today()});
+  }
   const evText = text; // for agenda: "title, note"
   // category: your own presets first, then built-ins (+ common words / brands)
   const words = toks().filter(x=>!STOP.has(x.t) && !/^\d+$/.test(x.t));
@@ -2076,7 +2142,9 @@ function parseCmd(raw){
 
 function askAnswer(q){
   const mk = today().slice(0,7);
-  const spentRange = (from, to) => S.tx.filter(t=>t.type==='expense' && t.date>=from && t.date<=to).reduce((s,t)=>s+t.amount,0);
+  const spentRange = (from, to) => S.tx.filter(t=>t.type==='expense' && !isLoanish(t) && t.date>=from && t.date<=to).reduce((s,t)=>s+t.amount,0);
+  if (/χρωστ|δανεικ/.test(q)){ const L = openLoans(); if (!L.length) return 'Δεν σου χρωστάει κανείς 🙂'; const by = {}; L.forEach(l=>{ by[l.place] = (by[l.place]||0)+loanLeft(l); });
+    return `Σου χρωστάνε <b style="color:var(--loan)">+${fmt(loansTotal())}</b><br>` + Object.entries(by).map(([w,v])=>`${esc(w)}: <b>${fmt(v)}</b>`).join(' · '); }
   if (/υπολοιπ/.test(q)) return `Συνολικό υπόλοιπο ${fmt(total())}<br>` + S.accounts.map(a=>`${esc(a.name)}: <b>${fmt(balance(a.id))}</b>`).join(' · ');
   if (/τι εχω|τι πρεπει|προγραμμα/.test(q)){ const d = /αυριο/.test(q) ? ymd(dShift(new Date(),1)) : today(); const ev = eventsOn(d);
     return (d===today()?'Σήμερα':'Αύριο') + (ev.length ? ':<br>' + ev.map(e=>`${e.start?`<b>${e.start}</b> `:''}${esc(e.title)}${isDone(e,d)?' ✓':''}`).join('<br>') : ' δεν έχεις τίποτα στην ατζέντα.'); }
@@ -2100,6 +2168,8 @@ function previewHtml(p){
   }
   if (p.kind==='event') return [c('pc-ev','Ατζέντα'), c('pc-hit', esc(p.title)), c('', p.date===today()?'σήμερα':p.date===ymd(dShift(new Date(),1))?'αύριο':fmtDate(p.date)),
     p.start?c('', `${p.start}–${p.end}${toMin(p.end)<toMin(p.start)?' (+1)':''}`):c('', 'όλη μέρα'), p.repeat!=='none'?c('', REPEATS[p.repeat]):'', p.note?c('', '📝 '+esc(p.note)):''].join('');
+  if (p.kind==='loan'){ const a = accById(p.accountId); return [c('pc-loan','Δανεικά'), c('pc-amt', '−'+fmt(p.amount)), c('pc-hit', '🤝 '+esc(p.person)), a?c('', esc(a.name)):'', c('', p.date===today()?'σήμερα':fmtDate(p.date)), c('pc-loan', `σύνολο που σου χρωστάνε: +${fmt(loansTotal()+p.amount)}`)].join(''); }
+  if (p.kind==='repay'){ const a = accById(p.accountId); return [c('pc-loan','Επιστροφή δανεικών'), c('pc-amt pc-inc', '+'+fmt(p.amount)), c('pc-hit', '🤝 '+esc(p.person)+` <i>χρωστούσε ${fmt(p.owed)}</i>`), a?c('', esc(a.name)):'', p.amount<p.owed?c('', `μένουν ${fmt(p.owed-p.amount)}`):c('', 'εξοφλείται ✓')].join(''); }
   if (p.kind==='ask') return c('pc-ev','Ερώτηση') + c('', 'πάτα Enter για απάντηση');
   return `<span class="pc pc-warn">${esc(p.why)}</span>`;
 }
@@ -2119,7 +2189,7 @@ function aiGrow(){ const t = document.getElementById('aiIn'); t.style.height = '
 function aiClose(){ document.getElementById('ai').classList.remove('open'); document.body.classList.remove('ai-on'); }
 function aiPaint(){
   const box = document.getElementById('aiMsgs');
-  const hello = `<div class="msg bot"><b>Γεια σου${S.settings.name?' '+esc(S.settings.name):''} 👋</b><br>Γράψε μου κάτι σαν:<div class="aiex">${['έξοδο 5€ 4all φαγητό','έσοδο μισθός +1200','αύριο γυμναστήριο 7-9','καφές 3,5 revolut','πόσα ξόδεψα αυτόν τον μήνα;','τι έχω αύριο;'].map(x=>`<button type="button" data-aiex="${esc(x)}">${esc(x)}</button>`).join('')}</div></div>`;
+  const hello = `<div class="msg bot"><b>Γεια σου${S.settings.name?' '+esc(S.settings.name):''} 👋</b><br>Γράψε μου κάτι σαν:<div class="aiex">${['έξοδο 5€ 4all φαγητό','έσοδο μισθός +1200','αύριο γυμναστήριο 7-9','καφές 3,5 revolut','δανεικά 100€ στη μαμά','πόσα ξόδεψα αυτόν τον μήνα;','τι έχω αύριο;'].map(x=>`<button type="button" data-aiex="${esc(x)}">${esc(x)}</button>`).join('')}</div></div>`;
   box.innerHTML = hello + AI.log.map(m=>`<div class="msg ${m.me?'me':'bot'}">${m.html}${m.undo&&!m.undone?`<button type="button" class="undo" data-aiundo="${m.undo}">Αναίρεση</button>`:''}${m.undone?'<small class="faint"> · αναιρέθηκε</small>':''}</div>`).join('');
   box.scrollTop = box.scrollHeight;
 }
@@ -2135,6 +2205,17 @@ function aiSend(){
       S.settings.lastAcc = p.accountId; flashId = id; save();
       const a = accById(p.accountId);
       AI.log.push({undo:'tx:'+id, html:`✓ ${p.type==='income'?'Έσοδο':'Έξοδο'} <b>${p.type==='income'?'+':'−'}${fmt(p.amount)}</b> · ${p.catEmoji} ${esc(p.category)}${p.place?' · '+esc(p.place):''}<br><small class="faint">${esc(a.name)}: ${fmt(balance(a.id))} · ${p.date===today()?'σήμερα':fmtDate(p.date)}</small>`});
+    }
+    if (p.kind==='loan'){
+      const id = uid(); S.tx.push({id, created:Date.now(), type:'expense', loan:true, amount:p.amount, accountId:p.accountId, toAccountId:'', place:p.person, category:'Δανεικά', emoji:'', date:p.date, note:''});
+      flashId = id; save();
+      AI.log.push({undo:'tx:'+id, html:`✓ Δανεικά σε <b>${esc(p.person)}</b>: <b style="color:var(--loan)">${fmt(p.amount)}</b><br><small class="faint">${esc(accById(p.accountId)?.name||'')}: ${fmt(balance(p.accountId))} · σου χρωστάνε συνολικά <b style="color:var(--loan)">+${fmt(loansTotal())}</b></small>`});
+    }
+    if (p.kind==='repay'){
+      let left = p.amount; const ids = [];
+      for (const lid of p.loans){ if (left<=0) break; const l = S.tx.find(x=>x.id===lid); if (!l) continue; const part = Math.min(left, loanLeft(l)); if (part<=0) continue; ids.push(repayLoan(l, part, p.accountId, p.date)); left = Math.round((left-part)*100)/100; }
+      const still = Math.round(S.tx.filter(x=>p.loans.includes(x.id)).reduce((s,l)=>s+loanLeft(l),0)*100)/100;
+      AI.log.push({undo:'txs:'+ids.join(','), html:`✓ Επιστροφή από <b>${esc(p.person)}</b>: <b>+${fmt(p.amount)}</b><br><small class="faint">${still>0?`χρωστάει ακόμα ${fmt(still)}`:'εξοφλήθηκε ✓'} · σύνολο δανεικών +${fmt(loansTotal())}</small>`});
     }
     if (p.kind==='event'){
       const id = uid(); S.events.push({id, created:Date.now(), done:false, doneDates:[], title:p.title, date:p.date, start:p.start, end:p.end, color:EV_COLORS[S.events.length%EV_COLORS.length], repeat:p.repeat, note:p.note||''});
@@ -2152,7 +2233,7 @@ function aiPreview(){
 document.getElementById('ai').addEventListener('click', e=>{
   const ex = e.target.closest('[data-aiex]'); if (ex){ const i = document.getElementById('aiIn'); i.value = ex.dataset.aiex; aiPreview(); i.focus(); return; }
   const u = e.target.closest('[data-aiundo]'); if (u){ const [k,id] = u.dataset.aiundo.split(':');
-    if (k==='tx') S.tx = S.tx.filter(t=>t.id!==id); else S.events = S.events.filter(x=>x.id!==id);
+    if (k==='tx') S.tx = S.tx.filter(t=>t.id!==id); else if (k==='txs'){ const ids = id.split(','); S.tx = S.tx.filter(t=>!ids.includes(t.id)); } else S.events = S.events.filter(x=>x.id!==id);
     save(); const m = AI.log.find(x=>x.undo===u.dataset.aiundo); if (m) m.undone = true; aiSaveLog(); aiPaint(); render(); toast('Αναιρέθηκε'); return; }
   if (e.target.closest('[data-aiclose]')) aiClose();
   if (e.target.closest('[data-aiclear]')){ AI.log = []; aiSaveLog(); aiPaint(); }
@@ -2179,6 +2260,7 @@ document.addEventListener('click', e=>{
     delTx:()=>{ if (confirm('Διαγραφή κίνησης; Το υπόλοιπο θα διορθωθεί.')){ removeTx(id); render(); } },
     newAcc:()=>formAcc(), editAcc:()=>formAcc(accById(id)), quickstart,
     newSub:()=>formSub(), editSub:()=>formSub(S.subs.find(s=>s.id===id)), delSub:()=>delSub(id),
+    repay:()=>{ const l = S.tx.find(x=>x.id===id); if (l) formRepay(l); },
     toggleSub:()=>{ const s = S.subs.find(x=>x.id===id); s.active = !s.active; if (s.active && s.next < today()){ s.next = today(); } save(); render(); },
     toggleLine:()=>{ const n = note(); const l = n && n.items.find(x=>x.id===id); if (l){ l.done = !l.done; save(); render(); } },
     newEvent:()=>formEvent(null,{date:b.dataset.date||agSel, time:b.dataset.time}), editEvent:()=>formEvent(S.events.find(x=>x.id===id),{date:b.dataset.date}),
